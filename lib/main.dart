@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:metronomic/audio.dart';
 
 void main() {
   runApp(const MainApp());
@@ -12,8 +13,15 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  bool playing = false;
+  bool playback = false;
   int bpm = 120;
+
+  void togglePlayback() {
+    playback ? Audio.stopPlayback() : Audio.startPlayback();
+    setState(() {
+      playback = !playback;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,12 +36,10 @@ class _MainAppState extends State<MainApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                onPressed: () => setState(() {
-                  playing = !playing;
-                }),
-                icon: playing
-                    ? const Icon(Icons.play_arrow_rounded)
-                    : const Icon(Icons.pause_circle_rounded),
+                onPressed: togglePlayback,
+                icon: playback
+                    ? const Icon(Icons.pause_circle_rounded)
+                    : const Icon(Icons.play_arrow_rounded),
                 iconSize: 100,
               ),
               const SizedBox(
