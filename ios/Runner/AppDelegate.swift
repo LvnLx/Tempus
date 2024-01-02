@@ -2,39 +2,58 @@ import UIKit
 import Flutter
 import AVFoundation
 
+struct MetronomeSettings {
+  let bpm: Int
+}
+
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
   var audioEngine: AVAudioEngine!
   var audioFile: AVAudioFile!
   var audioPlayerNode: AVAudioPlayerNode!
+  var methodChannel: FlutterMethodChannel!
   
   override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
-    let audio_method_channel = FlutterMethodChannel(name: "audio_method_channel", binaryMessenger: controller.binaryMessenger)
-    audio_method_channel.setMethodCallHandler({
+    
+    methodChannel = FlutterMethodChannel(name: "audio_method_channel", binaryMessenger: controller.binaryMessenger)
+    methodChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
-      if call.method == "startPlayback" {
+      let arguments = call.arguments as? [String] ?? []
+      
+      switch call.method {
+      case "postFlutterInit":
+        self.postFlutterInit(result: result)
+      case"startPlayback":
         self.startPlayback(result: result)
-      } else if call.method == "stopPlayback" {
+      case "stopPlayback":
         self.stopPlayback(result: result)
+      case "configureAudioBuffer":
+        self.configureAudioBuffer(result: result, arguments: arguments)
+      default:
+        result(FlutterMethodNotImplemented)
       }
     })
     
-    audioEngine = AVAudioEngine()
+    GeneratedPluginRegistrant.register(with: self)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+  
+  private func postFlutterInit(result: FlutterResult) {audioEngine = AVAudioEngine()
     audioPlayerNode = AVAudioPlayerNode()
     
     do {
       guard
         let url = Bundle.main.url(forResource: "Limbo", withExtension: "mp3")
       else {
-        print("Error opening audio file")
-        return false
+        result("Error opening audio file")
+        return
       }
       audioFile = try AVAudioFile(forReading: url)
     } catch {
-      print("Error getting AVAudioFile: \(error.localizedDescription)")
-      return false
-    } 
+      result("Error getting AVAudioFile: \(error.localizedDescription)")
+      return
+    }
     
     audioEngine.attach(audioPlayerNode)
     audioEngine.connect(audioPlayerNode, to: audioEngine.outputNode, format: audioFile.processingFormat)
@@ -42,22 +61,25 @@ import AVFoundation
     do {
       try audioEngine.start()
     } catch {
-      print("Error starting AVAudioEngine: \(error.localizedDescription)")
-      return false
+      result("Error starting AVAudioEngine: \(error.localizedDescription)")
+      return
     }
     
-    GeneratedPluginRegistrant.register(with: self)
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    result("Completed post Flutter initialization")
   }
   
   private func startPlayback(result: FlutterResult) {
     audioPlayerNode.scheduleFile(audioFile, at: nil)
     audioPlayerNode.play()
-    result("started")
+    result("Started playback")
   }
   
   private func stopPlayback(result: FlutterResult) {
     audioPlayerNode.stop()
-    result("stopped")
+    result("Stopped playback")
+  }
+  
+  private func configureAudioBuffer(result: FlutterResult, arguments: [String]) {
+    result("Configured audio buffer")
   }
 }

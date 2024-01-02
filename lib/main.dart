@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metronomic/audio.dart';
 
-void main() {
+void main() async {
   runApp(const MainApp());
 }
 
@@ -14,7 +14,15 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   bool playback = false;
-  int bpm = 120;
+  final ValueNotifier<int> _bpm = ValueNotifier<int>(120);
+  
+  @override void initState() {
+    super.initState();
+
+    Audio.postFlutterInit();
+    Audio.configureBuffer(_bpm.value);
+    _bpm.addListener(() => Audio.configureBuffer(_bpm.value));
+  }
 
   void togglePlayback() {
     playback ? Audio.stopPlayback() : Audio.startPlayback();
@@ -53,7 +61,7 @@ class _MainAppState extends State<MainApp> {
                       padding: const EdgeInsets.all(8.0),
                       child: IconButton(
                         onPressed: () => setState(() {
-                          bpm--;
+                          _bpm.value--;
                         }),
                         icon: const Icon(
                           Icons.remove,
@@ -65,7 +73,7 @@ class _MainAppState extends State<MainApp> {
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(bpm.toString(),
+                      child: Text(_bpm.value.toString(),
                           style: const TextStyle(fontSize: 50)),
                     ),
                   ),
@@ -74,7 +82,7 @@ class _MainAppState extends State<MainApp> {
                       padding: const EdgeInsets.all(8.0),
                       child: IconButton(
                           onPressed: () => setState(() {
-                                bpm++;
+                                _bpm.value++;
                               }),
                           icon: const Icon(
                             Icons.add,
