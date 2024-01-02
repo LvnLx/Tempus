@@ -8,8 +8,9 @@ struct MetronomeSettings {
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
+  var audioBuffer: AVAudioPCMBuffer!
   var audioEngine: AVAudioEngine!
-  var audioFile: AVAudioFile!
+  var audioFormat: AVAudioFormat!
   var audioPlayerNode: AVAudioPlayerNode!
   var methodChannel: FlutterMethodChannel!
   
@@ -40,23 +41,12 @@ struct MetronomeSettings {
   }
   
   private func postFlutterInit(result: FlutterResult) {audioEngine = AVAudioEngine()
+    audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100.0, channels: 1)
+    audioBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: UInt32(audioFormat.sampleRate))
+
     audioPlayerNode = AVAudioPlayerNode()
-    
-    do {
-      guard
-        let url = Bundle.main.url(forResource: "Limbo", withExtension: "mp3")
-      else {
-        result("Error opening audio file")
-        return
-      }
-      audioFile = try AVAudioFile(forReading: url)
-    } catch {
-      result("Error getting AVAudioFile: \(error.localizedDescription)")
-      return
-    }
-    
     audioEngine.attach(audioPlayerNode)
-    audioEngine.connect(audioPlayerNode, to: audioEngine.outputNode, format: audioFile.processingFormat)
+    audioEngine.connect(audioPlayerNode, to: audioEngine.outputNode, format: audioFormat)
     
     do {
       try audioEngine.start()
@@ -69,7 +59,7 @@ struct MetronomeSettings {
   }
   
   private func startPlayback(result: FlutterResult) {
-    audioPlayerNode.scheduleFile(audioFile, at: nil)
+    audioPlayerNode.scheduleBuffer(audioBuffer)
     audioPlayerNode.play()
     result("Started playback")
   }
@@ -80,6 +70,18 @@ struct MetronomeSettings {
   }
   
   private func configureAudioBuffer(result: FlutterResult, arguments: [String]) {
+    let frequency: Double = 440.0
+    let amplitude: Double = 1.0
+    let angularFrequency: Double = 2.0 * Double.pi * frequency
+    
+    for frame in 0..<Int(audioBuffer.frameCapacity) {
+      let time = Double(frame) / audioFormat.sampleRate
+      let value = sin(angularFrequency * time) * amplitude
+      audioBuffer.floatChannelData?.pointee[frame] = Float(value)
+    }
+    
+    audioBuffer.frameLength = audioBuffer.frameCapacity
+    
     result("Configured audio buffer")
   }
 }
