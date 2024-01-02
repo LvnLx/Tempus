@@ -5,8 +5,9 @@ import 'package:flutter/services.dart';
 class Audio {
   static const MethodChannel methodChannel = MethodChannel('audio_method_channel');
 
-  static Future<void> postFlutterInit() async {
+  static Future<void> postFlutterInit(int bpm) async {
     final result = await methodChannel.invokeMethod('postFlutterInit');
+    await configureBuffer(bpm);
     print(result);
   }
 

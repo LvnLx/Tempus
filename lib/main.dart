@@ -19,8 +19,7 @@ class _MainAppState extends State<MainApp> {
   @override void initState() {
     super.initState();
 
-    Audio.postFlutterInit();
-    Audio.configureBuffer(_bpm.value);
+    Audio.postFlutterInit(_bpm.value);
     _bpm.addListener(() => Audio.configureBuffer(_bpm.value));
   }
 
