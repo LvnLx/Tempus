@@ -20,7 +20,7 @@ class _MainAppState extends State<MainApp> {
     super.initState();
 
     Audio.postFlutterInit(_bpm.value);
-    _bpm.addListener(() => Audio.configureBuffer(_bpm.value));
+    _bpm.addListener(() => Audio.updateBpm(_bpm.value));
   }
 
   void togglePlayback() {

@@ -7,7 +7,13 @@ class Audio {
 
   static Future<void> postFlutterInit(int bpm) async {
     final result = await methodChannel.invokeMethod('postFlutterInit');
-    await configureBuffer(bpm);
+    print(result);
+    await configureBuffer();
+    await updateBpm(bpm);
+  }
+
+  static Future<void> configureBuffer() async {
+    final result = await methodChannel.invokeMethod('configureAudioBuffer');
     print(result);
   }
 
@@ -21,8 +27,8 @@ class Audio {
     print(result);
   }
 
-  static Future<void> configureBuffer(int bpm) async {
-    final result = await methodChannel.invokeMethod('configureAudioBuffer', [bpm.toString()]);
+  static Future<void> updateBpm(int bpm) async {
+    final result = await methodChannel.invokeMethod('updateBpm', [bpm.toString()]);
     print(result);
   }
 }

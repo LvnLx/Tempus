@@ -9,8 +9,6 @@ import AVFoundation
   var audioEngine: AVAudioEngine!
   var audioFormat: AVAudioFormat!
   var audioPlayerNode: AVAudioPlayerNode!
-  var interrupted: Bool = false
-  var lastPlaybackCompletion: AVAudioTime!
   var methodChannel: FlutterMethodChannel!
   
   override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -24,12 +22,14 @@ import AVFoundation
       switch call.method {
       case "postFlutterInit":
         self.postFlutterInit(result: result)
-      case"startPlayback":
+      case "updateBpm":
+        self.updateBpm(result: result, arguments: arguments)
+      case "startPlayback":
         self.startPlayback(result: result)
       case "stopPlayback":
         self.stopPlayback(result: result)
       case "configureAudioBuffer":
-        self.configureAudioBuffer(result: result, arguments: arguments)
+        self.configureAudioBuffer(result: result)
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -43,7 +43,7 @@ import AVFoundation
     audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100.0, channels: 1)
     let frameCapacity: UInt32 = UInt32(audioFormat.sampleRate * 10) // 60 seconds = 1 bpm
     audioBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: frameCapacity)
-
+    
     audioPlayerNode = AVAudioPlayerNode()
     audioEngine.attach(audioPlayerNode)
     audioEngine.connect(audioPlayerNode, to: audioEngine.outputNode, format: audioFormat)
@@ -55,25 +55,30 @@ import AVFoundation
       return
     }
     
+    schedulePlayback()
+    
     result("Completed post Flutter initialization")
   }
   
-  private func schedulePlayback(at: AVAudioTime!) {
-    audioPlayerNode.scheduleBuffer(audioBuffer, at: at, completionHandler: {() -> Void in
+  private func schedulePlayback() {
+    audioPlayerNode.scheduleBuffer(audioBuffer, at: nil, completionHandler: {() -> Void in
       DispatchQueue.main.async {
-        if (self.interrupted) {
-          self.interrupted = false
-        } else {
-          self.lastPlaybackCompletion = self.audioPlayerNode.lastRenderTime
-          self.schedulePlayback(at: nil)
-        }
+        self.schedulePlayback()
       }
     })
   }
   
+  private func updateBpm(result: FlutterResult, arguments: [String]) {
+    let bpm: UInt16 = UInt16(arguments[0]) ?? 0
+    let bps: Double = Double(bpm) / 60.0
+    let beatDurationPerSecond: Double = 1.0 / bps
+    audioBuffer.frameLength = UInt32(beatDurationPerSecond * audioFormat.sampleRate)
+    
+    result("Updated BPM")
+  }
+  
   private func startPlayback(result: FlutterResult) {
     audioPlayerNode.play()
-    self.lastPlaybackCompletion = audioPlayerNode.lastRenderTime
     result("Started playback")
   }
   
@@ -82,36 +87,12 @@ import AVFoundation
     result("Stopped playback")
   }
   
-  private func configureAudioBuffer(result: FlutterResult, arguments: [String]) {
-    let wasPlaying: Bool = audioPlayerNode.isPlaying
-    var beatStart: AVAudioTime!
-    var beatStop: AVAudioTime!
-    if wasPlaying {
-      interrupted = true
-      beatStart = self.lastPlaybackCompletion
-      beatStop = audioPlayerNode.lastRenderTime
-      audioPlayerNode.pause()
-    }
-    
-    let bpm: UInt16 = UInt16(arguments[0]) ?? 0
-    let bps: Double = Double(bpm) / 60.0
-    let beatDurationPerSecond: Double = 1.0 / bps
-    audioBuffer.frameLength = UInt32(beatDurationPerSecond * audioFormat.sampleRate)
-    
+  private func configureAudioBuffer(result: FlutterResult) {
     for frame in 0..<Int(audioFormat.sampleRate * 0.05) {
       let time = Double(frame) / audioFormat.sampleRate
       let value = sin(angularFrequency * time)
       audioBuffer.floatChannelData?.pointee[frame] = Float(value)
     }
-    
-    if wasPlaying {
-      audioPlayerNode.scheduleBuffer(audioBuffer, at: AVAudioTime(sampleTime: beatStop.sampleTime - beatStart.sampleTime, atRate: audioFormat.sampleRate))
-      audioPlayerNode.play()
-    } else {
-      audioPlayerNode.reset()
-    }
-    
-    schedulePlayback(at: nil)
     
     result("Configured audio buffer")
   }
