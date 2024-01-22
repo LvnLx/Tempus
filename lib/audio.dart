@@ -8,8 +8,8 @@ class Audio {
   static Future<void> postFlutterInit(int bpm) async {
     final result = await methodChannel.invokeMethod('postFlutterInit');
     print(result);
-    await configureBuffer();
     await updateBpm(bpm);
+    await configureBuffer();
   }
 
   static Future<void> configureBuffer() async {
