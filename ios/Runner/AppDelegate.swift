@@ -28,8 +28,8 @@ import AVFoundation
         self.startPlayback(result: result)
       case "stopPlayback":
         self.stopPlayback(result: result)
-      case "updateBpm":
-        self.updateBpm(result: result, arguments: arguments)
+      case "setBpm":
+        self.setBpm(result: result, arguments: arguments)
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -89,7 +89,7 @@ import AVFoundation
     AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, nil)
   }
   
-  private func updateBpm(result: FlutterResult, arguments: [String]) {
+  private func setBpm(result: FlutterResult, arguments: [String]) {
     let bpm: UInt16 = UInt16(arguments[0]) ?? 0
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps

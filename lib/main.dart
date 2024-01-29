@@ -4,44 +4,61 @@ import 'package:metronomic/audio.dart';
 import 'package:metronomic/subdivision.dart';
 
 void main() async {
-  runApp(const MainApp());
+  runApp(MainApp());
 }
 
 class MainApp extends StatefulWidget {
-  const MainApp({super.key});
+  MainApp({super.key});
 
   @override
   State<MainApp> createState() => _MainAppState();
 }
 
 class _MainAppState extends State<MainApp> {
+  bool hasMaxSubdivisions = false;
   bool playback = false;
-  List<Subdivision> subdivisons = [];
-  final ValueNotifier<int> _bpm = ValueNotifier<int>(120);
+
+  final ValueNotifier<int> bpm = ValueNotifier<int>(120);
+  final ValueNotifier<List<Subdivision>> subdivisions =
+      ValueNotifier<List<Subdivision>>([]);
 
   @override
   void initState() {
     super.initState();
 
-    Audio.postFlutterInit(_bpm.value);
-    _bpm.addListener(() => Audio.updateBpm(_bpm.value));
+    Audio.postFlutterInit(bpm.value);
+    bpm.addListener(() => Audio.updateBpm(bpm.value));
+    subdivisions.addListener(() => checkSubdivisionCount());
   }
 
   void addSubdivision() {
+    var subdivisionKey = UniqueKey();
     setState(() {
-      subdivisons = [
-        ...subdivisons,
+      subdivisions.value = [
+        ...subdivisions.value,
         Subdivision(
-            key: UniqueKey(), onRemove: (Key key) => removeSubdivisonByKey(key))
+            key: subdivisionKey,
+            onRemove: (Key key) => removeSubdivisonByKey(key))
       ];
+    });
+    Audio.addSubdivision(subdivisionKey);
+  }
+
+  void checkSubdivisionCount() {
+    setState(() {
+      hasMaxSubdivisions = subdivisions.value.length >= 4 ? true : false;
     });
   }
 
   void removeSubdivisonByKey(Key key) {
-    var subdivision = subdivisons.firstWhere((element) => element.key == key);
+    var subdivision =
+        subdivisions.value.firstWhere((element) => element.key == key);
+    var index = subdivisions.value.indexOf(subdivision);
     setState(() {
-      subdivisons.remove(subdivision);
+      subdivisions.value = subdivisions.value.sublist(0, index) +
+          subdivisions.value.sublist(index + 1, subdivisions.value.length);
     });
+    Audio.removeSubdivision(key);
   }
 
   void togglePlayback() {
@@ -56,7 +73,7 @@ class _MainAppState extends State<MainApp> {
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: const ColorScheme.dark(),
+        colorScheme: ColorScheme.dark(),
       ),
       home: Scaffold(
         body: Center(
@@ -64,19 +81,16 @@ class _MainAppState extends State<MainApp> {
             children: [
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.25,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          _bpm.value.toString(),
-                          style: const TextStyle(fontSize: 50),
-                        ),
+                child: Center(
+                  child: Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        bpm.value.toString(),
+                        style: TextStyle(fontSize: 50),
                       ),
-                    )
-                  ],
+                    ),
+                  ),
                 ),
               ),
               SizedBox(
@@ -84,21 +98,29 @@ class _MainAppState extends State<MainApp> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ...subdivisons,
                     Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DottedBorder(
-                          color: Colors.grey,
-                          dashPattern: [5, 5],
-                          borderType: BorderType.RRect,
-                          radius: Radius.circular(12),
-                          child: Container(
-                            width: double.infinity,
-                            child: IconButton(
-                                onPressed: addSubdivision,
-                                icon: Icon(Icons.add, color: Colors.grey)),
-                          ),
-                        )),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Subdivisions',
+                        style: TextStyle(color: Colors.grey, fontSize: 22),
+                      ),
+                    ),
+                    ...subdivisions.value,
+                    if (!hasMaxSubdivisions)
+                      Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: DottedBorder(
+                            color: Colors.grey,
+                            dashPattern: [5, 5],
+                            borderType: BorderType.RRect,
+                            radius: Radius.circular(12),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: IconButton(
+                                  onPressed: addSubdivision,
+                                  icon: Icon(Icons.add, color: Colors.grey)),
+                            ),
+                          )),
                   ],
                 ),
               ),
@@ -109,12 +131,12 @@ class _MainAppState extends State<MainApp> {
                   children: [
                     Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0),
                         child: IconButton(
                           onPressed: () => setState(() {
-                            _bpm.value--;
+                            bpm.value--;
                           }),
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.remove,
                             size: 50,
                           ),
@@ -123,24 +145,24 @@ class _MainAppState extends State<MainApp> {
                     ),
                     Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0),
                         child: IconButton(
                           onPressed: togglePlayback,
                           icon: playback
-                              ? const Icon(Icons.pause_circle_rounded)
-                              : const Icon(Icons.play_arrow_rounded),
+                              ? Icon(Icons.pause_circle_rounded)
+                              : Icon(Icons.play_arrow_rounded),
                           iconSize: 50,
                         ),
                       ),
                     ),
                     Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0),
                         child: IconButton(
                             onPressed: () => setState(() {
-                                  _bpm.value++;
+                                  bpm.value++;
                                 }),
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.add,
                               size: 50,
                             )),
