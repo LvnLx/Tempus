@@ -9,9 +9,6 @@ const List<String> subdivisionOptions = [
   '4',
   '5',
   '6',
-  '7',
-  '8',
-  '9'
 ];
 
 class Subdivision extends StatefulWidget {

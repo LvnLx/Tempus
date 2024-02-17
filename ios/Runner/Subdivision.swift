@@ -12,4 +12,12 @@ class Subdivision: CustomStringConvertible {
   var description: String {
     return "Subdivision(option: \(self.option), volume: \(self.volume)"
   }
+  
+  func setOption(option: Int) {
+    self.option = option
+  }
+  
+  func setVolume(volume: Float) {
+    self.volume = volume
+  }
 }
