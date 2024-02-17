@@ -41,7 +41,11 @@ class _MainAppState extends State<MainApp> {
             onRemove: (Key key) => removeSubdivisonByKey(key))
       ];
     });
-    Audio.addSubdivision(subdivisionKey);
+    Audio.addSubdivision(
+        subdivisionKey,
+        subdivisions.value
+            .firstWhere((subdivision) => subdivision.key == subdivisionKey)
+            .getSubdivisionOption());
   }
 
   void checkSubdivisionCount() {

@@ -10,6 +10,7 @@ import AVFoundation
   var methodChannel: FlutterMethodChannel!
   let sampleRate: Float64 = 44100.0
   let sizeOfFloat: UInt32 = UInt32(MemoryLayout<Float>.size)
+  var subdivisions: [String: Subdivision] = [:]
   
   override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
@@ -20,8 +21,8 @@ import AVFoundation
       let arguments = call.arguments as? [String] ?? []
       
       switch call.method {
-      case "configureAudioBuffer":
-        self.configureAudioBuffer(result: result)
+      case "initializeAudioBuffer":
+        self.initializeAudioBuffer(result: result)
       case "postFlutterInit":
         self.postFlutterInit(result: result)
       case "startPlayback":
@@ -30,6 +31,14 @@ import AVFoundation
         self.stopPlayback(result: result)
       case "setBpm":
         self.setBpm(result: result, arguments: arguments)
+      case "addSubdivision":
+        self.addSubdivision(result: result, arguments: arguments)
+      case "removeSubdivision":
+        self.removeSubdivision(result: result, arguments: arguments)
+      case "setSubdivisionOption":
+        self.setSubdivisionOption(result: result, arguments: arguments)
+      case "setSubdivisionVolume":
+        self.setSubdivisionVolume(result: result, arguments: arguments)
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -39,7 +48,7 @@ import AVFoundation
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
   
-  private func configureAudioBuffer(result: FlutterResult) {
+  private func initializeAudioBuffer(result: FlutterResult) {
     var audioData: [Float] = [Float](repeating: 0.0, count: Int(audioBuffer!.pointee.mAudioDataByteSize))
     
     for frame in 0..<Int(sampleRate * 0.05) {
@@ -50,7 +59,11 @@ import AVFoundation
     
     audioBuffer!.pointee.mAudioData.copyMemory(from: audioData, byteCount: Int(audioBuffer!.pointee.mAudioDataByteSize))
     
-    result("Configured audio buffer")
+    result("Initialized audio buffer")
+  }
+  
+  private func updateAudioBuffer() {
+    
   }
   
   private func postFlutterInit(result: FlutterResult) {
@@ -90,7 +103,7 @@ import AVFoundation
   }
   
   private func setBpm(result: FlutterResult, arguments: [String]) {
-    let bpm: UInt16 = UInt16(arguments[0]) ?? 0
+    let bpm: UInt16 = UInt16(arguments[0])!
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
     audioBuffer?.pointee.mAudioDataByteSize = UInt32(beatDurationSeconds * sampleRate * Double(sizeOfFloat))
@@ -110,5 +123,44 @@ import AVFoundation
     AudioQueueStop(audioQueue!, true)
     
     result("Stopped playback")
+  }
+  
+  private func addSubdivision(result: FlutterResult, arguments: [String]) {
+    let key: String = arguments[0]
+    let option: Int = Int(arguments[1])!
+    self.subdivisions[key] = Subdivision(option: option)
+    
+    print(self.subdivisions)
+    
+    result("Added subdivision")
+  }
+  
+  private func removeSubdivision(result: FlutterResult, arguments: [String]) {
+    let key: String = arguments[0]
+    self.subdivisions.removeValue(forKey: key)
+    
+    print(self.subdivisions)
+    
+    result("Removed subdivision")
+  }
+  
+  private func setSubdivisionOption(result: FlutterResult, arguments: [String]) {
+    let key: String = arguments[0]
+    let option: Int = Int(arguments[1])!
+    self.subdivisions[key]!.option = option
+    
+    print(self.subdivisions)
+    
+    result("Set subdivision option")
+  }
+  
+  private func setSubdivisionVolume(result: FlutterResult, arguments: [String]) {
+    let key: String = arguments[0]
+    let volume: Float = Float(arguments[1])!
+    self.subdivisions[key]!.volume = volume
+    
+    print(self.subdivisions)
+    
+    result("Set subdivision volume")
   }
 }

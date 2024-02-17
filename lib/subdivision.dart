@@ -21,17 +21,46 @@ class Subdivision extends StatefulWidget {
 
   @override
   SubdivisionState createState() => SubdivisionState();
+
+  String getSubdivisionOption() {
+    final SubdivisionState subdivisionState = SubdivisionState();
+    return subdivisionState.option;
+  }
+
+  double getSubdivisionVolume() {
+    final SubdivisionState subdivisionState = SubdivisionState();
+    return subdivisionState.volume;
+  }
 }
 
 class SubdivisionState extends State<Subdivision> {
   bool _muted = true;
-  double _volume = 0.5;
-  String subdivisionOption = subdivisionOptions[0];
+  double volume = 0.5;
+  String option = subdivisionOptions[0];
+
+  void setOption(String newOption) {
+    setState(() {
+      option = newOption;
+    });
+    Audio.setSubdivisionOption(widget.key!, newOption);
+  }
+
+  void setVolume(double newVolume) {
+    setState(() {
+      volume = newVolume;
+    });
+    if (!_muted) {
+      Audio.setSubdivisionVolume(widget.key!, newVolume);
+    }
+  }
 
   void toggleMuted() {
     setState(() {
       _muted = !_muted;
     });
+    _muted
+        ? Audio.setSubdivisionVolume(widget.key!, 0.0)
+        : Audio.setSubdivisionVolume(widget.key!, volume);
   }
 
   @override
@@ -48,7 +77,7 @@ class SubdivisionState extends State<Subdivision> {
                     isExpanded: true,
                     iconSize: 0,
                     underline: Container(),
-                    value: subdivisionOption,
+                    value: option,
                     items: subdivisionOptions
                         .map<DropdownMenuItem<String>>((String option) {
                       return DropdownMenuItem(
@@ -63,10 +92,10 @@ class SubdivisionState extends State<Subdivision> {
                             ),
                           ));
                     }).toList(),
-                    onChanged: (String? option) {
-                      setState(() {
-                        subdivisionOption = option!;
-                      });
+                    onChanged: (String? newOption) {
+                      if (newOption != option) {
+                        setOption(newOption!);
+                      }
                     },
                   )),
             ),
@@ -74,13 +103,8 @@ class SubdivisionState extends State<Subdivision> {
               width: MediaQuery.of(context).size.width * 0.7,
               child: Slider(
                 activeColor: _muted ? Colors.grey : Colors.white,
-                value: _volume,
-                onChanged: (double value) {
-                  setState(() {
-                    _volume = value;
-                  });
-                  Audio.setSubdivisionVolume(widget.key!, value);
-                },
+                value: volume,
+                onChanged: (double newVolume) => setVolume(newVolume),
               ),
             ),
             SizedBox(
