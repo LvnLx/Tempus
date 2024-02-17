@@ -33,19 +33,13 @@ class _MainAppState extends State<MainApp> {
 
   void addSubdivision() {
     var subdivisionKey = UniqueKey();
+    var subdivision = Subdivision(
+        key: subdivisionKey, onRemove: (Key key) => removeSubdivisonByKey(key));
     setState(() {
-      subdivisions.value = [
-        ...subdivisions.value,
-        Subdivision(
-            key: subdivisionKey,
-            onRemove: (Key key) => removeSubdivisonByKey(key))
-      ];
+      subdivisions.value = [...subdivisions.value, subdivision];
     });
-    Audio.addSubdivision(
-        subdivisionKey,
-        subdivisions.value
-            .firstWhere((subdivision) => subdivision.key == subdivisionKey)
-            .getSubdivisionOption());
+    Audio.addSubdivision(subdivisionKey, subdivision.getSubdivisionOption(),
+        subdivision.getSubdivisionVolume());
   }
 
   void checkSubdivisionCount() {

@@ -7,8 +7,6 @@ class Audio {
   static MethodChannel methodChannel = MethodChannel('audio_method_channel');
 
   static Future<void> postFlutterInit(int bpm) async {
-    final result = await methodChannel.invokeMethod('postFlutterInit');
-    print(result);
     await updateBpm(bpm);
     await initializeBuffer();
   }
@@ -33,9 +31,9 @@ class Audio {
     print(result);
   }
 
-  static Future<void> addSubdivision(Key key, String subdivisionOption) async {
+  static Future<void> addSubdivision(Key key, String subdivisionOption, double volume) async {
     final result = await methodChannel
-        .invokeMethod('addSubdivision', [key.toString(), subdivisionOption]);
+        .invokeMethod('addSubdivision', [key.toString(), subdivisionOption, volume.toString()]);
     print(result);
   }
 

@@ -4,9 +4,9 @@ class Subdivision: CustomStringConvertible {
   var option: Int
   var volume: Float
   
-  init(option: Int) {
+  init(option: Int, volume: Float) {
     self.option = option
-    self.volume = 0.0
+    self.volume = volume
   }
   
   var description: String {

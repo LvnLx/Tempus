@@ -14,9 +14,6 @@ class Metronome {
   private var subdivisions: [String: Subdivision] = [:]
   
   init() {
-    let bufferSize: UInt32 = sizeOfFloat * UInt32(sampleRate) * 60 // 60 seconds = 1 beat per minute
-    AudioQueueAllocateBuffer(audioQueue!, bufferSize, &audioBuffer)
-    
     var audioStreamBasicDescription: AudioStreamBasicDescription = AudioStreamBasicDescription(
       mSampleRate: sampleRate,
       mFormatID: kAudioFormatLinearPCM,
@@ -34,6 +31,9 @@ class Metronome {
     AudioQueueSetParameter(audioQueue!, kAudioQueueParam_PlayRate, 1.0)
     AudioQueueSetParameter(audioQueue!, kAudioQueueParam_VolumeRampTime, 0.0)
     AudioQueueSetParameter(audioQueue!, kAudioQueueParam_Volume, 1.0)
+    
+    let bufferSize: UInt32 = sizeOfFloat * UInt32(sampleRate) * 60 // 60 seconds = 1 beat per minute
+    AudioQueueAllocateBuffer(audioQueue!, bufferSize, &audioBuffer)
   }
   
   func addSubdivision(key: String, subdivision: Subdivision) {
@@ -61,7 +61,7 @@ class Metronome {
   }
   
   func updateAudioBuffer() {
-    
+    // TODO
   }
   
   func setBpm(bpm: UInt16) {
