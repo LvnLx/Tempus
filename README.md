@@ -17,10 +17,10 @@ Current implementation is for iOS (Swift), with Android (Kotlin) and web (JavaSc
 - [x] UI
 - [x] Communication Channels
 - [ ] Lockscreen Controls
-- [ ] Audio Playback
+- [x] Audio Playback
   - [x] Downbeat
     - [x] Audio
     - [x] Controls
-  - [ ] Subdivisions
-    - [ ] Audio
+  - [x] Subdivisions
+    - [x] Audio
     - [x] Controls
