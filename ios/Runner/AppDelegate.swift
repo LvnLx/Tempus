@@ -18,9 +18,9 @@ import AVFoundation
       let arguments = call.arguments as? [String] ?? []
       
       switch call.method {
-      case "initializeAudioBuffer":
-        self.metronome.initializeAudioBuffer()
-        result("Initialized audio buffer")
+      case "writeAudioBuffer":
+        self.metronome.writeAudioBuffer()
+        result("Wrote audio buffer")
       case "startPlayback":
         self.metronome.startPlayback()
         result("Started playback")
@@ -30,31 +30,31 @@ import AVFoundation
       case "setBpm":
         let bpm: UInt16 = UInt16(arguments[0])!
         self.metronome.setBpm(bpm: bpm)
-        self.metronome.updateAudioBuffer()
+        self.metronome.writeAudioBuffer()
         result("Updated BPM")
       case "addSubdivision":
         let key: String = arguments[0]
         let option: Int = Int(arguments[1])!
         let volume: Float = Float(arguments[2])!
         self.metronome.addSubdivision(key: key, subdivision: Subdivision(option: option, volume: volume))
-        self.metronome.updateAudioBuffer()
+        self.metronome.writeAudioBuffer()
         result("Added subdivision")
       case "removeSubdivision":
         let key: String = arguments[0]
         self.metronome.removeSubdivision(key: key)
-        self.metronome.updateAudioBuffer()
+        self.metronome.writeAudioBuffer()
         result("Removed subdivision")
       case "setSubdivisionOption":
         let key: String = arguments[0]
         let option: Int = Int(arguments[1])!
         self.metronome.getSubdivision(key: key).setOption(option: option)
-        self.metronome.updateAudioBuffer()
+        self.metronome.writeAudioBuffer()
         result("Set subdivision option")
       case "setSubdivisionVolume":
         let key: String = arguments[0]
         let volume: Float = Float(arguments[1])!
         self.metronome.getSubdivision(key: key).setVolume(volume: volume)
-        self.metronome.updateAudioBuffer()
+        self.metronome.writeAudioBuffer()
         result("Set subdivision volume")
       default:
         result(FlutterMethodNotImplemented)

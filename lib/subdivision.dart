@@ -26,12 +26,12 @@ class Subdivision extends StatefulWidget {
 
   double getSubdivisionVolume() {
     final SubdivisionState subdivisionState = SubdivisionState();
-    return subdivisionState.volume;
+    return subdivisionState.muted ? 0.0 : subdivisionState.volume;
   }
 }
 
 class SubdivisionState extends State<Subdivision> {
-  bool _muted = true;
+  bool muted = true;
   double volume = 0.5;
   String option = subdivisionOptions[0];
 
@@ -46,16 +46,16 @@ class SubdivisionState extends State<Subdivision> {
     setState(() {
       volume = newVolume;
     });
-    if (!_muted) {
+    if (!muted) {
       Audio.setSubdivisionVolume(widget.key!, newVolume);
     }
   }
 
   void toggleMuted() {
     setState(() {
-      _muted = !_muted;
+      muted = !muted;
     });
-    _muted
+    muted
         ? Audio.setSubdivisionVolume(widget.key!, 0.0)
         : Audio.setSubdivisionVolume(widget.key!, volume);
   }
@@ -84,7 +84,7 @@ class SubdivisionState extends State<Subdivision> {
                               option,
                               style: (TextStyle(
                                   fontSize: 32,
-                                  color: _muted ? Colors.grey : Colors.white)),
+                                  color: muted ? Colors.grey : Colors.white)),
                               textAlign: TextAlign.center,
                             ),
                           ));
@@ -99,7 +99,7 @@ class SubdivisionState extends State<Subdivision> {
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.7,
               child: Slider(
-                activeColor: _muted ? Colors.grey : Colors.white,
+                activeColor: muted ? Colors.grey : Colors.white,
                 value: volume,
                 onChanged: (double newVolume) => setVolume(newVolume),
               ),
@@ -109,10 +109,10 @@ class SubdivisionState extends State<Subdivision> {
               child: IconButton(
                 onPressed: () => toggleMuted(),
                 icon: Icon(
-                  _muted ? Icons.volume_off : Icons.volume_up,
+                  muted ? Icons.volume_off : Icons.volume_up,
                   size: 32,
                 ),
-                color: _muted ? Colors.red : Colors.white,
+                color: muted ? Colors.red : Colors.white,
               ),
             ),
             SizedBox(

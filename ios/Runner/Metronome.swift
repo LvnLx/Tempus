@@ -48,7 +48,7 @@ class Metronome {
     self.subdivisions.removeValue(forKey: key)
   }
   
-  func initializeAudioBuffer() {
+  func writeAudioBuffer() {
     var audioData: [Float] = [Float](repeating: 0.0, count: Int(audioBuffer!.pointee.mAudioDataByteSize))
     
     for frame in 0..<Int(sampleRate * 0.05) {
@@ -57,11 +57,29 @@ class Metronome {
       audioData[frame] = Float(value)
     }
     
+    for (_, subdivision) in subdivisions {
+      if (subdivision.volume == 0) {
+        continue
+      }
+      
+      var startFrames: [UInt32] = Array(repeating: audioBuffer!.pointee.mAudioDataByteSize / sizeOfFloat / UInt32(subdivision.option), count: subdivision.option - 1)
+      for (index, startFrame) in startFrames.enumerated() {
+        startFrames[index] = startFrame * UInt32(index + 1)
+      }
+      
+      for startFrame in startFrames {
+        let sampleLength = UInt32(sampleRate * 0.05)
+        let endFrame = Int(startFrame + sampleLength)
+        for frame in Int(startFrame)..<endFrame {
+          let time = Double(frame) / sampleRate
+          let value = sin(Float(angularFrequency * time)) * subdivision.volume
+          print(subdivision.volume)
+          audioData[frame] = Float(value)
+        }
+      }
+    }
+    
     audioBuffer!.pointee.mAudioData.copyMemory(from: audioData, byteCount: Int(audioBuffer!.pointee.mAudioDataByteSize))
-  }
-  
-  func updateAudioBuffer() {
-    // TODO
   }
   
   func setBpm(bpm: UInt16) {
