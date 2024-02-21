@@ -1,6 +1,8 @@
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:metronomic/audio.dart';
+import 'package:metronomic/SubdivisionController.dart';
+import 'package:metronomic/playbackController.dart';
 import 'package:metronomic/subdivision.dart';
 
 void main() async {
@@ -67,6 +69,27 @@ class _MainAppState extends State<MainApp> {
   }
 
   @override
+  Widget build(BuildContext context) {
+    return PlatformApp(
+      home: PlatformScaffold(
+        body: OrientationBuilder(
+          builder: (context, orientation) {
+            return Flex(
+              direction: orientation == Orientation.portrait
+                  ? Axis.vertical
+                  : Axis.horizontal,
+              children: [
+                Expanded(child: SubdivisionController()),
+                Expanded(child: PlaybackController())
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+/*
+@override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
@@ -174,5 +197,5 @@ class _MainAppState extends State<MainApp> {
         ),
       ),
     );
-  }
+  }*/
 }
