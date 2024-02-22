@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:metronomic/audio.dart';
 
 typedef SubdivisionCallback = void Function(Key key);
@@ -8,7 +9,6 @@ const List<String> subdivisionOptions = [
   '3',
   '4',
   '5',
-  '6',
 ];
 
 class Subdivision extends StatefulWidget {
@@ -26,14 +26,14 @@ class Subdivision extends StatefulWidget {
 
   double getSubdivisionVolume() {
     final SubdivisionState subdivisionState = SubdivisionState();
-    return subdivisionState.muted ? 0.0 : subdivisionState.volume;
+    return subdivisionState.volume;
   }
 }
 
 class SubdivisionState extends State<Subdivision> {
-  bool muted = true;
-  double volume = 0.5;
+  double volume = 0.0;
   String option = subdivisionOptions[0];
+  PageController scrollController = PageController(viewportFraction: 1);
 
   void setOption(String newOption) {
     setState(() {
@@ -46,20 +46,58 @@ class SubdivisionState extends State<Subdivision> {
     setState(() {
       volume = newVolume;
     });
-    if (!muted) {
-      Audio.setSubdivisionVolume(widget.key!, newVolume);
-    }
+    print(widget.key);
+    Audio.setSubdivisionVolume(widget.key!, newVolume);
   }
 
-  void toggleMuted() {
-    setState(() {
-      muted = !muted;
+  @override
+  void initState() {
+    super.initState();
+
+    scrollController.addListener(() {
+      if (scrollController.position.isScrollingNotifier.value == false) {
+        final int currentPage = scrollController.page!.round();
+        scrollController.animateToPage(
+          currentPage,
+          curve: Curves.easeOut,
+          duration: Duration(),
+        );
+      }
     });
-    muted
-        ? Audio.setSubdivisionVolume(widget.key!, 0.0)
-        : Audio.setSubdivisionVolume(widget.key!, volume);
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      Expanded(
+        child: RotatedBox(
+            quarterTurns: 3,
+            child: PlatformSlider(
+                value: volume,
+                onChanged: (double value) {
+                  setVolume(value);
+                })),
+      ),
+      SizedBox(
+        width: 100,
+        height: 100,
+        child: ListWheelScrollView(
+            controller: scrollController,
+            itemExtent: 100,
+            physics: PageScrollPhysics(),
+            children: List.generate(
+                subdivisionOptions.length,
+                (index) => Center(
+                      child: Text(
+                        subdivisionOptions[index],
+                        style: TextStyle(color: Colors.white, fontSize: 50),
+                      ),
+                    ))),
+      ),
+    ]);
+  }
+
+/*
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -130,5 +168,5 @@ class SubdivisionState extends State<Subdivision> {
         ),
       ],
     );
-  }
+  }*/
 }

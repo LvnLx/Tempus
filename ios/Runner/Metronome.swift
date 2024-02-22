@@ -38,6 +38,7 @@ class Metronome {
   
   func addSubdivision(key: String, subdivision: Subdivision) {
     self.subdivisions[key] = subdivision
+    print(self.subdivisions)
   }
   
   func getSubdivision(key: String) -> Subdivision {
