@@ -7,7 +7,7 @@ class Audio {
   static MethodChannel methodChannel = MethodChannel('audio_method_channel');
 
   static Future<void> postFlutterInit(int bpm) async {
-    await updateBpm(bpm);
+    await setBpm(bpm);
     await writeBuffer();
   }
 
@@ -26,7 +26,7 @@ class Audio {
     print(result);
   }
 
-  static Future<void> updateBpm(int bpm) async {
+  static Future<void> setBpm(int bpm) async {
     final result = await methodChannel.invokeMethod('setBpm', [bpm.toString()]);
     print(result);
   }

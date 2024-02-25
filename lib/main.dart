@@ -29,7 +29,7 @@ class _MainAppState extends State<MainApp> {
     super.initState();
 
     Audio.postFlutterInit(bpm.value);
-    bpm.addListener(() => Audio.updateBpm(bpm.value));
+    bpm.addListener(() => Audio.setBpm(bpm.value));
     subdivisions.addListener(() => checkSubdivisionCount());
   }
 
@@ -83,11 +83,8 @@ class _MainAppState extends State<MainApp> {
                 children: [
                   Expanded(child: SubdivisionController()),
                   orientation == Orientation.portrait
-                      ? Divider(
-                          indent: 5.0,
-                          endIndent: 5.0,
-                        )
-                      : VerticalDivider(indent: 5.0, endIndent: 5.0),
+                      ? Divider(color: Color.fromRGBO(60, 60, 60, 1.0),)
+                      : VerticalDivider(),
                   Expanded(child: PlaybackController())
                 ],
               );
