@@ -10,10 +10,24 @@ class PlaybackController extends StatefulWidget {
 
 class PlaybackControllerState extends State<PlaybackController> {
   int bpm = 120;
+  bool playback = false;
+
+  @override
+  initState() {
+    super.initState();
+    Audio.postFlutterInit(bpm);
+  }
 
   setBpm(int newBpm) {
     setState(() => bpm = newBpm);
     Audio.setBpm(bpm);
+  }
+
+  togglePlayback() {
+    playback ? Audio.stopPlayback() : Audio.startPlayback();
+    setState(() {
+      playback = !playback;
+    });
   }
 
   @override
@@ -27,12 +41,18 @@ class PlaybackControllerState extends State<PlaybackController> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               PlatformIconButton(
-                icon: Icon(Icons.remove, color: Colors.white, size: 35,),
+                icon: Icon(
+                  Icons.remove,
+                  color: Colors.white,
+                  size: 35,
+                ),
                 onPressed: () => setBpm(bpm - 1),
               ),
               Container(
-                padding: EdgeInsets.all(8.0),
-                decoration: BoxDecoration(border: Border.all(color: Colors.white), borderRadius: BorderRadius.circular(8.0)),
+                  padding: EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white),
+                      borderRadius: BorderRadius.circular(8.0)),
                   width: 100,
                   child: Center(
                       child: Text(
@@ -41,16 +61,13 @@ class PlaybackControllerState extends State<PlaybackController> {
                     textAlign: TextAlign.center,
                   ))),
               PlatformIconButton(
-                  icon: Icon(
-                    Icons.add,
-                    color: Colors.white,
-                    size: 35
-                  ),
+                  icon: Icon(Icons.add, color: Colors.white, size: 35),
                   onPressed: () => setBpm(bpm + 1)),
             ],
           ),
         ),
-        Expanded(flex: 4, child: BpmDial())
+        Expanded(
+            flex: 4, child: SizedBox(width: 220, height: 220, child: BpmDial()))
       ],
     );
   }
