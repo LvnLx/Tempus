@@ -18,6 +18,10 @@ class PlaybackControllerState extends State<PlaybackController> {
     Audio.postFlutterInit(bpm);
   }
 
+  onDialChanged(int change) {
+    setBpm(bpm + change);
+  }
+
   setBpm(int newBpm) {
     setState(() => bpm = newBpm);
     Audio.setBpm(bpm);
@@ -67,7 +71,9 @@ class PlaybackControllerState extends State<PlaybackController> {
           ),
         ),
         Expanded(
-            flex: 4, child: SizedBox(width: 220, height: 220, child: BpmDial()))
+            flex: 4,
+            child: SizedBox(
+                width: 220, height: 220, child: BpmDial(callback: onDialChanged)))
       ],
     );
   }

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
 class BpmDial extends StatefulWidget {
+  final Function(int) callback;
+
+  BpmDial({required this.callback});
+
   @override
   State<StatefulWidget> createState() => BpmDialState();
 }
@@ -13,74 +17,85 @@ class BpmDialState extends State<BpmDial> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        double centerX = constraints.maxWidth / 2;
-        double centerY = constraints.maxHeight / 2;
+        double xCenter = constraints.maxWidth / 2;
+        double yCenter = constraints.maxHeight / 2;
 
         return GestureDetector(
+          onPanStart: (DragStartDetails details) {
+            xPrevious = details.localPosition.dx - xCenter;
+            yPrevious = yCenter - details.localPosition.dy;
+          },
           onPanUpdate: (DragUpdateDetails details) {
-            double x = details.localPosition.dx - centerX;
-            double y = centerY - details.localPosition.dy;
+            double x = details.localPosition.dx - xCenter;
+            double y = yCenter - details.localPosition.dy;
 
-            if (xPrevious != null && yPrevious != null) {
-              Direction direction = getDirection(xPrevious!, yPrevious!, x, y);
+            int rotationMinimum = 15;
+            if (((x - xPrevious!).abs() < rotationMinimum &&
+                (y - yPrevious!).abs() < rotationMinimum)) {
+              return;
+            }
 
-              if (y > 0) {
-                if (x > 0) {
-                  // Quadrant 1
-                  switch (direction) {
-                    case Direction.up:
-                      print('-');
-                    case Direction.down:
-                      print('+');
-                    case Direction.left:
-                      print('-');
-                    case Direction.right:
-                      print('+');
-                  }
-                } else {
-                  // Quadrant 2
-                  switch (direction) {
-                    case Direction.up:
-                      print('+');
-                    case Direction.down:
-                      print('-');
-                    case Direction.left:
-                      print('-');
-                    case Direction.right:
-                      print('+');
-                  }
+            Direction direction = getDirection(xPrevious!, yPrevious!, x, y);
+            bool isClockwise;
+
+            if (y > 0) {
+              if (x > 0) {
+                // Quadrant 1
+                switch (direction) {
+                  case Direction.up:
+                    isClockwise = false;
+                  case Direction.down:
+                    isClockwise = true;
+                  case Direction.left:
+                    isClockwise = false;
+                  case Direction.right:
+                    isClockwise = true;
                 }
               } else {
-                if (x < 0) {
-                  // Quadrant 3
-                  switch (direction) {
-                    case Direction.up:
-                      print('+');
-                    case Direction.down:
-                      print('-');
-                    case Direction.left:
-                      print('+');
-                    case Direction.right:
-                      print('-');
-                  }
-                } else {
-                  // Quadrant 4
-                  switch (direction) {
-                    case Direction.up:
-                      print('-');
-                    case Direction.down:
-                      print('+');
-                    case Direction.left:
-                      print('+');
-                    case Direction.right:
-                      print('-');
-                  }
+                // Quadrant 2
+                switch (direction) {
+                  case Direction.up:
+                    isClockwise = true;
+                  case Direction.down:
+                    isClockwise = false;
+                  case Direction.left:
+                    isClockwise = false;
+                  case Direction.right:
+                    isClockwise = true;
+                }
+              }
+            } else {
+              if (x < 0) {
+                // Quadrant 3
+                switch (direction) {
+                  case Direction.up:
+                    isClockwise = true;
+                  case Direction.down:
+                    isClockwise = false;
+                  case Direction.left:
+                    isClockwise = true;
+                  case Direction.right:
+                    isClockwise = false;
+                }
+              } else {
+                // Quadrant 4
+                switch (direction) {
+                  case Direction.up:
+                    isClockwise = false;
+                  case Direction.down:
+                    isClockwise = true;
+                  case Direction.left:
+                    isClockwise = true;
+                  case Direction.right:
+                    isClockwise = false;
                 }
               }
             }
 
             xPrevious = x;
             yPrevious = y;
+
+            widget.callback(isClockwise ? 1 : -1);
           },
           child: Container(
             width: constraints.maxWidth,
