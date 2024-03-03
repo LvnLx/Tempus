@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:metronomic/subdivision/subdivision.dart';
 
 class ScrollWheel extends StatefulWidget {
+  final Function(String) callback;
+
+  ScrollWheel({required this.callback});
+
   @override
   State<StatefulWidget> createState() => ScrollWheelState();
 }
@@ -39,6 +43,7 @@ class ScrollWheelState extends State<ScrollWheel> {
         controller: _scrollController,
         itemExtent: itemHeight,
         physics: FixedExtentScrollPhysics(),
+        onSelectedItemChanged: (int value) => {widget.callback(subdivisionOptions[value])},
         childDelegate: ListWheelChildBuilderDelegate(
           builder: (context, index) {
             final double scrollOffset = _scrollController.offset;

@@ -13,7 +13,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
   final Map<Key, Subdivision> subdivisions = <Key, Subdivision>{};
 
   double volume = 1.0;
-  IconData volumeIcon = Icons.volume_up;
+  late IconData volumeIcon;
 
   void addSubdivision() {
     var key = UniqueKey();
@@ -33,23 +33,24 @@ class SubdivisionControllerState extends State<SubdivisionController> {
     Audio.removeSubdivision(key);
   }
 
-  void setVolume(double newVolume) {
+  void setVolume(BuildContext context, double newVolume) {
     setState(() {
       volume = newVolume;
       if (volume > 0.66) {
-        volumeIcon = Icons.volume_up;
+        volumeIcon = PlatformIcons(context).volumeUp;
       } else if (volume > 0.33) {
-        volumeIcon = Icons.volume_down;
+        volumeIcon = PlatformIcons(context).volumeDown;
       } else if (volume > 0.0) {
-        volumeIcon = Icons.volume_mute;
+        volumeIcon = PlatformIcons(context).volumeMute;
       } else {
-        volumeIcon = Icons.volume_off;
+        volumeIcon = PlatformIcons(context).volumeOff;
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    setVolume(context, volume);
     return Row(
       children: [
         Padding(
@@ -61,7 +62,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                 quarterTurns: 3,
                 child: PlatformSlider(
                   activeColor: Colors.white,
-                  onChanged: (double value) => setVolume(volume = value),
+                  onChanged: (double value) => setVolume(context, volume = value),
                   value: volume,
                 ),
               )),
@@ -85,7 +86,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
         if (subdivisions.length < 2) PlatformIconButton(
             onPressed: addSubdivision,
             icon: Icon(
-              Icons.add,
+              PlatformIcons(context).add,
               color: Colors.white,
               size: 35,
             ))

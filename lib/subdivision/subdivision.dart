@@ -84,11 +84,11 @@ class SubdivisionState extends State<Subdivision> {
                       onChanged: (double value) => setVolume(value),
                       value: volume,
                     ))),
-            SizedBox(width: 50, height: 120, child: ScrollWheel()),
+            SizedBox(width: 50, height: 120, child: ScrollWheel(callback: setOption)),
             SizedBox(
               child: PlatformIconButton(
                   onPressed: () => widget.onRemove(widget.key!),
-                  icon: Icon(Icons.close, color: Colors.red, size: 35)),
+                  icon: Icon(PlatformIcons(context).clear, color: Colors.red, size: 35)),
             )
           ]),
         ),

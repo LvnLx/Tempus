@@ -23,7 +23,7 @@ class PlaybackControllerState extends State<PlaybackController> {
   }
 
   setBpm(int newBpm) {
-    setState(() => bpm = newBpm);
+    setState(() => newBpm > 0 ? bpm = newBpm : 1);
     Audio.setBpm(bpm);
   }
 
@@ -39,14 +39,14 @@ class PlaybackControllerState extends State<PlaybackController> {
     return Flex(
       direction: Axis.vertical,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
+        Expanded(
+          flex: 1,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               PlatformIconButton(
                 icon: Icon(
-                  Icons.remove,
+                  PlatformIcons(context).remove,
                   color: Colors.white,
                   size: 35,
                 ),
@@ -58,6 +58,7 @@ class PlaybackControllerState extends State<PlaybackController> {
                       border: Border.all(color: Colors.white),
                       borderRadius: BorderRadius.circular(8.0)),
                   width: 100,
+                  height: 60,
                   child: Center(
                       child: Text(
                     bpm.toString(),
@@ -65,15 +66,54 @@ class PlaybackControllerState extends State<PlaybackController> {
                     textAlign: TextAlign.center,
                   ))),
               PlatformIconButton(
-                  icon: Icon(Icons.add, color: Colors.white, size: 35),
+                  icon: Icon(PlatformIcons(context).add,
+                      color: Colors.white, size: 35),
                   onPressed: () => setBpm(bpm + 1)),
             ],
           ),
         ),
         Expanded(
-            flex: 4,
-            child: SizedBox(
-                width: 220, height: 220, child: BpmDial(callback: onDialChanged)))
+            flex: 3,
+            child: Stack(
+              children: [
+                Center(
+                  child: SizedBox(
+                      width: 250,
+                      height: 250,
+                      child: BpmDial(
+                          callbackThreshold: 20, callback: onDialChanged)),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            PlatformIconButton(
+                              icon: Icon(
+                                PlatformIcons(context).settings,
+                                size: 35,
+                                color: Colors.white,
+                              ),
+                              onPressed: () => (print("Settings")),
+                            ),
+                            PlatformIconButton(
+                              cupertinoIcon: Icon(
+                                  size: 35,
+                                  playback
+                                      ? PlatformIcons(context).pause
+                                      : PlatformIcons(context).playArrowSolid,
+                                  color: Colors.white),
+                              onPressed: togglePlayback,
+                            )
+                          ]),
+                    ),
+                  ],
+                )
+              ],
+            )),
       ],
     );
   }
