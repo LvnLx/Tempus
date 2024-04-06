@@ -18,44 +18,48 @@ import AVFoundation
       let arguments = call.arguments as? [String] ?? []
       
       switch call.method {
-      case "writeAudioBuffer":
-        self.metronome.writeAudioBuffer()
-        result("Wrote audio buffer")
+      case "addSubdivision":
+        let key: String = arguments[0]
+        let option: Int = Int(arguments[1])!
+        let volume: Float = Float(arguments[2])!
+        self.metronome.addSubdivision(key: key, subdivision: Subdivision(option: option, volume: volume))
+        result("Added subdivision")
+      case "removeSubdivision":
+        let key: String = arguments[0]
+        self.metronome.removeSubdivision(key: key)
+        result("Removed subdivision")
+      case "setBpm":
+        let bpm: UInt16 = UInt16(arguments[0])!
+        self.metronome.setBpm(bpm: bpm)
+        result("Set BPM")
+      case "setSubdivisionOption":
+        let key: String = arguments[0]
+        let option: Int = Int(arguments[1])!
+        let subdivision: Subdivision = self.metronome.getSubdivision(key: key)
+        self.metronome.eraseSubdivision(subdivision: subdivision)
+        subdivision.setOption(option: option)
+        self.metronome.writeSubdivision(subdivision: subdivision)
+        result("Set subdivision option")
+      case "setSubdivisionVolume":
+        let key: String = arguments[0]
+        let volume: Float = Float(arguments[1])!
+        let subdivision: Subdivision = self.metronome.getSubdivision(key: key)
+        subdivision.setVolume(volume: volume)
+        self.metronome.writeSubdivision(subdivision: subdivision)
+        result("Set subdivision volume")
+      case "setVolume":
+        let volume: Float = Float(arguments[0])!
+        self.metronome.setVolume(volume: volume)
+        result("Set volume")
       case "startPlayback":
         self.metronome.startPlayback()
         result("Started playback")
       case "stopPlayback":
         self.metronome.stopPlayback()
         result("Stopped playback")
-      case "setBpm":
-        let bpm: UInt16 = UInt16(arguments[0])!
-        self.metronome.setBpm(bpm: bpm)
-        self.metronome.writeAudioBuffer()
-        result("Updated BPM")
-      case "addSubdivision":
-        let key: String = arguments[0]
-        let option: Int = Int(arguments[1])!
-        let volume: Float = Float(arguments[2])!
-        self.metronome.addSubdivision(key: key, subdivision: Subdivision(option: option, volume: volume))
-        self.metronome.writeAudioBuffer()
-        result("Added subdivision")
-      case "removeSubdivision":
-        let key: String = arguments[0]
-        self.metronome.removeSubdivision(key: key)
-        self.metronome.writeAudioBuffer()
-        result("Removed subdivision")
-      case "setSubdivisionOption":
-        let key: String = arguments[0]
-        let option: Int = Int(arguments[1])!
-        self.metronome.getSubdivision(key: key).setOption(option: option)
-        self.metronome.writeAudioBuffer()
-        result("Set subdivision option")
-      case "setSubdivisionVolume":
-        let key: String = arguments[0]
-        let volume: Float = Float(arguments[1])!
-        self.metronome.getSubdivision(key: key).setVolume(volume: volume)
-        self.metronome.writeAudioBuffer()
-        result("Set subdivision volume")
+      case "writeDownbeat":
+        self.metronome.writeDownbeat()
+        result("Wrote downbeat")
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -64,7 +68,7 @@ import AVFoundation
     do {
       try AVAudioSession.sharedInstance().setCategory(.playback, options: .mixWithOthers)
     } catch {
-      print("Failed to se AVAudioSession's shared instance category")
+      print("Failed to set AVAudioSession's shared instance category")
     }
     
     GeneratedPluginRegistrant.register(with: self)
