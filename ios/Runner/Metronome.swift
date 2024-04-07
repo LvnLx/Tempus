@@ -7,7 +7,6 @@ class Metronome {
     AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, nil)
   }
   
-  private let angularFrequency: Double = 2.0 * Double.pi * 880.0
   private let sampleRate: Float64 = 44100.0
   private let sizeOfFloat: UInt32 = UInt32(MemoryLayout<Float>.size)
   
@@ -56,15 +55,13 @@ class Metronome {
     }
     
     for startFrame in startFrames {
-      let sampleLength = UInt32(sampleRate * 0.05)
-      let endFrame = Int(startFrame + sampleLength)
-      for frame in Int(startFrame)..<endFrame {
-        let time = Double(frame) / sampleRate
-        let value = sin(Float(angularFrequency * time)) * subdivision.volume
-        
-        let offsetPointer: UnsafeMutableRawPointer = audioBuffer!.pointee.mAudioData + (frame * Int(sizeOfFloat))
-        offsetPointer.storeBytes(of: Float(value), as: Float.self)
-        subdivision.locations.append(offsetPointer)
+      let start: UnsafeMutableRawPointer = audioBuffer!.pointee.mAudioData + Int(startFrame * sizeOfFloat)
+      let samplesWritten: UInt32 = loadAudioFile(fileName: "Subdivision", outputBuffer: start)
+      
+      for sample in 0..<samplesWritten {
+        var current: UnsafeMutableRawPointer = start + Int(sample * sizeOfFloat)
+        current.storeBytes(of: current.load(as: Float.self) * subdivision.volume, as: Float.self)
+        subdivision.locations.append(current)
       }
     }
   }
@@ -87,13 +84,13 @@ class Metronome {
     }
     downbeatLocations.removeAll()
     
-    for frame in 0..<Int(sampleRate * 0.05) {
-      let time = Double(frame) / sampleRate
-      let value = sin(angularFrequency * time)
-      
-      let offsetPointer: UnsafeMutableRawPointer = audioBuffer!.pointee.mAudioData + (frame * Int(sizeOfFloat))
-      offsetPointer.storeBytes(of: Float(value), as: Float.self)
-      downbeatLocations.append(offsetPointer)
+    let start: UnsafeMutableRawPointer = audioBuffer!.pointee.mAudioData
+    let samplesWritten: UInt32 = loadAudioFile(fileName: "Downbeat", outputBuffer: start)
+    
+    for sample in 0..<samplesWritten {
+      var current: UnsafeMutableRawPointer = start + Int(sample * sizeOfFloat)
+      current.storeBytes(of: current.load(as: Float.self) * 1.0, as: Float.self)
+      downbeatLocations.append(current)
     }
   }
   
