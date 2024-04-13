@@ -46,6 +46,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
         volumeIcon = PlatformIcons(context).volumeOff;
       }
     });
+    Audio.setVolume(newVolume);
   }
 
   @override
