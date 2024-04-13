@@ -10,7 +10,6 @@ class Metronome {
   private let sampleRate: Float64 = 44100.0
   private let sizeOfFloat: UInt32 = UInt32(MemoryLayout<Float>.size)
   
-  private var downbeatLocations: [UnsafeMutableRawPointer] = []
   private var subdivisions: [String: Subdivision] = [:]
   
   init() {
@@ -79,18 +78,12 @@ class Metronome {
   }
   
   func writeDownbeat() {
-    for downbeatLocation in downbeatLocations {
-      downbeatLocation.storeBytes(of: 0.0, as: Float.self)
-    }
-    downbeatLocations.removeAll()
-    
     let start: UnsafeMutableRawPointer = audioBuffer!.pointee.mAudioData
     let samplesWritten: UInt32 = copyAudio(fileName: "Downbeat", outputBuffer: start)
     
     for sample in 0..<samplesWritten {
       let current: UnsafeMutableRawPointer = start + Int(sample * sizeOfFloat)
-      current.storeBytes(of: current.load(as: Float.self) * 1.0, as: Float.self)
-      downbeatLocations.append(current)
+      current.storeBytes(of: current.load(as: Float.self), as: Float.self)
     }
   }
   
