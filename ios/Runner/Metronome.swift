@@ -56,10 +56,10 @@ class Metronome {
     
     for startFrame in startFrames {
       let start: UnsafeMutableRawPointer = audioBuffer!.pointee.mAudioData + Int(startFrame * sizeOfFloat)
-      let samplesWritten: UInt32 = loadAudioFile(fileName: "Subdivision", outputBuffer: start)
+      let samplesWritten: UInt32 = copyAudio(fileName: "Subdivision", outputBuffer: start)
       
       for sample in 0..<samplesWritten {
-        var current: UnsafeMutableRawPointer = start + Int(sample * sizeOfFloat)
+        let current: UnsafeMutableRawPointer = start + Int(sample * sizeOfFloat)
         current.storeBytes(of: current.load(as: Float.self) * subdivision.volume, as: Float.self)
         subdivision.locations.append(current)
       }
@@ -85,10 +85,10 @@ class Metronome {
     downbeatLocations.removeAll()
     
     let start: UnsafeMutableRawPointer = audioBuffer!.pointee.mAudioData
-    let samplesWritten: UInt32 = loadAudioFile(fileName: "Downbeat", outputBuffer: start)
+    let samplesWritten: UInt32 = copyAudio(fileName: "Downbeat", outputBuffer: start)
     
     for sample in 0..<samplesWritten {
-      var current: UnsafeMutableRawPointer = start + Int(sample * sizeOfFloat)
+      let current: UnsafeMutableRawPointer = start + Int(sample * sizeOfFloat)
       current.storeBytes(of: current.load(as: Float.self) * 1.0, as: Float.self)
       downbeatLocations.append(current)
     }
