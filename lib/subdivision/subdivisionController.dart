@@ -33,7 +33,8 @@ class SubdivisionControllerState extends State<SubdivisionController> {
     Audio.removeSubdivision(key);
   }
 
-  void setVolume(BuildContext context, double newVolume) {
+  void setVolume(BuildContext context, double newVolume,
+      [bool useThrottling = true]) {
     setState(() {
       volume = newVolume;
       if (volume > 0.66) {
@@ -46,7 +47,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
         volumeIcon = PlatformIcons(context).volumeOff;
       }
     });
-    Audio.setVolume(newVolume);
+    Audio.setVolume(newVolume, useThrottling);
   }
 
   @override
@@ -63,7 +64,9 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                 quarterTurns: 3,
                 child: PlatformSlider(
                   activeColor: Colors.white,
-                  onChanged: (double value) => setVolume(context, volume = value),
+                  onChanged: (double value) => setVolume(context, value),
+                  onChangeEnd: (double value) =>
+                      setVolume(context, value, false),
                   value: volume,
                 ),
               )),
@@ -84,13 +87,14 @@ class SubdivisionControllerState extends State<SubdivisionController> {
         VerticalDivider(
           color: Color.fromRGBO(60, 60, 60, 1.0),
         ),
-        if (subdivisions.length < 2) PlatformIconButton(
-            onPressed: addSubdivision,
-            icon: Icon(
-              PlatformIcons(context).add,
-              color: Colors.white,
-              size: 35,
-            ))
+        if (subdivisions.length < 2)
+          PlatformIconButton(
+              onPressed: addSubdivision,
+              icon: Icon(
+                PlatformIcons(context).add,
+                color: Colors.white,
+                size: 35,
+              ))
       ],
     );
   }

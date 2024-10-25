@@ -43,11 +43,11 @@ class SubdivisionState extends State<Subdivision> {
     Audio.setSubdivisionOption(widget.key!, newOption);
   }
 
-  void setVolume(double newVolume) {
+  void setVolume(double newVolume, [bool useThrottling = true]) {
     setState(() {
       volume = newVolume;
     });
-    Audio.setSubdivisionVolume(widget.key!, newVolume);
+    Audio.setSubdivisionVolume(widget.key!, newVolume, useThrottling);
   }
 
   @override
@@ -82,6 +82,7 @@ class SubdivisionState extends State<Subdivision> {
                     child: PlatformSlider(
                       activeColor: Colors.white,
                       onChanged: (double value) => setVolume(value),
+                      onChangeEnd: (double value) => setVolume(value, false),
                       value: volume,
                     ))),
             SizedBox(width: 50, height: 120, child: ScrollWheel(callback: setOption)),
