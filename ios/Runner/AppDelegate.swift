@@ -22,29 +22,29 @@ import AVFoundation
         let key: String = arguments[0]
         let option: Int = Int(arguments[1])!
         let volume: Float = Float(arguments[2])!
-        self.metronome.addSubdivision(key: key, option: option, volume: volume)
+        self.metronome.addSubdivision(key, option, volume)
         result("Added subdivision")
       case "removeSubdivision":
         let key: String = arguments[0]
-        self.metronome.removeSubdivision(key: key)
+        self.metronome.removeSubdivision(key)
         result("Removed subdivision")
       case "setBpm":
         let bpm: UInt16 = UInt16(arguments[0])!
-        self.metronome.setBpm(bpm: bpm)
+        self.metronome.setBpm(bpm)
         result("Set BPM")
       case "setSubdivisionOption":
         let key: String = arguments[0]
         let option: Int = Int(arguments[1])!
-        self.metronome.setSubdivisionOption(key: key, option: option)
+        self.metronome.setSubdivisionOption(key, option)
         result("Set subdivision option")
       case "setSubdivisionVolume":
         let key: String = arguments[0]
         let volume: Float = Float(arguments[1])!
-        self.metronome.setSubdivisionVolume(key: key, volume: volume)
+        self.metronome.setSubdivisionVolume(key, volume)
         result("Set subdivision volume")
       case "setVolume":
         let volume: Float = Float(arguments[0])!
-        self.metronome.setVolume(volume: volume)
+        self.metronome.setVolume(volume)
         result("Set volume")
       case "startPlayback":
         self.metronome.startPlayback()
@@ -66,8 +66,8 @@ import AVFoundation
       print("Failed to set AVAudioSession's shared instance category")
     }
     
-    loadAudioFile(fileName: "Downbeat")
-    loadAudioFile(fileName: "Subdivision")
+    loadAudioFile("Downbeat")
+    loadAudioFile("Subdivision")
     
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

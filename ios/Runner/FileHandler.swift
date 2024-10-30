@@ -7,7 +7,18 @@ struct Audio {
 
 var audioFiles: [String:Audio] = [:]
 
-func loadAudioFile(fileName: String) {
+func copyAudio(_ fileName: String, _ outputBuffer: UnsafeMutableRawPointer) -> UInt32 {
+  let audio: Audio = audioFiles[fileName]!
+  outputBuffer.copyMemory(from: audio.data, byteCount: Int(audio.byteLength))
+  return audio.byteLength / UInt32(MemoryLayout<Float>.size)
+}
+
+func getAudioLength(_ fileName: String) -> UInt32 {
+  let audio: Audio = audioFiles[fileName]!
+  return audio.byteLength / UInt32(MemoryLayout<Float>.size)
+}
+
+func loadAudioFile(_ fileName: String) {
   let path: String = Bundle.main.path(forResource: fileName, ofType: "wav")!
   let url: URL = URL(string: path)!
   
@@ -41,8 +52,3 @@ func loadAudioFile(fileName: String) {
   audioFiles[fileName] = Audio(data: buffer, byteLength: bytesRead)
 }
 
-func copyAudio(fileName: String, outputBuffer: UnsafeMutableRawPointer) -> UInt32 {
-  let audio: Audio = audioFiles[fileName]!
-  outputBuffer.copyMemory(from: audio.data, byteCount: Int(audio.byteLength))
-  return audio.byteLength / UInt32(MemoryLayout<Float>.size)
-}
