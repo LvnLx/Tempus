@@ -22,7 +22,7 @@ import AVFoundation
         let key: String = arguments[0]
         let option: Int = Int(arguments[1])!
         let volume: Float = Float(arguments[2])!
-        self.metronome.addSubdivision(key: key, subdivision: Subdivision(option: option, volume: volume))
+        self.metronome.addSubdivision(key: key, option: option, volume: volume)
         result("Added subdivision")
       case "removeSubdivision":
         let key: String = arguments[0]
@@ -35,17 +35,12 @@ import AVFoundation
       case "setSubdivisionOption":
         let key: String = arguments[0]
         let option: Int = Int(arguments[1])!
-        let subdivision: Subdivision = self.metronome.getSubdivision(key: key)
-        self.metronome.eraseSubdivision(subdivision: subdivision)
-        subdivision.setOption(option: option)
-        self.metronome.writeSubdivision(subdivision: subdivision)
+        self.metronome.setSubdivisionOption(key: key, option: option)
         result("Set subdivision option")
       case "setSubdivisionVolume":
         let key: String = arguments[0]
         let volume: Float = Float(arguments[1])!
-        let subdivision: Subdivision = self.metronome.getSubdivision(key: key)
-        subdivision.setVolume(volume: volume)
-        self.metronome.writeSubdivision(subdivision: subdivision)
+        self.metronome.setSubdivisionVolume(key: key, volume: volume)
         result("Set subdivision volume")
       case "setVolume":
         let volume: Float = Float(arguments[0])!

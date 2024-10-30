@@ -38,16 +38,23 @@ class Metronome {
     audioBuffer!.pointee.mAudioData.copyMemory(from: audioData, byteCount: Int(audioBuffer!.pointee.mAudioDataByteSize))
   }
   
-  func getSubdivision(key: String) -> Subdivision {
-    return subdivisions[key]!
+  func addSubdivision(key: String, option: Int, volume: Float) {
+    subdivisions[key] = Subdivision(option: option, volume: volume)
+    // TODO
   }
   
-  func addSubdivision(key: String, subdivision: Subdivision) {
-    subdivisions[key] = subdivision
-    writeSubdivision(subdivision: subdivision)
+  /*
+  func writeAllSubdivisions() {
+    for subdivision in subdivisions.values {
+      writeSubdivision(subdivision: subdivision)
+    }
   }
   
   func writeSubdivision(subdivision: Subdivision) {
+    if (subdivisions.values.contains(where: { $0.option == subdivision.option && $0.volume > subdivision.volume })) {
+      return
+    }
+    
     var startFrames: [UInt32] = Array(repeating: audioBuffer!.pointee.mAudioDataByteSize / sizeOfFloat / UInt32(subdivision.option), count: subdivision.option - 1)
     for (index, startFrame) in startFrames.enumerated() {
       startFrames[index] = startFrame * UInt32(index + 1)
@@ -63,40 +70,32 @@ class Metronome {
         subdivision.locations.append(current)
       }
     }
-  }
+  }*/
   
   func removeSubdivision(key: String) {
-    eraseSubdivision(subdivision: subdivisions[key]!)
+    deleteAudio(locationGroups: subdivisions[key]!.locationGroups)
     subdivisions.removeValue(forKey: key)
   }
   
-  func eraseSubdivision(subdivision: Subdivision) {
-    for location in subdivision.locations {
-      location.storeBytes(of: 0.0, as: Float.self)
-    }
-    subdivision.locations.removeAll()
-  }
-  
-  func writeDownbeat() {
-    let start: UnsafeMutableRawPointer = audioBuffer!.pointee.mAudioData
-    let samplesWritten: UInt32 = copyAudio(fileName: "Downbeat", outputBuffer: start)
-    
-    for sample in 0..<samplesWritten {
-      let current: UnsafeMutableRawPointer = start + Int(sample * sizeOfFloat)
-      current.storeBytes(of: current.load(as: Float.self), as: Float.self)
-    }
-  }
-  
   func setBpm(bpm: UInt16) {
+    // TODO
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
+    
     for subdivision in subdivisions.values {
-      eraseSubdivision(subdivision: subdivision)
+      deleteAudio(locationGroups: subdivision.locationGroups)
+      subdivision.locationGroups.removeAll()
     }
     audioBuffer?.pointee.mAudioDataByteSize = UInt32(beatDurationSeconds * sampleRate * Double(sizeOfFloat))
-    for subdivision in subdivisions.values {
-      writeSubdivision(subdivision: subdivision)
-    }
+    writeAllSubdivisions()
+  }
+  
+  func setSubdivisionOption(key: String, option: Int) {
+    // TODO
+  }
+  
+  func setSubdivisionVolume(key: String, volume:Float) {
+    // TODO
   }
   
   func setVolume(volume: Float) {
@@ -111,5 +110,43 @@ class Metronome {
   
   func stopPlayback() {
     AudioQueueStop(audioQueue!, true)
+  }
+  
+  func writeDownbeat() {
+    // TODO
+    /*
+    let start: UnsafeMutableRawPointer = audioBuffer!.pointee.mAudioData
+    let samplesWritten: UInt32 = copyAudio(fileName: "Downbeat", outputBuffer: start)
+    
+    for sample in 0..<samplesWritten {
+      let current: UnsafeMutableRawPointer = start + Int(sample * sizeOfFloat)
+      current.storeBytes(of: current.load(as: Float.self), as: Float.self)
+    }*/
+  }
+  
+  private func getNonDominatedLocationGroups(subdivision: Subdivision) -> [UnsafeMutableRawPointer] {
+    subdivision.locationGroups.filter({
+      let heads = this.subdivisions.values
+        .filter({ $0 !== subdivision && max($0.option, subdivision.option) % min($0.option, subdivision.option) == 0 && $0.volume < subdivision.volume })
+        .flatMap({ $0.locationGroups })
+        .flatMap({ $0.first! })
+      heads.contains($0.first!)
+    })
+  }
+  
+  private func deleteAudio(locationGroups: [[UnsafeMutableRawPointer]]) {
+    for locationGroup in locationGroups {
+      for location in locationGroup {
+        location.storeBytes(of: 0.0, as: Float.self)
+      }
+    }
+  }
+  
+  private func writeAllSubdivisions() {
+    
+  }
+  
+  private func writeAudio() {
+    
   }
 }

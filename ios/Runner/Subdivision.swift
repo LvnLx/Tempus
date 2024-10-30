@@ -3,12 +3,12 @@ import Foundation
 class Subdivision: CustomStringConvertible {
   var option: Int
   var volume: Float
-  var locations: [UnsafeMutableRawPointer]
+  var locationGroups: [[UnsafeMutableRawPointer]]
   
   init(option: Int, volume: Float) {
     self.option = option
     self.volume = volume
-    self.locations = []
+    self.locationGroups = []
   }
   
   var description: String {
