@@ -15,12 +15,12 @@ Current implementation is for iOS (Swift), with Android (Kotlin) and web (JavaSc
 ## Feature Roadmap
 
 - [x] UI
-- [x] Communication Channels
-- [ ] Lockscreen Controls
-- [x] Audio Playback
+- [ ] Native Implementations
+  - [x] iOS
+  - [ ] Android
+- [ ] Core Features
   - [x] Downbeat
-    - [x] Audio
-    - [x] Controls
   - [x] Subdivisions
-    - [x] Audio
-    - [x] Controls
+  - [ ] Lockscreen Controls
+  - [ ] Tap tempo
+  - [ ] Speaker Delay Measurement
