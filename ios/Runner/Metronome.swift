@@ -39,7 +39,10 @@ class Metronome {
   }
   
   func addSubdivision(key: String, option: Int, volume: Float) {
-    subdivisions[key] = Subdivision(option: option, volume: volume)
+    let subdivision = Subdivision(option: option, volume: volume)
+    subdivisions[key] = subdivision
+    let locationsNeedingReplacement = getLocationsNeedingAudio(subdivision: subdivision)
+    print(locationsNeedingReplacement)
     // TODO
   }
   
@@ -55,11 +58,6 @@ class Metronome {
       return
     }
     
-    var startFrames: [UInt32] = Array(repeating: audioBuffer!.pointee.mAudioDataByteSize / sizeOfFloat / UInt32(subdivision.option), count: subdivision.option - 1)
-    for (index, startFrame) in startFrames.enumerated() {
-      startFrames[index] = startFrame * UInt32(index + 1)
-    }
-    
     for startFrame in startFrames {
       let start: UnsafeMutableRawPointer = audioBuffer!.pointee.mAudioData + Int(startFrame * sizeOfFloat)
       let samplesWritten: UInt32 = copyAudio(fileName: "Subdivision", outputBuffer: start)
@@ -73,7 +71,9 @@ class Metronome {
   }*/
   
   func removeSubdivision(key: String) {
-    deleteAudio(locationGroups: subdivisions[key]!.locationGroups)
+    let subdivision = subdivisions[key]!
+    let locationsNeedingReplpacement = getLocationsNeedingAudio(subdivision: subdivision)
+    print(locationsNeedingReplpacement)
     subdivisions.removeValue(forKey: key)
   }
   
@@ -83,18 +83,20 @@ class Metronome {
     let beatDurationSeconds: Double = 1.0 / bps
     
     for subdivision in subdivisions.values {
-      deleteAudio(locationGroups: subdivision.locationGroups)
-      subdivision.locationGroups.removeAll()
+      deleteAudio(startFrames: subdivision.locations)
+      subdivision.locations.removeAll()
     }
     audioBuffer?.pointee.mAudioDataByteSize = UInt32(beatDurationSeconds * sampleRate * Double(sizeOfFloat))
     writeAllSubdivisions()
   }
   
   func setSubdivisionOption(key: String, option: Int) {
+    subdivisions[key]!.setOption(option: option, bufferSize: audioBuffer!.pointee.mAudioDataByteSize)
     // TODO
   }
   
-  func setSubdivisionVolume(key: String, volume:Float) {
+  func setSubdivisionVolume(key: String, volume: Float) {
+    subdivisions[key]!.setVolume(volume: volume)
     // TODO
   }
   
@@ -113,33 +115,26 @@ class Metronome {
   }
   
   func writeDownbeat() {
-    // TODO
-    /*
     let start: UnsafeMutableRawPointer = audioBuffer!.pointee.mAudioData
     let samplesWritten: UInt32 = copyAudio(fileName: "Downbeat", outputBuffer: start)
     
     for sample in 0..<samplesWritten {
       let current: UnsafeMutableRawPointer = start + Int(sample * sizeOfFloat)
       current.storeBytes(of: current.load(as: Float.self), as: Float.self)
-    }*/
+    }
   }
   
-  private func getNonDominatedLocationGroups(subdivision: Subdivision) -> [UnsafeMutableRawPointer] {
-    subdivision.locationGroups.filter({
-      let heads = this.subdivisions.values
-        .filter({ $0 !== subdivision && max($0.option, subdivision.option) % min($0.option, subdivision.option) == 0 && $0.volume < subdivision.volume })
-        .flatMap({ $0.locationGroups })
-        .flatMap({ $0.first! })
-      heads.contains($0.first!)
+  private func getLocationsNeedingAudio(subdivision: Subdivision) -> [Double] {
+    subdivision.locations.filter({
+      !subdivisions.values
+        .filter({ $0 !== subdivision && max($0.option, subdivision.option) % min($0.option, subdivision.option) == 0 && $0.volume > subdivision.volume })
+        .flatMap({ $0.locations })
+        .contains($0)
     })
   }
   
-  private func deleteAudio(locationGroups: [[UnsafeMutableRawPointer]]) {
-    for locationGroup in locationGroups {
-      for location in locationGroup {
-        location.storeBytes(of: 0.0, as: Float.self)
-      }
-    }
+  private func deleteAudio(startFrames: [Double]) {
+    
   }
   
   private func writeAllSubdivisions() {
