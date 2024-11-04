@@ -87,7 +87,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
         VerticalDivider(
           color: Color.fromRGBO(60, 60, 60, 1.0),
         ),
-        if (subdivisions.length < 2)
+        if (subdivisions.length < 3)
           PlatformIconButton(
               onPressed: addSubdivision,
               icon: Icon(

@@ -52,9 +52,9 @@ import AVFoundation
       case "stopPlayback":
         self.metronome.stopPlayback()
         result("Stopped playback")
-      case "writeDownbeat":
-        self.metronome.writeDownbeat()
-        result("Wrote downbeat")
+      case "writeAudio":
+        self.metronome.writeAudio()
+        result("Wrote audio")
       default:
         result(FlutterMethodNotImplemented)
       }
