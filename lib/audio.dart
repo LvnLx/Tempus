@@ -12,7 +12,7 @@ enum Action {
   setVolume,
   startPlayback,
   stopPlayback,
-  writeAudio
+  writeBuffer
 }
 
 class Audio {
@@ -33,7 +33,7 @@ class Audio {
 
   static Future<void> postFlutterInit(int bpm) async {
     await setBpm(bpm);
-    await writeAudio();
+    await writeBuffer();
   }
 
   static Future<void> addSubdivision(
@@ -87,8 +87,8 @@ class Audio {
     print(result);
   }
 
-  static Future<void> writeAudio() async {
-    final result = await methodChannel.invokeMethod(Action.writeAudio.name);
+  static Future<void> writeBuffer() async {
+    final result = await methodChannel.invokeMethod(Action.writeBuffer.name);
     print(result);
   }
 }

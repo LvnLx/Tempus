@@ -1,6 +1,7 @@
 import AVFoundation
 
 let sizeOfFloat: UInt32 = UInt32(MemoryLayout<Float>.size)
+let sampleRate: Float64 = 44100.0
 
 class Metronome {
   private var audioQueue: AudioQueueRef?
@@ -9,10 +10,9 @@ class Metronome {
     AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, nil)
   }
   
-  private let sampleRate: Float64 = 44100.0
-  
+  private var bufferCallbacks: [(_ buffer: inout [Float]) -> Void] = []
   private var subdivisions: [String: Subdivision] = [:]
-  
+
   init() {
     var audioStreamBasicDescription: AudioStreamBasicDescription = AudioStreamBasicDescription(
       mSampleRate: sampleRate,
@@ -37,20 +37,22 @@ class Metronome {
     
     let audioData: [Float] = [Float](repeating: 0.0, count: Int(audioBuffer!.pointee.mAudioDataByteSize))
     audioBuffer!.pointee.mAudioData.copyMemory(from: audioData, byteCount: Int(audioBuffer!.pointee.mAudioDataByteSize))
+    
+    createBufferCallbacks()
   }
   
   func addSubdivision(_ key: String, _ option: Int, _ volume: Float) {
     let subdivision = Subdivision(option, volume)
     subdivisions[key] = subdivision
     
-    writeAudio()
+    writeBuffer()
   }
   
   func removeSubdivision(_ key: String) {
     let subdivision = subdivisions[key]!
     subdivisions.removeValue(forKey: key)
 
-    writeAudio()
+    writeBuffer()
   }
   
   func setBpm(_ bpm: UInt16) {
@@ -58,21 +60,21 @@ class Metronome {
     let beatDurationSeconds: Double = 1.0 / bps
     audioBuffer!.pointee.mAudioDataByteSize = UInt32(beatDurationSeconds * sampleRate * Double(sizeOfFloat))
     
-    writeAudio()
+    writeBuffer()
   }
   
   func setSubdivisionOption(_ key: String, _ option: Int) {
     let subdivision = subdivisions[key]!
     subdivision.setOption(option)
     
-    writeAudio()
+    writeBuffer()
   }
   
   func setSubdivisionVolume(_ key: String, _ volume: Float) {
     let subdivision = subdivisions[key]!
     subdivision.setVolume(volume)
     
-    writeAudio()
+    writeBuffer()
   }
   
   func setVolume(_ volume: Float) {
@@ -89,30 +91,40 @@ class Metronome {
     AudioQueueStop(audioQueue!, true)
   }
   
-  func writeAudio() {
-    var finalAudio: [Float] = Array(repeating: 0, count: Int(audioBuffer!.pointee.mAudioDataByteSize) / Int(sizeOfFloat))
-
-    for (index, sample) in downbeatAudio.enumerated() {
-      finalAudio[index] += sample
+  func writeBuffer() {
+    var buffer: [Float] = Array(repeating: 0, count: Int(audioBuffer!.pointee.mAudioDataByteSize) / Int(sizeOfFloat))
+    
+    for bufferCallback in bufferCallbacks {
+      bufferCallback(&buffer)
     }
     
-    var locationVolumes: [Float:Float] = subdivisions.values.reduce(into: [:]) {(accumulator, subdivision) in
-      for location in subdivision.getLocations() {
-        if (subdivision.volume >= accumulator[location] ?? 0) {
-          accumulator[location] = subdivision.volume
+    audioBuffer!.pointee.mAudioData.copyMemory(from: buffer, byteCount: buffer.count * Int(sizeOfFloat))
+  }
+  
+  private func createBufferCallbacks() {
+    bufferCallbacks.append { buffer in
+      for (index, sample) in downbeatAudio.enumerated() {
+        buffer[index] += sample
+      }
+    }
+    
+    bufferCallbacks.append { buffer in
+      var locationVolumes: [Float:Float] = self.subdivisions.values.reduce(into: [:]) {(accumulator, subdivision) in
+        for location in subdivision.getLocations() {
+          if (subdivision.volume >= accumulator[location] ?? 0) {
+            accumulator[location] = subdivision.volume
+          }
+        }
+      }
+    
+      for (location, volume) in locationVolumes {
+        let exactLocation: Double = Double(self.audioBuffer!.pointee.mAudioDataByteSize / sizeOfFloat) * Double(location)
+        let startFrame: Int = Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat)
+      
+        for (index, sample) in subdivisionAudio.enumerated() {
+          buffer[startFrame + index] += sample * volume
         }
       }
     }
-    
-    for (location, volume) in locationVolumes {
-      let exactLocation: Double = Double(audioBuffer!.pointee.mAudioDataByteSize / sizeOfFloat) * Double(location)
-      let startFrame: Int = Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat)
-      
-      for (index, sample) in subdivisionAudio.enumerated() {
-        finalAudio[startFrame + index] += sample * volume
-      }
-    }
-    
-    audioBuffer!.pointee.mAudioData.copyMemory(from: finalAudio, byteCount: finalAudio.count * Int(sizeOfFloat))
   }
 }
