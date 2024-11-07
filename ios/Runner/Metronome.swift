@@ -49,7 +49,6 @@ class Metronome {
   }
   
   func removeSubdivision(_ key: String) {
-    let subdivision = subdivisions[key]!
     subdivisions.removeValue(forKey: key)
 
     writeBuffer()
@@ -109,7 +108,7 @@ class Metronome {
     }
     
     bufferCallbacks.append { buffer in
-      var locationVolumes: [Float:Float] = self.subdivisions.values.reduce(into: [:]) {(accumulator, subdivision) in
+      let locationVolumes: [Float:Float] = self.subdivisions.values.reduce(into: [:]) {(accumulator, subdivision) in
         for location in subdivision.getLocations() {
           if (subdivision.volume >= accumulator[location] ?? 0) {
             accumulator[location] = subdivision.volume
