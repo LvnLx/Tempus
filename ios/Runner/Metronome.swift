@@ -4,16 +4,27 @@ let sizeOfFloat: UInt32 = UInt32(MemoryLayout<Float>.size)
 let sampleRate: Float64 = 44100.0
 
 class Metronome {
-  private var audioQueue: AudioQueueRef?
-  private var audioBuffer: AudioQueueBufferRef?
-  private let audioQueueOutputCallback: AudioQueueOutputCallback = { (inUserData, inAQ, inBuffer) in
-    AudioQueueEnqueueBuffer(inAQ, inBuffer, 0, nil)
-  }
+  private var audioUnit: AudioUnit?
   
   private var bufferCallbacks: [(_ buffer: inout [Float]) -> Void] = []
   private var subdivisions: [String: Subdivision] = [:]
+  private var volume: Float = 1
 
   init() {
+    var audioComponentDescription: AudioComponentDescription = AudioComponentDescription(
+      componentType: kAudioUnitType_Output,
+      componentSubType: kAudioUnitSubType_GenericOutput,
+      componentManufacturer: kAudioUnitManufacturer_Apple,
+      componentFlags: 0,
+      componentFlagsMask: 0
+    )
+    
+    let audioComponent: AudioComponent? = AudioComponentFindNext(nil, &audioComponentDescription)
+    guard AudioComponentInstanceNew(audioComponent!, &audioUnit) == noErr else {
+      print("Error creating new audio component instance")
+      return
+    }
+    
     var audioStreamBasicDescription: AudioStreamBasicDescription = AudioStreamBasicDescription(
       mSampleRate: sampleRate,
       mFormatID: kAudioFormatLinearPCM,
@@ -25,20 +36,40 @@ class Metronome {
       mBitsPerChannel: sizeOfFloat * 8,
       mReserved: 0
     )
+    guard AudioUnitSetProperty(
+      audioUnit!,
+      kAudioUnitProperty_StreamFormat,
+      kAudioUnitScope_Output,
+      0,
+      &audioStreamBasicDescription,
+      UInt32(MemoryLayout.size(ofValue: audioStreamBasicDescription))
+    ) == noErr else {
+      print("Error setting stream format property")
+      return
+    }
     
-    AudioQueueNewOutput(&audioStreamBasicDescription, audioQueueOutputCallback, nil, nil, nil, 0, &audioQueue)
-    AudioQueueSetParameter(audioQueue!, kAudioQueueParam_Pan, 0.0)
-    AudioQueueSetParameter(audioQueue!, kAudioQueueParam_PlayRate, 1.0)
-    AudioQueueSetParameter(audioQueue!, kAudioQueueParam_VolumeRampTime, 0.0)
-    AudioQueueSetParameter(audioQueue!, kAudioQueueParam_Volume, 1.0)
+    let auRenderCallback: AURenderCallback = { _, _, _, _, inNumberFrames, ioData in
+      print("Hi")
+      return noErr
+    }
+    var auRenderCallbackStruct: AURenderCallbackStruct = AURenderCallbackStruct(inputProc: auRenderCallback, inputProcRefCon: nil)
     
-    let bufferSize: UInt32 = sizeOfFloat * UInt32(sampleRate) * 60 // 60 seconds = 1 beat per minute
-    AudioQueueAllocateBuffer(audioQueue!, bufferSize, &audioBuffer)
+    guard AudioUnitSetProperty(
+      audioUnit!,
+      kAudioUnitProperty_SetRenderCallback,
+      kAudioUnitScope_Input,
+      0,
+      &auRenderCallbackStruct,
+      UInt32(MemoryLayout.size(ofValue: auRenderCallbackStruct))
+    ) == noErr else {
+      print("Error setting render callback property")
+      return
+    }
     
-    let audioData: [Float] = [Float](repeating: 0.0, count: Int(audioBuffer!.pointee.mAudioDataByteSize))
-    audioBuffer!.pointee.mAudioData.copyMemory(from: audioData, byteCount: Int(audioBuffer!.pointee.mAudioDataByteSize))
-    
-    createBufferCallbacks()
+    guard AudioUnitInitialize(audioUnit!) == noErr else {
+      print("Error initializing audio unit")
+      return
+    }
   }
   
   func addSubdivision(_ key: String, _ option: Int, _ volume: Float) {
@@ -57,7 +88,7 @@ class Metronome {
   func setBpm(_ bpm: UInt16) {
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
-    audioBuffer!.pointee.mAudioDataByteSize = UInt32(beatDurationSeconds * sampleRate * Double(sizeOfFloat))
+    // audioBuffer!.pointee.mAudioDataByteSize = UInt32(beatDurationSeconds * sampleRate * Double(sizeOfFloat))
     
     writeBuffer()
   }
@@ -77,33 +108,41 @@ class Metronome {
   }
   
   func setVolume(_ volume: Float) {
-    AudioQueueSetParameter(audioQueue!, kAudioQueueParam_Volume, volume)
+    self.volume = volume
+    
+    writeBuffer()
   }
   
   func startPlayback() {
-    AudioQueueEnqueueBuffer(audioQueue!, audioBuffer!, 0, nil)
-    AudioQueueEnqueueBuffer(audioQueue!, audioBuffer!, 0, nil) // Pre-fill buffer
-    AudioQueueStart(audioQueue!, nil)
+    guard AudioOutputUnitStart(audioUnit!) == noErr else {
+      print("Error starting audio output unit")
+      return
+    }
   }
   
   func stopPlayback() {
-    AudioQueueStop(audioQueue!, true)
+    guard AudioOutputUnitStop(audioUnit!) == noErr else {
+      print("Error stopping audio output unit")
+      return
+    }
   }
   
   func writeBuffer() {
-    var buffer: [Float] = Array(repeating: 0, count: Int(audioBuffer!.pointee.mAudioDataByteSize) / Int(sizeOfFloat))
+    // var buffer: [Float] = Array(repeating: 0, count: Int(audioBuffer!.pointee.mAudioDataByteSize) / Int(sizeOfFloat))
     
+    /*
     for bufferCallback in bufferCallbacks {
       bufferCallback(&buffer)
     }
+    */
     
-    audioBuffer!.pointee.mAudioData.copyMemory(from: buffer, byteCount: buffer.count * Int(sizeOfFloat))
+    // audioBuffer!.pointee.mAudioData.copyMemory(from: buffer, byteCount: buffer.count * Int(sizeOfFloat))
   }
   
   private func createBufferCallbacks() {
     bufferCallbacks.append { buffer in
       for (index, sample) in downbeatAudio.enumerated() {
-        buffer[index] += sample
+        buffer[index] += sample * self.volume
       }
     }
     
@@ -117,12 +156,14 @@ class Metronome {
       }
     
       for (location, volume) in locationVolumes {
-        let exactLocation: Double = Double(self.audioBuffer!.pointee.mAudioDataByteSize / sizeOfFloat) * Double(location)
-        let startFrame: Int = Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat)
+        // let exactLocation: Double = Double(self.audioBuffer!.pointee.mAudioDataByteSize / sizeOfFloat) * Double(location)
+        // let startFrame: Int = Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat)
       
+        /*
         for (index, sample) in subdivisionAudio.enumerated() {
-          buffer[startFrame + index] += sample * volume
+          buffer[startFrame + index] += sample * volume * self.volume
         }
+        */
       }
     }
   }
