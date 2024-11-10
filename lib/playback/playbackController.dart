@@ -12,12 +12,6 @@ class PlaybackControllerState extends State<PlaybackController> {
   int bpm = 120;
   bool playback = false;
 
-  @override
-  initState() {
-    super.initState();
-    Audio.postFlutterInit(bpm);
-  }
-
   onDialChanged(int change) {
     setBpm(bpm + change);
   }
