@@ -1,75 +1,20 @@
 import AVFoundation
 
-let sizeOfFloat: UInt32 = UInt32(MemoryLayout<Float>.size)
-let sampleRate: Float64 = 44100.0
-
 class Metronome {
   private var audioUnit: AudioUnit?
-  
-  private var bufferCallbacks: [(_ buffer: inout [Float]) -> Void] = []
+  private var buffer: MetronomeBuffer = MetronomeBuffer(sampleRate * 60)
   private var subdivisions: [String: Subdivision] = [:]
-  private var volume: Float = 1
+  private var volume: Float?
 
   init() {
-    var audioComponentDescription: AudioComponentDescription = AudioComponentDescription(
-      componentType: kAudioUnitType_Output,
-      componentSubType: kAudioUnitSubType_GenericOutput,
-      componentManufacturer: kAudioUnitManufacturer_Apple,
-      componentFlags: 0,
-      componentFlagsMask: 0
-    )
+    let bps: Double = 120 / 60.0
+    let beatDurationSeconds: Double = 1.0 / bps
+    buffer.validFrames.pointee = Int(beatDurationSeconds * Double(sampleRate))
     
-    let audioComponent: AudioComponent? = AudioComponentFindNext(nil, &audioComponentDescription)
-    guard AudioComponentInstanceNew(audioComponent!, &audioUnit) == noErr else {
-      print("Error creating new audio component instance")
-      return
-    }
+    writeBuffer()
     
-    var audioStreamBasicDescription: AudioStreamBasicDescription = AudioStreamBasicDescription(
-      mSampleRate: sampleRate,
-      mFormatID: kAudioFormatLinearPCM,
-      mFormatFlags: kLinearPCMFormatFlagIsFloat | kLinearPCMFormatFlagIsPacked,
-      mBytesPerPacket: sizeOfFloat,
-      mFramesPerPacket: 1,
-      mBytesPerFrame: sizeOfFloat,
-      mChannelsPerFrame: 1,
-      mBitsPerChannel: sizeOfFloat * 8,
-      mReserved: 0
-    )
-    guard AudioUnitSetProperty(
-      audioUnit!,
-      kAudioUnitProperty_StreamFormat,
-      kAudioUnitScope_Output,
-      0,
-      &audioStreamBasicDescription,
-      UInt32(MemoryLayout.size(ofValue: audioStreamBasicDescription))
-    ) == noErr else {
-      print("Error setting stream format property")
-      return
-    }
-    
-    let auRenderCallback: AURenderCallback = { _, _, _, _, inNumberFrames, ioData in
-      print("Hi")
-      return noErr
-    }
-    var auRenderCallbackStruct: AURenderCallbackStruct = AURenderCallbackStruct(inputProc: auRenderCallback, inputProcRefCon: nil)
-    
-    guard AudioUnitSetProperty(
-      audioUnit!,
-      kAudioUnitProperty_SetRenderCallback,
-      kAudioUnitScope_Input,
-      0,
-      &auRenderCallbackStruct,
-      UInt32(MemoryLayout.size(ofValue: auRenderCallbackStruct))
-    ) == noErr else {
-      print("Error setting render callback property")
-      return
-    }
-    
-    guard AudioUnitInitialize(audioUnit!) == noErr else {
-      print("Error initializing audio unit")
-      return
-    }
+    setupAudioUnit()
+    setupBufferCallbacks()
   }
   
   func addSubdivision(_ key: String, _ option: Int, _ volume: Float) {
@@ -88,7 +33,7 @@ class Metronome {
   func setBpm(_ bpm: UInt16) {
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
-    // audioBuffer!.pointee.mAudioDataByteSize = UInt32(beatDurationSeconds * sampleRate * Double(sizeOfFloat))
+    buffer.validFrames.pointee = Int(beatDurationSeconds * Double(sampleRate))
     
     writeBuffer()
   }
@@ -127,26 +72,88 @@ class Metronome {
     }
   }
   
-  func writeBuffer() {
-    // var buffer: [Float] = Array(repeating: 0, count: Int(audioBuffer!.pointee.mAudioDataByteSize) / Int(sizeOfFloat))
+  private func setupAudioUnit() {
+    var audioComponentDescription: AudioComponentDescription = AudioComponentDescription(
+      componentType: kAudioUnitType_Output,
+      componentSubType: kAudioUnitSubType_RemoteIO,
+      componentManufacturer: kAudioUnitManufacturer_Apple,
+      componentFlags: 0,
+      componentFlagsMask: 0
+    )
     
-    /*
-    for bufferCallback in bufferCallbacks {
-      bufferCallback(&buffer)
+    let audioComponent: AudioComponent? = AudioComponentFindNext(nil, &audioComponentDescription)
+    guard AudioComponentInstanceNew(audioComponent!, &audioUnit) == noErr else {
+      print("Error creating new audio component instance")
+      return
     }
-    */
     
-    // audioBuffer!.pointee.mAudioData.copyMemory(from: buffer, byteCount: buffer.count * Int(sizeOfFloat))
+    guard AudioUnitSetProperty(
+      audioUnit!,
+      kAudioUnitProperty_StreamFormat,
+      kAudioUnitScope_Input,
+      0,
+      &audioStreamBasicDescription,
+      UInt32(MemoryLayout.size(ofValue: audioStreamBasicDescription))
+    ) == noErr else {
+      print("Error setting stream format property")
+      return
+    }
+    
+    let auRenderCallback: AURenderCallback = { inRefCon, _, _, _, inNumberFrames, ioData in
+      var inRefCon = inRefCon.assumingMemoryBound(to: RefCon.self).pointee
+      var nextFrameToCopy = inRefCon.nextFrameToCopy.pointee
+      let validFrames = inRefCon.validFrames.pointee
+      
+      let target = ioData!.pointee.mBuffers.mData!.assumingMemoryBound(to: Float.self)
+      
+      for i in 0..<inNumberFrames {
+        if (nextFrameToCopy + Int(i) >= validFrames) {
+          inRefCon.nextFrameToCopy.pointee = 0
+        }
+        
+        target.advanced(by: Int(i)).pointee = inRefCon.sourceFrames.advanced(by: nextFrameToCopy + Int(i)).pointee
+        
+        inRefCon.nextFrameToCopy.pointee += 1
+      }
+      
+      return noErr
+    }
+    
+    let refCon = UnsafeMutableRawPointer.allocate(byteCount: MemoryLayout<RefCon>.size, alignment: MemoryLayout<RefCon>.alignment)
+    let nextFrameToCopy = UnsafeMutablePointer<Int>.allocate(capacity: MemoryLayout<Int>.size)
+    nextFrameToCopy.pointee = 0
+    refCon.storeBytes(of: RefCon(nextFrameToCopy: nextFrameToCopy, sourceFrames: buffer.frames, validFrames: buffer.validFrames), as: RefCon.self)
+    var auRenderCallbackStruct: AURenderCallbackStruct = AURenderCallbackStruct(
+      inputProc: auRenderCallback,
+      inputProcRefCon: refCon
+    )
+    
+    guard AudioUnitSetProperty(
+      audioUnit!,
+      kAudioUnitProperty_SetRenderCallback,
+      kAudioUnitScope_Global,
+      0,
+      &auRenderCallbackStruct,
+      UInt32(MemoryLayout.size(ofValue: auRenderCallbackStruct))
+    ) == noErr else {
+      print("Error setting render callback property")
+      return
+    }
+    
+    guard AudioUnitInitialize(audioUnit!) == noErr else {
+      print("Error initializing audio unit")
+      return
+    }
   }
   
-  private func createBufferCallbacks() {
-    bufferCallbacks.append { buffer in
-      for (index, sample) in downbeatAudio.enumerated() {
-        buffer[index] += sample * self.volume
+  private func setupBufferCallbacks() {
+    buffer.callbacks.append { buffer in
+      for (index, sample) in audioData["Downbeat"]!.enumerated() {
+        buffer[index] += sample * self.volume!
       }
     }
     
-    bufferCallbacks.append { buffer in
+    buffer.callbacks.append { (buffer: inout [Float]) in
       let locationVolumes: [Float:Float] = self.subdivisions.values.reduce(into: [:]) {(accumulator, subdivision) in
         for location in subdivision.getLocations() {
           if (subdivision.volume >= accumulator[location] ?? 0) {
@@ -156,15 +163,28 @@ class Metronome {
       }
     
       for (location, volume) in locationVolumes {
-        // let exactLocation: Double = Double(self.audioBuffer!.pointee.mAudioDataByteSize / sizeOfFloat) * Double(location)
-        // let startFrame: Int = Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat)
+        let exactLocation: Double = Double(buffer.count) * Double(location)
+        let startFrame: Int = Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat)
       
-        /*
-        for (index, sample) in subdivisionAudio.enumerated() {
-          buffer[startFrame + index] += sample * volume * self.volume
+        for (index, sample) in audioData["Subdivision"]!.enumerated() {
+          buffer[startFrame + index] += sample * volume * self.volume!
         }
-        */
       }
     }
   }
+  
+  private func writeBuffer() {
+    var updatedBuffer: [Float] = Array(repeating: 0, count: buffer.validFrames.pointee)
+    for callback in buffer.callbacks {
+      callback(&updatedBuffer)
+    }
+    
+    buffer.frames.update(from: updatedBuffer, count: buffer.validFrames.pointee)
+  }
+}
+
+struct RefCon {
+  var nextFrameToCopy: UnsafeMutablePointer<Int>
+  var sourceFrames: UnsafePointer<Float>
+  var validFrames: UnsafePointer<Int>
 }

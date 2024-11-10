@@ -12,6 +12,8 @@
 		0BC3768F2BC234BF00E38D18 /* FileHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BC3768E2BC234BF00E38D18 /* FileHandler.swift */; };
 		0BCCC10D2BC324D100E11CCD /* Subdivision.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0BCCC10B2BC324D100E11CCD /* Subdivision.wav */; };
 		0BCCC10E2BC324D100E11CCD /* Downbeat.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0BCCC10C2BC324D100E11CCD /* Downbeat.wav */; };
+		0BFF78102CE00E32004F81A8 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BFF780F2CE00E32004F81A8 /* Configuration.swift */; };
+		0BFF78122CE02259004F81A8 /* MetronomeBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BFF78112CE02259004F81A8 /* MetronomeBuffer.swift */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
@@ -50,6 +52,8 @@
 		0BC3768E2BC234BF00E38D18 /* FileHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHandler.swift; sourceTree = "<group>"; };
 		0BCCC10B2BC324D100E11CCD /* Subdivision.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Subdivision.wav; sourceTree = "<group>"; };
 		0BCCC10C2BC324D100E11CCD /* Downbeat.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Downbeat.wav; sourceTree = "<group>"; };
+		0BFF780F2CE00E32004F81A8 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		0BFF78112CE02259004F81A8 /* MetronomeBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeBuffer.swift; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
@@ -140,6 +144,8 @@
 				0B864CC32B81359000D0AE13 /* Subdivision.swift */,
 				0B864CC52B81625900D0AE13 /* Metronome.swift */,
 				0BC3768E2BC234BF00E38D18 /* FileHandler.swift */,
+				0BFF780F2CE00E32004F81A8 /* Configuration.swift */,
+				0BFF78112CE02259004F81A8 /* MetronomeBuffer.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -297,8 +303,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0BFF78102CE00E32004F81A8 /* Configuration.swift in Sources */,
 				0B864CC62B81625900D0AE13 /* Metronome.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				0BFF78122CE02259004F81A8 /* MetronomeBuffer.swift in Sources */,
 				0B864CC42B81359000D0AE13 /* Subdivision.swift in Sources */,
 				0BC3768F2BC234BF00E38D18 /* FileHandler.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
