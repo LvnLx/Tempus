@@ -100,18 +100,20 @@ class Metronome {
     }
     
     let auRenderCallback: AURenderCallback = { inRefCon, _, _, _, inNumberFrames, ioData in
-      var inRefCon = inRefCon.assumingMemoryBound(to: RefCon.self).pointee
-      var nextFrameToCopy = inRefCon.nextFrameToCopy.pointee
+      let inRefCon = inRefCon.assumingMemoryBound(to: RefCon.self).pointee
+      
+      let nextFrameToCopy = inRefCon.nextFrameToCopy.pointee
+      let sourceFrames = inRefCon.sourceFrames
       let validFrames = inRefCon.validFrames.pointee
       
-      let target = ioData!.pointee.mBuffers.mData!.assumingMemoryBound(to: Float.self)
+      let targetFrames = ioData!.pointee.mBuffers.mData!.assumingMemoryBound(to: Float.self)
       
       for i in 0..<inNumberFrames {
         if (nextFrameToCopy + Int(i) >= validFrames) {
           inRefCon.nextFrameToCopy.pointee = 0
         }
         
-        target.advanced(by: Int(i)).pointee = inRefCon.sourceFrames.advanced(by: nextFrameToCopy + Int(i)).pointee
+        targetFrames.advanced(by: Int(i)).pointee = sourceFrames.advanced(by: nextFrameToCopy + Int(i)).pointee
         
         inRefCon.nextFrameToCopy.pointee += 1
       }

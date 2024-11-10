@@ -44,7 +44,7 @@ class PlaybackControllerState extends State<PlaybackController> {
                   color: Colors.white,
                   size: 35,
                 ),
-                onPressed: () => setBpm(bpm - 60),
+                onPressed: () => setBpm(bpm - 1),
               ),
               Container(
                   padding: EdgeInsets.all(8.0),
@@ -62,7 +62,7 @@ class PlaybackControllerState extends State<PlaybackController> {
               PlatformIconButton(
                   icon: Icon(PlatformIcons(context).add,
                       color: Colors.white, size: 35),
-                  onPressed: () => setBpm(bpm + 60)),
+                  onPressed: () => setBpm(bpm + 1)),
             ],
           ),
         ),
