@@ -2,7 +2,7 @@
 
 A cross-platform metronome app developed with [Flutter](https://flutter.dev/).
 
-Current implementation is for iOS (Swift), with Android (Kotlin) and web (JavaScript) planned.
+Current implementation is for iOS (Swift), with Android (Kotlin) planned.
 
 ---
 
@@ -15,12 +15,16 @@ Current implementation is for iOS (Swift), with Android (Kotlin) and web (JavaSc
 ## Feature Roadmap
 
 - [x] UI
+  - [x] Playback Controller
+  - [x] Subdivision Controller
 - [ ] Native Implementations
   - [x] iOS
+    - [x] Method channels
+    - [x] Audio file loading
+    - [x] Buffer loop
+    - [x] Buffer callbacks
   - [ ] Android
-- [ ] Core Features
-  - [x] Downbeat
-  - [x] Subdivisions
-  - [ ] Lockscreen Controls
-  - [ ] Tap tempo
-  - [ ] Speaker Delay Measurement
+    - [ ] Method channels
+    - [ ] Audio file loading
+    - [ ] Buffer loop
+    - [ ] Buffer callbacks
