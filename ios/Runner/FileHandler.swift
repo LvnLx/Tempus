@@ -1,13 +1,6 @@
 import AudioToolbox
 
-var audioFiles: [String:[Float]] = [:]
-
-let downbeatAudio: [Float] = getAudio("Downbeat")
-let subdivisionAudio: [Float] = getAudio("Subdivision")
-
-func getAudio(_ fileName: String) -> [Float] {
-  audioFiles[fileName]!
-}
+var audioData: [String:[Float]] = [:]
 
 func loadAudioFile(_ fileName: String) {
   let path: String = Bundle.main.path(forResource: fileName, ofType: "wav")!
@@ -32,13 +25,13 @@ func loadAudioFile(_ fileName: String) {
     print("Failed to get audio file size")
   }
   
-  var buffer: [Float] = [Float](repeating: 0.0, count: Int(fileSize / sizeOfFloat))
+  var buffer: [Float] = [Float](repeating: 0.0, count: Int(fileSize) / sizeOfFloat)
   
   status = AudioFileReadBytes(audioFile!, true, 0, &fileSize, &buffer)
   if status != noErr {
     print("Failed to read audio file")
   }
   
-  audioFiles[fileName] = buffer
+  audioData[fileName] = buffer
 }
 

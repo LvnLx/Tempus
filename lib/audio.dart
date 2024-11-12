@@ -31,11 +31,6 @@ class Audio {
     }
   }
 
-  static Future<void> postFlutterInit(int bpm) async {
-    await setBpm(bpm);
-    await writeBuffer();
-  }
-
   static Future<void> addSubdivision(
       Key key, String subdivisionOption, double volume) async {
     final result = await methodChannel.invokeMethod(Action.addSubdivision.name,
