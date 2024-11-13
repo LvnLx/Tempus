@@ -42,7 +42,7 @@ class Metronome {
     }
 
     fun startPlayback() {
-        // TODO: Start buffer playback
+        // TODO: Set valid buffer size
     }
 
     fun stopPlayback() {
@@ -52,6 +52,9 @@ class Metronome {
     private fun initializeBuffer() {
         val bps: Double = (120 / 60).toDouble()
         val beatDurationSeconds: Double = 1 / bps
+        // TODO: Update valid buffer size
+
+        writeBuffer()
     }
 
     private fun writeBuffer() {
