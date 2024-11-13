@@ -24,7 +24,7 @@ Current implementation is for iOS (Swift), with Android (Kotlin) planned.
     - [x] Buffer loop
     - [x] Buffer callbacks
   - [ ] Android
-    - [ ] Method channels
+    - [x] Method channels
     - [ ] Audio file loading
     - [ ] Buffer loop
     - [ ] Buffer callbacks
