@@ -2,7 +2,7 @@
 
 A cross-platform metronome app developed with [Flutter](https://flutter.dev/).
 
-Current implementation is for iOS (Swift), with Android (Kotlin/C++) planned.
+Current implementation is for iOS (Swift) and Android (Kotlin/C++).
 
 ---
 
