@@ -13,7 +13,7 @@ class MainActivity : FlutterActivity() {
             "audio"
         ).setMethodCallHandler { call, result ->
             run {
-                var arguments: ArrayList<String> = arrayListOf()
+                val arguments: ArrayList<String> = arrayListOf()
                 try {
                     arguments.addAll(call.arguments as ArrayList<String>)
                 } catch (_: Exception) {}
