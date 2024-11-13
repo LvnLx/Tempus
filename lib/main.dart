@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:metronomic/subdivision/subdivisionController.dart';
@@ -17,7 +19,8 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
-    return PlatformApp(
+    return Material(
+        child: PlatformApp(
       home: Container(
         color: Color.fromRGBO(30, 30, 30, 1.0),
         child: SafeArea(
@@ -30,7 +33,9 @@ class _MainAppState extends State<MainApp> {
                 children: [
                   Expanded(child: SubdivisionController()),
                   orientation == Orientation.portrait
-                      ? Divider(color: Color.fromRGBO(60, 60, 60, 1.0),)
+                      ? Divider(
+                          color: Color.fromRGBO(60, 60, 60, 1.0),
+                        )
                       : VerticalDivider(),
                   Expanded(child: PlaybackController())
                 ],
@@ -39,6 +44,6 @@ class _MainAppState extends State<MainApp> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

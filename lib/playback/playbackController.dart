@@ -94,7 +94,7 @@ class PlaybackControllerState extends State<PlaybackController> {
                               onPressed: () => (print("Settings")),
                             ),
                             PlatformIconButton(
-                              cupertinoIcon: Icon(
+                              icon: Icon(
                                   size: 35,
                                   playback
                                       ? PlatformIcons(context).pause
