@@ -16,7 +16,7 @@ enum Action {
 }
 
 class Audio {
-  static MethodChannel methodChannel = MethodChannel('audio_method_channel');
+  static MethodChannel methodChannel = MethodChannel('audio');
   static Map<Action, bool> throttles =
       Map.fromEntries(Action.values.map((action) => MapEntry(action, false)));
 

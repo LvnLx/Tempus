@@ -7,26 +7,18 @@ class Metronome {
   private var volume: Float?
 
   init() {
-    let bps: Double = 120 / 60.0
-    let beatDurationSeconds: Double = 1.0 / bps
-    buffer.validFrames.pointee = Int(beatDurationSeconds * Double(sampleRate))
-    
-    writeBuffer()
-    
+    initializeBuffer()
     setupAudioUnit()
     setupBufferCallbacks()
   }
   
   func addSubdivision(_ key: String, _ option: Int, _ volume: Float) {
-    let subdivision = Subdivision(option, volume)
-    subdivisions[key] = subdivision
-    
+    subdivisions[key] = Subdivision(option, volume)
     writeBuffer()
   }
   
   func removeSubdivision(_ key: String) {
     subdivisions.removeValue(forKey: key)
-
     writeBuffer()
   }
   
@@ -39,22 +31,17 @@ class Metronome {
   }
   
   func setSubdivisionOption(_ key: String, _ option: Int) {
-    let subdivision = subdivisions[key]!
-    subdivision.setOption(option)
-    
+    subdivisions[key]!.option = option
     writeBuffer()
   }
   
   func setSubdivisionVolume(_ key: String, _ volume: Float) {
-    let subdivision = subdivisions[key]!
-    subdivision.setVolume(volume)
-    
+    subdivisions[key]!.volume = volume
     writeBuffer()
   }
   
   func setVolume(_ volume: Float) {
     self.volume = volume
-    
     writeBuffer()
   }
   
@@ -70,6 +57,14 @@ class Metronome {
       print("Error stopping audio output unit")
       return
     }
+  }
+  
+  private func initializeBuffer() {
+    let bps: Double = 120 / 60
+    let beatDurationSeconds: Double = 1.0 / bps
+    buffer.validFrames.pointee = Int(beatDurationSeconds * Double(sampleRate))
+    
+    writeBuffer()
   }
   
   private func setupAudioUnit() {

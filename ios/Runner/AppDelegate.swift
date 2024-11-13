@@ -10,7 +10,7 @@ import AVFoundation
   override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
     
-    methodChannel = FlutterMethodChannel(name: "audio_method_channel", binaryMessenger: controller.binaryMessenger)
+    methodChannel = FlutterMethodChannel(name: "audio", binaryMessenger: controller.binaryMessenger)
     metronome = Metronome()
     
     methodChannel.setMethodCallHandler({

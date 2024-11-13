@@ -15,14 +15,6 @@ class Subdivision: CustomStringConvertible {
     return "Subdivision(option: \(self.option), volume: \(self.volume))"
   }
   
-  func setOption(_ option: Int) {
-    self.option = option
-  }
-  
-  func setVolume(_ volume: Float) {
-    self.volume = volume
-  }
-  
   func getLocations() -> [Float] {
     var startFrames: [Float] = Array(repeating: 1.0, count: self.option - 1)
       
