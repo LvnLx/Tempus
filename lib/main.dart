@@ -31,7 +31,7 @@ class _MainAppState extends State<MainApp> {
                     ? Axis.vertical
                     : Axis.horizontal,
                 children: [
-                  //Expanded(child: SubdivisionController()),
+                  Expanded(child: SubdivisionController()),
                   orientation == Orientation.portrait
                       ? Divider(
                           color: Color.fromRGBO(60, 60, 60, 1.0),
