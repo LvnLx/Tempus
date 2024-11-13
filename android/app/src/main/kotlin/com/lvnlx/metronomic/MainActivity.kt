@@ -13,7 +13,10 @@ class MainActivity : FlutterActivity() {
             "audio"
         ).setMethodCallHandler { call, result ->
             run {
-                val arguments: ArrayList<String> = call.arguments as ArrayList<String>
+                var arguments: ArrayList<String> = arrayListOf()
+                try {
+                    arguments.addAll(call.arguments as ArrayList<String>)
+                } catch (_: Exception) {}
                 when (call.method) {
                     "addSubdivision" -> {
                         val key: String = arguments[0]
