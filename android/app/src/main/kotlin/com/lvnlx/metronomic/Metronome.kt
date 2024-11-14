@@ -1,63 +1,18 @@
 package com.lvnlx.metronomic
 
 class Metronome {
-    var subdivisions: MutableMap<String, Subdivision> = mutableMapOf()
-    var volume: Float? = null
-
-    init {
-        initializeBuffer()
+    companion object {
+        init {
+            System.loadLibrary("metronomic")
+        }
     }
 
-    fun addSubdivision(key: String, option: Int, volume: Float) {
-        subdivisions[key] = Subdivision(option, volume)
-        writeBuffer()
-    }
-
-    fun removeSubdivision(key: String) {
-        subdivisions.remove(key)
-        writeBuffer()
-    }
-
-    fun setBpm(bpm: Int) {
-        val bps: Double = bpm.toDouble() / 60
-        val beatDurationSeconds: Double = 1 / bps
-        // TODO: Update buffer size
-
-        writeBuffer()
-    }
-
-    fun setSubdivisionOption(key: String, option: Int) {
-        subdivisions[key]!!.option = option
-        writeBuffer()
-    }
-
-    fun setSubdivisionVolume(key: String, volume: Float) {
-        subdivisions[key]!!.volume = volume
-        writeBuffer()
-    }
-
-    fun setVolume(volume: Float) {
-        this.volume = volume
-        writeBuffer()
-    }
-
-    fun startPlayback() {
-        // TODO: Set valid buffer size
-    }
-
-    fun stopPlayback() {
-        // TODO: Stop buffer playback
-    }
-
-    private fun initializeBuffer() {
-        val bps: Double = (120 / 60).toDouble()
-        val beatDurationSeconds: Double = 1 / bps
-        // TODO: Update valid buffer size
-
-        writeBuffer()
-    }
-
-    private fun writeBuffer() {
-        // TODO: Write buffer
-    }
+    external fun addSubdivision(key: String, option: Int, volume: Float)
+    external fun removeSubdivision(key: String)
+    external fun setBpm(bpm: Int)
+    external fun setSubdivisionOption(key: String, option: Int)
+    external fun setSubdivisionVolume(key: String, volume: Float)
+    external fun setVolume(volume: Float)
+    external fun startPlayback()
+    external fun stopPlayback()
 }
