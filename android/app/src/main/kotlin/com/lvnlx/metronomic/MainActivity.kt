@@ -5,9 +5,14 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
+    companion object {
+        init {
+            System.loadLibrary("metronomic")
+        }
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        val metronome = Metronome()
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             "audio"
@@ -22,49 +27,49 @@ class MainActivity : FlutterActivity() {
                         val key: String = arguments[0]
                         val option: Int = arguments[1].toInt()
                         val volume: Float = arguments[2].toFloat()
-                        metronome.addSubdivision(key, option, volume)
+                        addSubdivision(key, option, volume)
                         result.success("Added subdivision")
                     }
 
                     "removeSubdivision" -> {
                         val key: String = arguments[0]
-                        metronome.removeSubdivision(key)
+                        removeSubdivision(key)
                         result.success("Removed subdivision")
                     }
 
                     "setBpm" -> {
                         val bpm: Int = arguments[0].toInt()
-                        metronome.setBpm(bpm)
+                        setBpm(bpm)
                         result.success("Set BPM")
                     }
 
                     "setSubdivisionOption" -> {
                         val key: String = arguments[0]
                         val option: Int = arguments[1].toInt()
-                        metronome.setSubdivisionOption(key, option)
+                        setSubdivisionOption(key, option)
                         result.success("Set subdivision option")
                     }
 
                     "setSubdivisionVolume" -> {
                         val key: String = arguments[0]
                         val volume: Float = arguments[1].toFloat()
-                        metronome.setSubdivisionVolume(key, volume)
+                        setSubdivisionVolume(key, volume)
                         result.success("Set subdivision volume")
                     }
 
                     "setVolume" -> {
                         val volume: Float = arguments[0].toFloat()
-                        metronome.setVolume(volume)
+                        setVolume(volume)
                         result.success("Set volume")
                     }
 
                     "startPlayback" -> {
-                        metronome.startPlayback()
+                        startPlayback()
                         result.success("Started playback")
                     }
 
                     "stopPlayback" -> {
-                        metronome.stopPlayback()
+                        stopPlayback()
                         result.success("Stopped playback")
                     }
 
@@ -75,4 +80,13 @@ class MainActivity : FlutterActivity() {
             }
         }
     }
+
+    private external fun addSubdivision(key: String, option: Int, volume: Float)
+    private external fun removeSubdivision(key: String)
+    private external fun setBpm(bpm: Int)
+    private external fun setSubdivisionOption(key: String, option: Int)
+    private external fun setSubdivisionVolume(key: String, volume: Float)
+    private external fun setVolume(volume: Float)
+    private external fun startPlayback()
+    private external fun stopPlayback()
 }
