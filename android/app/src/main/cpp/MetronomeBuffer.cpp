@@ -1,6 +1,5 @@
 #include "MetronomeBuffer.h"
 
-MetronomeBuffer::MetronomeBuffer(int32_t maxFrames) {
-    this->maxFrames = maxFrames;
+MetronomeBuffer::MetronomeBuffer(int maxFrames) {
     frames.reserve(maxFrames);
 }

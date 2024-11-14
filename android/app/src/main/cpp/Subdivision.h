@@ -4,10 +4,10 @@
 
 class Subdivision {
 public:
-    Subdivision(int32_t option, float volume);
+    Subdivision(int option, float volume);
     virtual ~Subdivision() = default;
 
-    int32_t option;
+    int option;
     float volume;
 
     std::vector<float> getLocations() const;
