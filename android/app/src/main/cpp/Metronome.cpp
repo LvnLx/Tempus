@@ -11,7 +11,7 @@ Metronome::Metronome() {
     setupCallbacks();
 }
 
-void Metronome::addSubdivision(std::string key, int32_t option, float subdivisionVolume) {
+void Metronome::addSubdivision(std::string key, int option, float subdivisionVolume) {
     subdivisions.emplace(key, Subdivision(option, subdivisionVolume));
     writeBuffer();
 }
@@ -21,14 +21,14 @@ void Metronome::removeSubdivision(std::string key) {
     writeBuffer();
 }
 
-void Metronome::setBpm(int32_t bpm) {
-    float beatsPerSecond = 120 / 60;
+void Metronome::setBpm(int bpm) {
+    float beatsPerSecond = bpm / 60;
     float beatDurationSeconds = 1 / beatsPerSecond;
     buffer.validFrames = round(beatDurationSeconds * sampleRate);
     writeBuffer();
 }
 
-void Metronome::setSubdivisionOption(std::string key, int32_t option) {
+void Metronome::setSubdivisionOption(std::string key, int option) {
     subdivisions.at(key).option = option;
     writeBuffer();
 }
@@ -58,7 +58,7 @@ void Metronome::initializeBuffer() {
     writeBuffer();
 }
 
-oboe::DataCallbackResult Metronome::onAudioReady(oboe::AudioStream *oboeAudioStream, void *audioData, int32_t numFrames) {
+oboe::DataCallbackResult Metronome::onAudioReady(oboe::AudioStream *oboeAudioStream, void *audioData, int numFrames) {
     return oboe::DataCallbackResult::Continue;
 }
 

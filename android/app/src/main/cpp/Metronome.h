@@ -14,17 +14,17 @@ public:
     Metronome();
     ~Metronome() override = default;
 
-    void addSubdivision(std::string key, int32_t option, float volume);
+    void addSubdivision(std::string key, int option, float volume);
     void removeSubdivision(std::string key);
-    void setBpm(int32_t bpm);
-    void setSubdivisionOption(std::string key, int32_t option);
+    void setBpm(int bpm);
+    void setSubdivisionOption(std::string key, int option);
     void setSubdivisionVolume(std::string key, float volume);
     void setVolume(float volume);
     void startPlayback();
     void stopPlayback();
 
 private:
-    int32_t sampleRate = 44100;
+    int sampleRate = 44100;
 
     std::shared_ptr<oboe::AudioStream> audioStream;
     MetronomeBuffer buffer = MetronomeBuffer(sampleRate * 60);
@@ -32,7 +32,7 @@ private:
     float volume{};
 
     void initializeBuffer();
-    oboe::DataCallbackResult onAudioReady(oboe::AudioStream *oboeAudioStream, void *audioData, int32_t numFrames) override;
+    oboe::DataCallbackResult onAudioReady(oboe::AudioStream *oboeAudioStream, void *audioData, int numFrames) override;
     void setupAudioStream();
     void setupCallbacks();
     void writeBuffer();

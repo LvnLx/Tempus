@@ -1,10 +1,9 @@
 #include <cmath>
-#include <cstdint>
 #include <vector>
 
 #include "Subdivision.h"
 
-Subdivision::Subdivision(int32_t option, float volume) : option(option), volume(volume) {}
+Subdivision::Subdivision(int option, float volume) : option(option), volume(volume) {}
 
 std::vector<float> Subdivision::getLocations() const {
     std::vector<float> startFrames(option - 1, 1);
