@@ -2,8 +2,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Subdivision.h"
 #include "Metronome.h"
+#include "Subdivision.h"
 
 Metronome::Metronome() {
     initializeBuffer();
@@ -11,35 +11,35 @@ Metronome::Metronome() {
     setupCallbacks();
 }
 
-void Metronome::addSubdivision(std::string key, int option, float subdivisionVolume) {
+void Metronome::addSubdivision(const std::string& key, int option, float subdivisionVolume) {
     subdivisions.emplace(key, Subdivision(option, subdivisionVolume));
     writeBuffer();
 }
 
-void Metronome::removeSubdivision(std::string key) {
+void Metronome::removeSubdivision(const std::string& key) {
     subdivisions.erase(key);
     writeBuffer();
 }
 
 void Metronome::setBpm(int bpm) {
-    float beatsPerSecond = bpm / 60;
-    float beatDurationSeconds = 1 / beatsPerSecond;
-    buffer.validFrames = round(beatDurationSeconds * sampleRate);
+    double beatsPerSecond = bpm / (double) 60;
+    double beatDurationSeconds = 1 / beatsPerSecond;
+    buffer.validFrames = round(beatDurationSeconds * sampleRate); // NOLINT(cppcoreguidelines-narrowing-conversions)
     writeBuffer();
 }
 
-void Metronome::setSubdivisionOption(std::string key, int option) {
+void Metronome::setSubdivisionOption(const std::string& key, int option) {
     subdivisions.at(key).option = option;
     writeBuffer();
 }
 
-void Metronome::setSubdivisionVolume(std::string key, float subdivisionVolume) {
+void Metronome::setSubdivisionVolume(const std::string& key, float subdivisionVolume) {
     subdivisions.at(key).volume = subdivisionVolume;
     writeBuffer();
 }
 
-void Metronome::setVolume(float volume) {
-    this->volume = volume;
+void Metronome::setVolume(float updatedVolume) {
+    this->volume = updatedVolume;
     writeBuffer();
 }
 
@@ -52,13 +52,24 @@ void Metronome::stopPlayback() {
 }
 
 void Metronome::initializeBuffer() {
-    float beatsPerSecond = 120 / 60;
-    float beatDurationSeconds = 1 / beatsPerSecond;
-    buffer.validFrames = round(beatDurationSeconds * sampleRate);
+    double beatsPerSecond = 120 / (double) 60;
+    double beatDurationSeconds = 1 / beatsPerSecond;
+    buffer.validFrames = round(beatDurationSeconds * sampleRate); // NOLINT(cppcoreguidelines-narrowing-conversions)
     writeBuffer();
 }
 
-oboe::DataCallbackResult Metronome::onAudioReady(oboe::AudioStream *oboeAudioStream, void *audioData, int numFrames) {
+oboe::DataCallbackResult Metronome::onAudioReady(oboe::AudioStream* oboeAudioStream, void* audioData, int numFrames) {
+    auto* floatData = (float*) audioData;
+    for (int i = 0; i < numFrames; i++) {
+        if (nextFrameToCopy + i > buffer.validFrames) {
+            nextFrameToCopy = 0;
+        }
+
+        floatData[i] = buffer.frames[nextFrameToCopy + i];
+
+        nextFrameToCopy++;
+    }
+
     return oboe::DataCallbackResult::Continue;
 }
 
@@ -76,11 +87,42 @@ void Metronome::setupAudioStream() {
 }
 
 void Metronome::setupCallbacks() {
-    buffer.callbacks.emplace_back([](std::vector<float>& buffer) {
-        // TODO: Write downbeat
+    buffer.callbacks.emplace_back([this](std::vector<float>& metronomeBufferFrames) {
+        std::vector<float> downbeatAudioFrames = audioFrames["Downbeat"];
+        for (int i = 0; i < downbeatAudioFrames.size(); i ++) {
+            metronomeBufferFrames[i] = downbeatAudioFrames[i] * volume;
+        }
     });
-    buffer.callbacks.emplace_back([](std::vector<float>& buffer) {
-        // TODO: Write subdivisions
+
+    buffer.callbacks.emplace_back([this](std::vector<float>& metronomeBufferFrames) {
+        std::vector<Subdivision> subdivisionsValues;
+        subdivisionsValues.reserve(subdivisions.size());
+
+        for (const auto& keyValuePair : subdivisions) {
+            subdivisionsValues.push_back(keyValuePair.second);
+        }
+
+        std::unordered_map<float, float> locationVolumes;
+        for (const auto& subdivision : subdivisionsValues) {
+            for (auto location : subdivision.getLocations()) {
+                auto locationVolume = locationVolumes.find(location);
+                if (locationVolume != locationVolumes.end() && locationVolume->second > subdivision.volume) {
+                    continue;
+                } else {
+                    locationVolumes[location] = subdivision.volume;
+                }
+            }
+        }
+
+        std::vector<float> subdivisionAudioFrames = audioFrames["Subdivision"];
+        for (auto keyValuePair : locationVolumes) {
+            double exactLocation = (double) metronomeBufferFrames.size() * keyValuePair.first;
+            int startFrame = std::round(exactLocation / sizeof(float)) * sizeof(float); // NOLINT(cppcoreguidelines-narrowing-conversions)
+
+            for (int i = 0; i < subdivisionAudioFrames.size(); i++) {
+                metronomeBufferFrames[startFrame + i] = subdivisionAudioFrames[i] * keyValuePair.second * volume;
+            }
+        }
     });
 }
 

@@ -14,14 +14,14 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            "audio"
+            flutterEngine.dartExecutor.binaryMessenger, "audio"
         ).setMethodCallHandler { call, result ->
             run {
                 val arguments: ArrayList<String> = arrayListOf()
                 try {
                     arguments.addAll(call.arguments as ArrayList<String>)
-                } catch (_: Exception) {}
+                } catch (_: Exception) {
+                }
                 when (call.method) {
                     "addSubdivision" -> {
                         val key: String = arguments[0]
@@ -82,6 +82,7 @@ class MainActivity : FlutterActivity() {
     }
 
     private external fun addSubdivision(key: String, option: Int, volume: Float)
+    private external fun loadAudioFrames(fileName: String, audioFrames: FloatArray)
     private external fun removeSubdivision(key: String)
     private external fun setBpm(bpm: Int)
     private external fun setSubdivisionOption(key: String, option: Int)

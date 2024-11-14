@@ -1,46 +1,55 @@
 #include <jni.h>
+
 #include "Metronome.h"
 
 extern "C" {
-    static Metronome metronomeBuffer;
+    static Metronome metronome;
 
     JNIEXPORT void JNICALL
     Java_com_lvnlx_metronomic_MainActivity_addSubdivision(JNIEnv* env, jobject, jstring key, jint option, jfloat volume) {
-        metronomeBuffer.addSubdivision(env->GetStringUTFChars(key, nullptr), option, volume);
+        metronome.addSubdivision(env->GetStringUTFChars(key, nullptr), option, volume);
     }
 
     JNIEXPORT void JNICALL
     Java_com_lvnlx_metronomic_MainActivity_removeSubdivision(JNIEnv* env, jobject, jstring key) {
-        metronomeBuffer.removeSubdivision(env->GetStringUTFChars(key, nullptr));
+        metronome.removeSubdivision(env->GetStringUTFChars(key, nullptr));
     }
 
     JNIEXPORT void JNICALL
     Java_com_lvnlx_metronomic_MainActivity_setBpm(JNIEnv*, jobject, jint bpm) {
-        metronomeBuffer.setBpm(bpm);
+        metronome.setBpm(bpm);
     }
 
     JNIEXPORT void JNICALL
     Java_com_lvnlx_metronomic_MainActivity_setSubdivisionOption(JNIEnv* env, jobject, jstring key, jint option) {
-        metronomeBuffer.setSubdivisionOption(env->GetStringUTFChars(key, nullptr), option);
+        metronome.setSubdivisionOption(env->GetStringUTFChars(key, nullptr), option);
     }
 
     JNIEXPORT void JNICALL
     Java_com_lvnlx_metronomic_MainActivity_setSubdivisionVolume(JNIEnv* env, jobject, jstring key, jfloat volume) {
-        metronomeBuffer.setSubdivisionVolume(env->GetStringUTFChars(key, nullptr), volume);
+        metronome.setSubdivisionVolume(env->GetStringUTFChars(key, nullptr), volume);
     }
 
     JNIEXPORT void JNICALL
-    Java_com_lvnlx_metronomic_MainActivity_setVolume(JNIEnv*, jobject, float volume) {
-        metronomeBuffer.setVolume(volume);
+    Java_com_lvnlx_metronomic_MainActivity_setVolume(JNIEnv*, jobject, jfloat volume) {
+        metronome.setVolume(volume);
     }
 
     JNIEXPORT void JNICALL
     Java_com_lvnlx_metronomic_MainActivity_startPlayback(JNIEnv*, jobject) {
-        metronomeBuffer.startPlayback();
+        metronome.startPlayback();
     }
 
     JNIEXPORT void JNICALL
     Java_com_lvnlx_metronomic_MainActivity_stopPlayback(JNIEnv*, jobject) {
-        metronomeBuffer.stopPlayback();
+        metronome.stopPlayback();
+    }
+
+    JNIEXPORT void JNICALL
+    Java_com_lvnlx_metronomic_MainActivity_loadAudioFrames(JNIEnv* env, jobject, jstring fileName, jfloatArray audioFrames) {
+        jsize arrayFramesLength = env->GetArrayLength(audioFrames);
+        jfloat* arrayFramesPointer = env->GetFloatArrayElements(audioFrames, nullptr);
+        metronome.audioFrames[env->GetStringUTFChars(fileName, nullptr)] = std::vector<float>(arrayFramesPointer, arrayFramesPointer + arrayFramesLength);
+        env->ReleaseFloatArrayElements(audioFrames, arrayFramesPointer, 0);
     }
 }

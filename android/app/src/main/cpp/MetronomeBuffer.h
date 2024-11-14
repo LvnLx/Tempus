@@ -12,9 +12,6 @@ public:
     std::vector<std::function<void(std::vector<float>&)>> callbacks;
     std::vector<float> frames;
     int validFrames{};
-
-private:
-    int maxFrames;
 };
 
 
