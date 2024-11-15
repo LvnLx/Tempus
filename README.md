@@ -2,7 +2,7 @@
 
 A cross-platform metronome app developed with [Flutter](https://flutter.dev/).
 
-Current implementation is for iOS (Swift) and Android (C++).
+Current implementation is for iOS (Swift) and Android (C++/Kotlin).
 
 ---
 
@@ -13,18 +13,20 @@ Current implementation is for iOS (Swift) and Android (C++).
 ---
 
 ## Feature Roadmap
-
+- [x]
+  - [ ] Publish to App Store
+  - [ ] Publish to Google Play
 - [x] UI
   - [x] Playback Controller
   - [x] Subdivision Controller
-- [ ] Native Implementations
+- [x] Native Implementations
   - [x] iOS
     - [x] Method channels
     - [x] Audio file loading
     - [x] Buffer loop
     - [x] Buffer callbacks
-  - [ ] Android
+  - [x] Android
     - [x] Method channels
-    - [ ] Audio file loading
-    - [ ] Buffer loop
-    - [ ] Buffer callbacks
+    - [x] Audio file loading
+    - [x] Buffer loop
+    - [x] Buffer callbacks
