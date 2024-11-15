@@ -13,6 +13,11 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        val fileHandler = FileHandler(assets)
+        loadAudioFrames("downbeat", fileHandler.loadAudioFrames("downbeat"))
+        loadAudioFrames("subdivision", fileHandler.loadAudioFrames("subdivision"))
+
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger, "audio"
         ).setMethodCallHandler { call, result ->
