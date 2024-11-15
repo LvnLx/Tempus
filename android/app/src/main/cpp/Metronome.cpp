@@ -60,12 +60,13 @@ void Metronome::initializeBuffer() {
 
 oboe::DataCallbackResult Metronome::onAudioReady(oboe::AudioStream* oboeAudioStream, void* audioData, int numFrames) {
     auto* floatData = (float*) audioData;
+    int offset = nextFrameToCopy;
     for (int i = 0; i < numFrames; i++) {
         if (nextFrameToCopy + i > buffer.validFrames) {
             nextFrameToCopy = 0;
         }
 
-        floatData[i] = buffer.frames[nextFrameToCopy + i];
+        floatData[i] = buffer.frames[offset + i];
 
         nextFrameToCopy++;
     }
@@ -88,9 +89,9 @@ void Metronome::setupAudioStream() {
 
 void Metronome::setupCallbacks() {
     buffer.callbacks.emplace_back([this](std::vector<float>& metronomeBufferFrames) {
-        std::vector<float> downbeatAudioFrames = audioFrames["Downbeat"];
+        std::vector<float> downbeatAudioFrames = audioFrames["downbeat"];
         for (int i = 0; i < downbeatAudioFrames.size(); i ++) {
-            metronomeBufferFrames[i] = downbeatAudioFrames[i] * volume;
+            metronomeBufferFrames[i] += downbeatAudioFrames[i] * volume;
         }
     });
 
@@ -114,13 +115,13 @@ void Metronome::setupCallbacks() {
             }
         }
 
-        std::vector<float> subdivisionAudioFrames = audioFrames["Subdivision"];
+        std::vector<float> subdivisionAudioFrames = audioFrames["subdivision"];
         for (auto keyValuePair : locationVolumes) {
             double exactLocation = (double) metronomeBufferFrames.size() * keyValuePair.first;
             int startFrame = std::round(exactLocation / sizeof(float)) * sizeof(float); // NOLINT(cppcoreguidelines-narrowing-conversions)
 
             for (int i = 0; i < subdivisionAudioFrames.size(); i++) {
-                metronomeBufferFrames[startFrame + i] = subdivisionAudioFrames[i] * keyValuePair.second * volume;
+                metronomeBufferFrames[startFrame + i] += subdivisionAudioFrames[i] * keyValuePair.second * volume;
             }
         }
     });
