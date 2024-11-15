@@ -13,9 +13,9 @@ Current implementation is for iOS (Swift) and Android (C++/Kotlin).
 ---
 
 ## Feature Roadmap
-- [x]
-  - [ ] Publish to App Store
-  - [ ] Publish to Google Play
+- [ ] Publish
+  - [ ] App Store
+  - [ ] Google Play
 - [x] UI
   - [x] Playback Controller
   - [x] Subdivision Controller
