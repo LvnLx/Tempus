@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:metronomical/subdivision/subdivisionController.dart';
-import 'package:metronomical/playback/playbackController.dart';
+import 'package:metronomical/subdivision/subdivision_controller.dart';
+import 'package:metronomical/playback/playback_controller.dart';
 
 void main() async {
   runApp(MainApp());
@@ -18,30 +18,18 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return Material(
-        child: PlatformApp(
-      home: Container(
-        color: Color.fromRGBO(30, 30, 30, 1.0),
-        child: SafeArea(
-          child: OrientationBuilder(
-            builder: (context, orientation) {
-              return Flex(
-                direction: orientation == Orientation.portrait
-                    ? Axis.vertical
-                    : Axis.horizontal,
+      child: PlatformApp(
+          home: Container(
+              color: Color.fromRGBO(30, 30, 30, 1.0),
+              child: SafeArea(
+                  child: Flex(
+                direction: Axis.vertical,
                 children: [
                   Expanded(child: SubdivisionController()),
-                  orientation == Orientation.portrait
-                      ? Divider(
-                          color: Color.fromRGBO(60, 60, 60, 1.0),
-                        )
-                      : VerticalDivider(),
+                  Divider(color: Color.fromRGBO(60, 60, 60, 1.0)),
                   Expanded(child: PlaybackController())
                 ],
-              );
-            },
-          ),
-        ),
-      ),
-    ));
+              )))),
+    );
   }
 }

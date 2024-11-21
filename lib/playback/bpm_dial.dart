@@ -5,7 +5,7 @@ class BpmDial extends StatefulWidget {
   final int callbackThreshold;
   final Function(int) callback;
 
-  BpmDial({required this.callbackThreshold, required this.callback})
+  BpmDial({super.key, required this.callbackThreshold, required this.callback})
       : assert(callbackThreshold >= 1 && callbackThreshold <= 360,
             'callbackThreshold must be in the range [1, 360]');
 

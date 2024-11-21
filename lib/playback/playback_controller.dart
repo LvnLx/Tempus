@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:metronomical/audio.dart';
-import 'package:metronomical/playback/bpmDial.dart';
+import 'package:metronomical/playback/bpm_dial.dart';
 
 class PlaybackController extends StatefulWidget {
+  const PlaybackController({super.key});
+
   @override
   State<StatefulWidget> createState() => PlaybackControllerState();
 }
@@ -67,15 +69,25 @@ class PlaybackControllerState extends State<PlaybackController> {
           ),
         ),
         Expanded(
-            flex: 3,
+            flex: 4,
             child: Stack(
               children: [
-                Center(
-                  child: SizedBox(
-                      width: 250,
-                      height: 250,
-                      child: BpmDial(
-                          callbackThreshold: 20, callback: onDialChanged)),
+                Flex(
+                  direction: Axis.vertical,
+                  children: [
+                    Expanded(
+                      flex: 9,
+                      child: Center(
+                        child: SizedBox(
+                            width: 250,
+                            height: 250,
+                            child: BpmDial(
+                                callbackThreshold: 20,
+                                callback: onDialChanged)),
+                      ),
+                    ),
+                    Expanded(flex: 1, child: Container())
+                  ],
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -83,19 +95,11 @@ class PlaybackControllerState extends State<PlaybackController> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
                       child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             PlatformIconButton(
                               icon: Icon(
-                                PlatformIcons(context).settings,
-                                size: 35,
-                                color: Colors.white,
-                              ),
-                              onPressed: () => (print("Settings")),
-                            ),
-                            PlatformIconButton(
-                              icon: Icon(
-                                  size: 35,
+                                  size: 45,
                                   playback
                                       ? PlatformIcons(context).pause
                                       : PlatformIcons(context).playArrowSolid,

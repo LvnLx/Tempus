@@ -4,6 +4,8 @@ import 'package:metronomical/audio.dart';
 import 'package:metronomical/subdivision/subdivision.dart';
 
 class SubdivisionController extends StatefulWidget {
+  const SubdivisionController({super.key});
+
   @override
   State<StatefulWidget> createState() => SubdivisionControllerState();
 }
@@ -52,49 +54,55 @@ class SubdivisionControllerState extends State<SubdivisionController> {
   @override
   Widget build(BuildContext context) {
     setVolume(context, volume);
-    return Row(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Expanded(
-                  child: RotatedBox(
-                quarterTurns: 3,
-                child: PlatformSlider(
-                  activeColor: Colors.white,
-                  onChanged: (double value) => setVolume(context, value),
-                  onChangeEnd: (double value) =>
-                      setVolume(context, value, false),
-                  value: volume,
-                ),
-              )),
-              SizedBox(
-                child: Center(
-                  child: PlatformIconButton(
-                      icon: Icon(
-                    volumeIcon,
-                    size: 35,
-                    color: Colors.white,
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Expanded(
+                      child: RotatedBox(
+                    quarterTurns: 3,
+                    child: PlatformSlider(
+                      activeColor: Colors.white,
+                      onChanged: (double value) => setVolume(context, value),
+                      onChangeEnd: (double value) =>
+                          setVolume(context, value, false),
+                      value: volume,
+                    ),
                   )),
-                ),
+                  SizedBox(
+                    child: Center(
+                      child: PlatformIconButton(
+                          icon: Icon(
+                        volumeIcon,
+                        size: 35,
+                        color: Colors.white,
+                      )),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            ...subdivisions.values,
+            VerticalDivider(
+              color: Color.fromRGBO(60, 60, 60, 1.0),
+            ),
+            if (subdivisions.length <= subdivisionOptions.length)
+              PlatformIconButton(
+                  onPressed: addSubdivision,
+                  icon: Icon(
+                    PlatformIcons(context).add,
+                    color: Colors.white,
+                    size: 35,
+                  ))
+          ],
         ),
-        ...subdivisions.values,
-        VerticalDivider(
-          color: Color.fromRGBO(60, 60, 60, 1.0),
-        ),
-        if (subdivisions.length < 3)
-          PlatformIconButton(
-              onPressed: addSubdivision,
-              icon: Icon(
-                PlatformIcons(context).add,
-                color: Colors.white,
-                size: 35,
-              ))
-      ],
+      ),
     );
   }
 }

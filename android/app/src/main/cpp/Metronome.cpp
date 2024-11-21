@@ -121,7 +121,8 @@ void Metronome::setupCallbacks() {
             int startFrame = std::round(exactLocation / sizeof(float)) * sizeof(float); // NOLINT(cppcoreguidelines-narrowing-conversions)
 
             for (int i = 0; i < subdivisionAudioFrames.size(); i++) {
-                metronomeBufferFrames[startFrame + i] += subdivisionAudioFrames[i] * keyValuePair.second * volume;
+                if (startFrame + i < metronomeBufferFrames.size())
+                    metronomeBufferFrames[startFrame + i] += subdivisionAudioFrames[i] * keyValuePair.second * volume;
             }
         }
     });

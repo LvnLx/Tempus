@@ -2,7 +2,7 @@ import UIKit
 import Flutter
 import AVFoundation
 
-@UIApplicationMain
+@main
 @objc class AppDelegate: FlutterAppDelegate {
   private var methodChannel: FlutterMethodChannel!
   private var metronome: Metronome!

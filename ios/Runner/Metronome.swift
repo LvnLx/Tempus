@@ -164,7 +164,9 @@ class Metronome {
         let startFrame: Int = Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat)
       
         for (index, sample) in audioData["Subdivision"]!.enumerated() {
-          buffer[startFrame + index] += sample * volume * self.volume!
+          if (startFrame + index < buffer.count) {
+            buffer[startFrame + index] += sample * volume * self.volume!
+          }
         }
       }
     }

@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:metronomical/audio.dart';
-import 'package:metronomical/subdivision/scrollWheel.dart';
+import 'package:metronomical/subdivision/scroll_wheel.dart';
 
 typedef SubdivisionCallback = void Function(Key key);
 
-const List<String> subdivisionOptions = [
-  '2',
-  '3',
-  '4',
-  '5',
-];
+const List<String> subdivisionOptions = ["2", "3", "4", "5", "6", "7", "8", "9"];
 
 class Subdivision extends StatefulWidget {
   final SubdivisionCallback onRemove;

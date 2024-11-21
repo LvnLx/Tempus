@@ -4,7 +4,7 @@ import 'package:metronomical/subdivision/subdivision.dart';
 class ScrollWheel extends StatefulWidget {
   final Function(String) callback;
 
-  ScrollWheel({required this.callback});
+  ScrollWheel({super.key, required this.callback});
 
   @override
   State<StatefulWidget> createState() => ScrollWheelState();
