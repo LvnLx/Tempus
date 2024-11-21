@@ -75,7 +75,7 @@ class SubdivisionState extends State<Subdivision> {
                 child: RotatedBox(
                     quarterTurns: 3,
                     child: PlatformSlider(
-                      activeColor: Colors.white,
+                      activeColor: Theme.of(context).colorScheme.primary,
                       onChanged: (double value) => setVolume(value),
                       onChangeEnd: (double value) => setVolume(value, false),
                       value: volume,
@@ -84,7 +84,7 @@ class SubdivisionState extends State<Subdivision> {
             SizedBox(
               child: PlatformIconButton(
                   onPressed: () => widget.onRemove(widget.key!),
-                  icon: Icon(PlatformIcons(context).clear, color: Colors.red, size: 35)),
+                  icon: Icon(PlatformIcons(context).clear, color: Theme.of(context).colorScheme.error, size: 35)),
             )
           ]),
         ),

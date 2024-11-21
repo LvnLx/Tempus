@@ -68,7 +68,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                       child: RotatedBox(
                     quarterTurns: 3,
                     child: PlatformSlider(
-                      activeColor: Colors.white,
+                      activeColor: Theme.of(context).colorScheme.primary,
                       onChanged: (double value) => setVolume(context, value),
                       onChangeEnd: (double value) =>
                           setVolume(context, value, false),
@@ -81,7 +81,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                           icon: Icon(
                         volumeIcon,
                         size: 35,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.primary,
                       )),
                     ),
                   ),
@@ -90,14 +90,14 @@ class SubdivisionControllerState extends State<SubdivisionController> {
             ),
             ...subdivisions.values,
             VerticalDivider(
-              color: Color.fromRGBO(60, 60, 60, 1.0),
+              color: Theme.of(context).colorScheme.secondary,
             ),
             if (subdivisions.length <= subdivisionOptions.length)
               PlatformIconButton(
                   onPressed: addSubdivision,
                   icon: Icon(
                     PlatformIcons(context).add,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.primary,
                     size: 35,
                   ))
           ],

@@ -59,7 +59,7 @@ class BpmDialState extends State<BpmDial> {
                   height: constraints.maxHeight,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 Positioned(
@@ -69,7 +69,7 @@ class BpmDialState extends State<BpmDial> {
                     width: 50.0,
                     height: 50.0,
                     decoration: BoxDecoration(
-                        color: Color.fromRGBO(30, 30, 30, 1.0),
+                        color: Theme.of(context).colorScheme.surface,
                         shape: BoxShape.circle),
                   ),
                 ),

@@ -53,7 +53,7 @@ class PlaybackControllerState extends State<PlaybackController> {
               PlatformIconButton(
                 icon: Icon(
                   PlatformIcons(context).remove,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 35,
                 ),
                 onPressed: () => setBpm(bpm - 1),
@@ -61,19 +61,22 @@ class PlaybackControllerState extends State<PlaybackController> {
               Container(
                   padding: EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white),
+                      border: Border.all(
+                          color: Theme.of(context).colorScheme.primary),
                       borderRadius: BorderRadius.circular(8.0)),
                   width: 100,
                   height: 60,
                   child: Center(
                       child: Text(
                     bpm.toString(),
-                    style: TextStyle(fontSize: 35, color: Colors.white),
+                    style: TextStyle(
+                        fontSize: 35,
+                        color: Theme.of(context).colorScheme.primary),
                     textAlign: TextAlign.center,
                   ))),
               PlatformIconButton(
                   icon: Icon(PlatformIcons(context).add,
-                      color: Colors.white, size: 35),
+                      color: Theme.of(context).colorScheme.primary, size: 35),
                   onPressed: () => setBpm(bpm + 1)),
             ],
           ),
@@ -111,16 +114,17 @@ class PlaybackControllerState extends State<PlaybackController> {
                                 icon: Icon(
                                   PlatformIcons(context).edit,
                                   size: 40,
-                                  color: Colors.white,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
-                                onPressed: () => showFeedbackDialog(context, setFeedback, sendFeedback)),
+                                onPressed: () => showFeedbackDialog(
+                                    context, setFeedback, sendFeedback)),
                             PlatformIconButton(
                               icon: Icon(
                                   size: 40,
                                   playback
                                       ? PlatformIcons(context).pause
                                       : PlatformIcons(context).playArrowSolid,
-                                  color: Colors.white),
+                                  color: Theme.of(context).colorScheme.primary),
                               onPressed: togglePlayback,
                             )
                           ]),
@@ -134,14 +138,18 @@ class PlaybackControllerState extends State<PlaybackController> {
   }
 }
 
-showFeedbackDialog(BuildContext context, Function setFeedbackCallback, Function sendFeedbackCallback) {
+showFeedbackDialog(BuildContext context, Function setFeedbackCallback,
+    Function sendFeedbackCallback) {
   showPlatformDialog(
       context: context,
       builder: (context) => PlatformAlertDialog(
-              title: Text("Feedback"),
-              content: PlatformTextField(
-                  hintText: "Issues, feature requests, ...",
-                  onChanged: (text) => setFeedbackCallback(text)),
+              title: Text("Feedback Form"),
+              content: Padding(
+                  padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
+                  child: PlatformTextField(
+                    hintText: "Issues, feature requests, ...",
+                    onChanged: (text) => setFeedbackCallback(text),
+                  )),
               actions: [
                 PlatformDialogAction(
                     child: Text("Close"),

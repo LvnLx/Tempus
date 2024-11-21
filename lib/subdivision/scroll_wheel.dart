@@ -70,7 +70,7 @@ class ScrollWheelState extends State<ScrollWheel> {
                   child: Opacity(opacity: itemOpacity, child: child),
                 );
               },
-              child: Text(subdivisionOptions[index], style: TextStyle(color: Colors.white, fontSize: 35),)
+              child: Text(subdivisionOptions[index], style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 35),)
             );
           },
           childCount: itemCount,
