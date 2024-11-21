@@ -90,7 +90,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
             ),
             ...subdivisions.values,
             VerticalDivider(
-              color: Theme.of(context).colorScheme.secondary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             if (subdivisions.length <= subdivisionOptions.length)
               PlatformIconButton(

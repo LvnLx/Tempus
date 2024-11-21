@@ -25,24 +25,24 @@ class _MainAppState extends State<MainApp> {
                   colorScheme: ColorScheme(
                       brightness: Brightness.dark,
                       primary: Colors.white,
-                      onPrimary: Colors.black,
-                      secondary: Colors.grey,
-                      onSecondary: Colors.white,
+                      onPrimary: Color.fromRGBO(31, 31, 31, 1.0),
+                      secondary: Color.fromRGBO(112, 112, 112, 1.0),
+                      onSecondary: Colors.white, 
                       error: Colors.red,
                       onError: Colors.white,
-                      surface: Colors.black,
-                      onSurface: Colors.white)),
+                      surface: Color.fromRGBO(31, 31, 31, 1.0),
+                      onSurface: Color.fromRGBO(64, 64, 64, 1.0))),
               materialLightTheme: ThemeData(
                   colorScheme: ColorScheme(
                       brightness: Brightness.light,
-                      primary: Colors.black,
+                      primary: Color.fromRGBO(31, 31, 31, 1.0),
                       onPrimary: Colors.white,
-                      secondary: Colors.grey,
-                      onSecondary: Colors.black,
+                      secondary: Color.fromRGBO(147, 147, 147, 1.0),
+                      onSecondary: Color.fromRGBO(31, 31, 31, 1.0),
                       error: Colors.red,
-                      onError: Colors.black,
+                      onError: Color.fromRGBO(31, 31, 31, 1.0),
                       surface: Colors.white,
-                      onSurface: Colors.black)),
+                      onSurface: Color.fromRGBO(211, 211, 211, 1.0))),
               builder: (context) => PlatformApp(
                   home: Container(
                       color: Theme.of(context).colorScheme.surface,
@@ -52,7 +52,7 @@ class _MainAppState extends State<MainApp> {
                         children: [
                           Expanded(child: SubdivisionController()),
                           Divider(
-                              color: Theme.of(context).colorScheme.secondary),
+                              color: Theme.of(context).colorScheme.onSurface),
                           Expanded(child: PlaybackController())
                         ],
                       )))),

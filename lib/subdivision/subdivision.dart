@@ -66,7 +66,7 @@ class SubdivisionState extends State<Subdivision> {
     return Row(
       children: [
         VerticalDivider(
-          color: Color.fromRGBO(60, 60, 60, 1.0),
+          color: Theme.of(context).colorScheme.onSurface,
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
