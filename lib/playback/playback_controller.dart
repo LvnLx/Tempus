@@ -13,6 +13,7 @@ class PlaybackController extends StatefulWidget {
 class PlaybackControllerState extends State<PlaybackController> {
   int bpm = 120;
   bool playback = false;
+  String feedback = "";
 
   onDialChanged(int change) {
     setBpm(bpm + change);
@@ -21,6 +22,15 @@ class PlaybackControllerState extends State<PlaybackController> {
   setBpm(int newBpm) {
     setState(() => newBpm > 0 ? bpm = newBpm : 1);
     Audio.setBpm(bpm);
+  }
+
+  sendFeedback() {
+    print("Sent feedback \"$feedback\"");
+    Navigator.pop(context);
+  }
+
+  setFeedback(String feedback) {
+    this.feedback = feedback;
   }
 
   togglePlayback() {
@@ -95,11 +105,18 @@ class PlaybackControllerState extends State<PlaybackController> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
                       child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             PlatformIconButton(
+                                icon: Icon(
+                                  PlatformIcons(context).edit,
+                                  size: 40,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () => showFeedbackDialog(context, setFeedback, sendFeedback)),
+                            PlatformIconButton(
                               icon: Icon(
-                                  size: 45,
+                                  size: 40,
                                   playback
                                       ? PlatformIcons(context).pause
                                       : PlatformIcons(context).playArrowSolid,
@@ -115,4 +132,26 @@ class PlaybackControllerState extends State<PlaybackController> {
       ],
     );
   }
+}
+
+showFeedbackDialog(BuildContext context, Function setFeedbackCallback, Function sendFeedbackCallback) {
+  showPlatformDialog(
+      context: context,
+      builder: (context) => PlatformAlertDialog(
+              title: Text("Feedback"),
+              content: PlatformTextField(
+                  hintText: "Issues, feature requests, ...",
+                  onChanged: (text) => setFeedbackCallback(text)),
+              actions: [
+                PlatformDialogAction(
+                    child: Text("Close"),
+                    onPressed: () => Navigator.pop(context),
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDestructiveAction: true)),
+                PlatformDialogAction(
+                    child: Text("Submit"),
+                    onPressed: () => sendFeedbackCallback(),
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDefaultAction: true))
+              ]));
 }
