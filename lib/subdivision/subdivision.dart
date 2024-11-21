@@ -5,7 +5,7 @@ import 'package:metronomical/subdivision/scroll_wheel.dart';
 
 typedef SubdivisionCallback = void Function(Key key);
 
-const List<String> subdivisionOptions = ["2", "3", "4", "5", "6", "7", "8", "9"];
+List<String> subdivisionOptions = List.generate(8, (index) => (index + 2).toString());
 
 class Subdivision extends StatefulWidget {
   final SubdivisionCallback onRemove;
