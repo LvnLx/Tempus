@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:metronomic/audio.dart';
-import 'package:metronomic/subdivision/scrollWheel.dart';
+import 'package:metronomical/audio.dart';
+import 'package:metronomical/subdivision/scrollWheel.dart';
 
 typedef SubdivisionCallback = void Function(Key key);
 

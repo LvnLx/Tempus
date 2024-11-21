@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:metronomic/subdivision/subdivisionController.dart';
-import 'package:metronomic/playback/playbackController.dart';
+import 'package:metronomical/subdivision/subdivisionController.dart';
+import 'package:metronomical/playback/playbackController.dart';
 
 void main() async {
   runApp(MainApp());

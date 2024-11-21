@@ -1,4 +1,4 @@
-package com.lvnlx.metronomic
+package com.lvnlx.metronomical
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -7,7 +7,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     companion object {
         init {
-            System.loadLibrary("metronomic")
+            System.loadLibrary("metronomical")
         }
     }
 

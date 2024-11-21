@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:metronomic/audio.dart';
-import 'package:metronomic/playback/bpmDial.dart';
+import 'package:metronomical/audio.dart';
+import 'package:metronomical/playback/bpmDial.dart';
 
 class PlaybackController extends StatefulWidget {
   @override
