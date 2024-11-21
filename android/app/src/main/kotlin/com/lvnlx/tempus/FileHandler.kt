@@ -1,4 +1,4 @@
-package com.lvnlx.metronomical
+package com.lvnlx.tempus
 
 import android.content.res.AssetManager
 import java.io.InputStream

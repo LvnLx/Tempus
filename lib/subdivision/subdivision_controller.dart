@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:metronomical/audio.dart';
-import 'package:metronomical/subdivision/subdivision.dart';
+import 'package:tempus/audio.dart';
+import 'package:tempus/subdivision/subdivision.dart';
 
 class SubdivisionController extends StatefulWidget {
   const SubdivisionController({super.key});

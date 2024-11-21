@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:metronomical/subdivision/subdivision_controller.dart';
-import 'package:metronomical/playback/playback_controller.dart';
+import 'package:tempus/subdivision/subdivision_controller.dart';
+import 'package:tempus/playback/playback_controller.dart';
 
 void main() async {
   runApp(MainApp());

@@ -1,4 +1,4 @@
-# Metronomical
+# Tempus
 
 A cross-platform metronome app developed with [Flutter](https://flutter.dev/).
 

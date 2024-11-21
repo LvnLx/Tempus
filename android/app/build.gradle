@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.lvnlx.metronomical"
+    namespace "com.lvnlx.tempus"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
@@ -45,7 +45,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.lvnlx.metronomical"
+        applicationId "com.lvnlx.tempus"
         externalNativeBuild {
             cmake {
                 arguments "-DANDROID_STL=c++_shared"

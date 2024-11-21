@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:metronomical/subdivision/subdivision.dart';
+import 'package:tempus/subdivision/subdivision.dart';
 
 class ScrollWheel extends StatefulWidget {
   final Function(String) callback;
