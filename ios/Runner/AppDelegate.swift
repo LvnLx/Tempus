@@ -63,8 +63,8 @@ import AVFoundation
       print("Failed to set AVAudioSession's shared instance category")
     }
     
-    loadAudioFile("Downbeat")
-    loadAudioFile("Subdivision")
+    loadAudioFile("subdivision", controller.lookupKey(forAsset: "audio/subdivision.wav"))
+    loadAudioFile("downbeat", controller.lookupKey(forAsset: "audio/downbeat.wav"))
     
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

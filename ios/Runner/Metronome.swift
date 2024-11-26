@@ -145,7 +145,7 @@ class Metronome {
   
   private func setupBufferCallbacks() {
     buffer.callbacks.append { buffer in
-      for (index, sample) in audioData["Downbeat"]!.enumerated() {
+      for (index, sample) in audioData["downbeat"]!.enumerated() {
         buffer[index] += sample * self.volume!
       }
     }
@@ -163,7 +163,7 @@ class Metronome {
         let exactLocation: Double = Double(buffer.count) * Double(location)
         let startFrame: Int = Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat)
       
-        for (index, sample) in audioData["Subdivision"]!.enumerated() {
+        for (index, sample) in audioData["subdivision"]!.enumerated() {
           if (startFrame + index < buffer.count) {
             buffer[startFrame + index] += sample * volume * self.volume!
           }

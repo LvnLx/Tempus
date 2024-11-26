@@ -2,8 +2,8 @@ import AudioToolbox
 
 var audioData: [String:[Float]] = [:]
 
-func loadAudioFile(_ fileName: String) {
-  let path: String = Bundle.main.path(forResource: fileName, ofType: "wav")!
+func loadAudioFile(_ fileName: String, _ key: String) {
+  let path: String = Bundle.main.path(forResource: key, ofType: nil)!
   let url: URL = URL(string: path)!
   
   var audioFile: AudioFileID? = nil
