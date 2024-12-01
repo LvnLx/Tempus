@@ -1,18 +1,12 @@
-import Foundation
-
 let locationPrecision: Float = 2
 
-class Subdivision: CustomStringConvertible {
+class Subdivision {
   var option: Int
   var volume: Float
   
   init(_ option: Int, _  volume: Float) {
     self.option = option
     self.volume = volume
-  }
-  
-  var description: String {
-    return "Subdivision(option: \(self.option), volume: \(self.volume))"
   }
   
   func getLocations() -> [Float] {

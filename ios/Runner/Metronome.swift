@@ -2,72 +2,15 @@ import AVFoundation
 
 class Metronome {
   private var audioUnit: AudioUnit?
-  private var buffer: MetronomeBuffer = MetronomeBuffer(sampleRate * 60)
+  private var dispatchQueue: UnsafeMutablePointer<DispatchQueue> = UnsafeMutablePointer<DispatchQueue>.allocate(capacity: 1)
+  private let nextFrame: UnsafeMutablePointer<Int> = UnsafeMutablePointer.allocate(capacity: 1)
   private var subdivisions: [String: Subdivision] = [:]
+  private let validFrameCount: UnsafeMutablePointer<Int> = UnsafeMutablePointer<Int>.allocate(capacity: 1)
   private var volume: Float?
 
   init() {
-    initializeBuffer()
-    setupAudioUnit()
-    setupBufferCallbacks()
-  }
-  
-  func addSubdivision(_ key: String, _ option: Int, _ volume: Float) {
-    subdivisions[key] = Subdivision(option, volume)
-    writeBuffer()
-  }
-  
-  func removeSubdivision(_ key: String) {
-    subdivisions.removeValue(forKey: key)
-    writeBuffer()
-  }
-  
-  func setBpm(_ bpm: UInt16) {
-    let bps: Double = Double(bpm) / 60.0
-    let beatDurationSeconds: Double = 1.0 / bps
-    buffer.validFrames.pointee = Int(beatDurationSeconds * Double(sampleRate))
+    dispatchQueue.initialize(to: DispatchQueue(label: "com.lvnlx.tempus", attributes: .concurrent))
     
-    writeBuffer()
-  }
-  
-  func setSubdivisionOption(_ key: String, _ option: Int) {
-    subdivisions[key]!.option = option
-    writeBuffer()
-  }
-  
-  func setSubdivisionVolume(_ key: String, _ volume: Float) {
-    subdivisions[key]!.volume = volume
-    writeBuffer()
-  }
-  
-  func setVolume(_ volume: Float) {
-    self.volume = volume
-    writeBuffer()
-  }
-  
-  func startPlayback() {
-    guard AudioOutputUnitStart(audioUnit!) == noErr else {
-      print("Error starting audio output unit")
-      return
-    }
-  }
-  
-  func stopPlayback() {
-    guard AudioOutputUnitStop(audioUnit!) == noErr else {
-      print("Error stopping audio output unit")
-      return
-    }
-  }
-  
-  private func initializeBuffer() {
-    let bps: Double = 120 / 60
-    let beatDurationSeconds: Double = 1.0 / bps
-    buffer.validFrames.pointee = Int(beatDurationSeconds * Double(sampleRate))
-    
-    writeBuffer()
-  }
-  
-  private func setupAudioUnit() {
     var audioComponentDescription: AudioComponentDescription = AudioComponentDescription(
       componentType: kAudioUnitType_Output,
       componentSubType: kAudioUnitSubType_RemoteIO,
@@ -96,30 +39,46 @@ class Metronome {
     
     let auRenderCallback: AURenderCallback = { inRefCon, _, _, _, inNumberFrames, ioData in
       let inRefCon = inRefCon.assumingMemoryBound(to: RefCon.self).pointee
+      let inNumberFrames = Int(inNumberFrames)
+      let ioData = ioData!.pointee.mBuffers.mData!.assumingMemoryBound(to: Float.self)
       
-      let nextFrameToCopy = inRefCon.nextFrameToCopy.pointee
-      let sourceFrames = inRefCon.sourceFrames
-      let validFrames = inRefCon.validFrames.pointee
+      let dispatchQueue = inRefCon.dispatchQueue
+      let validFrameCount = inRefCon.validFrameCount.pointee
       
-      let targetFrames = ioData!.pointee.mBuffers.mData!.assumingMemoryBound(to: Float.self)
+      for index in 0..<inNumberFrames {
+        ioData.advanced(by: index).pointee = 0
+      }
       
-      for i in 0..<inNumberFrames {
-        if (nextFrameToCopy + Int(i) >= validFrames) {
-          inRefCon.nextFrameToCopy.pointee = 0
+      dispatchQueue.pointee.sync {
+        for index in 0..<inNumberFrames {
+          inRefCon.nextFrame.pointee = inRefCon.nextFrame.pointee % validFrameCount
+        
+          for clip in clips {
+            if (clip.pointee.isActive && !clip.pointee.isPlaying && clip.pointee.startFrame == inRefCon.nextFrame.pointee) {
+              clip.pointee.isPlaying = true
+            }
+          
+            if (clip.pointee.isPlaying) {
+              if (clip.pointee.nextFrame < clip.pointee.sample.pointee.length) {
+                ioData.advanced(by: index).pointee += clip.pointee.sample.pointee.data.advanced(by: clip.pointee.nextFrame).pointee * clip.pointee.volume
+                clip.pointee.nextFrame += 1
+              } else {
+                clip.pointee.isPlaying = false
+                clip.pointee.nextFrame = 0
+              }
+            }
+          }
+        
+          inRefCon.nextFrame.pointee += 1
         }
-        
-        targetFrames.advanced(by: Int(i)).pointee = sourceFrames.advanced(by: nextFrameToCopy + Int(i)).pointee
-        
-        inRefCon.nextFrameToCopy.pointee += 1
       }
       
       return noErr
     }
     
+    nextFrame.pointee = 0
     let refCon = UnsafeMutableRawPointer.allocate(byteCount: MemoryLayout<RefCon>.size, alignment: MemoryLayout<RefCon>.alignment)
-    let nextFrameToCopy = UnsafeMutablePointer<Int>.allocate(capacity: MemoryLayout<Int>.size)
-    nextFrameToCopy.pointee = 0
-    refCon.storeBytes(of: RefCon(nextFrameToCopy: nextFrameToCopy, sourceFrames: buffer.frames, validFrames: buffer.validFrames), as: RefCon.self)
+    refCon.storeBytes(of: RefCon(dispatchQueue: dispatchQueue, nextFrame: nextFrame, validFrameCount: validFrameCount), as: RefCon.self)
     var auRenderCallbackStruct: AURenderCallbackStruct = AURenderCallbackStruct(
       inputProc: auRenderCallback,
       inputProcRefCon: refCon
@@ -143,47 +102,88 @@ class Metronome {
     }
   }
   
-  private func setupBufferCallbacks() {
-    buffer.callbacks.append { buffer in
-      for (index, sample) in audioData["downbeat"]!.enumerated() {
-        buffer[index] += sample * self.volume!
-      }
+  func addSubdivision(_ key: String, _ option: Int, _ volume: Float) {
+    subdivisions[key] = Subdivision(option, volume)
+    updateClips()
+  }
+  
+  func removeSubdivision(_ key: String) {
+    subdivisions.removeValue(forKey: key)
+    updateClips()
+  }
+  
+  func setBpm(_ bpm: UInt16) {
+    let bps: Double = Double(bpm) / 60.0
+    let beatDurationSeconds: Double = 1.0 / bps
+    validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
+    
+    updateClips()
+  }
+  
+  func setSubdivisionOption(_ key: String, _ option: Int) {
+    subdivisions[key]!.option = option
+    updateClips()
+  }
+  
+  func setSubdivisionVolume(_ key: String, _ volume: Float) {
+    subdivisions[key]!.volume = volume
+    updateClips()
+  }
+  
+  func setVolume(_ volume: Float) {
+    self.volume = volume
+    updateClips()
+  }
+  
+  func startPlayback() {
+    guard AudioOutputUnitStart(audioUnit!) == noErr else {
+      print("Error starting audio output unit")
+      return
+    }
+  }
+  
+  func stopPlayback() {
+    nextFrame.pointee = 0
+    for clip in clips {
+      clip.pointee.isPlaying = false
+      clip.pointee.nextFrame = 0
     }
     
-    buffer.callbacks.append { (buffer: inout [Float]) in
-      let locationVolumes: [Float:Float] = self.subdivisions.values.reduce(into: [:]) {(accumulator, subdivision) in
+    guard AudioOutputUnitStop(audioUnit!) == noErr else {
+      print("Error stopping audio output unit")
+      return
+    }
+  }
+  
+  private func updateClips() {
+    let subdivisionClipData: [(Int, Float)] = subdivisions.values
+      .reduce(into: [Float:Float]()) { (accumulator, subdivision) in
         for location in subdivision.getLocations() {
           if (subdivision.volume >= accumulator[location] ?? 0) {
             accumulator[location] = subdivision.volume
           }
         }
       }
-    
-      for (location, volume) in locationVolumes {
-        let exactLocation: Double = Double(buffer.count) * Double(location)
-        let startFrame: Int = Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat)
-      
-        for (index, sample) in audioData["subdivision"]!.enumerated() {
-          if (startFrame + index < buffer.count) {
-            buffer[startFrame + index] += sample * volume * self.volume!
-          }
-        }
+      .map { (location, volume) in
+        let exactLocation: Double = Double(validFrameCount.pointee) * Double(location)
+        return (Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat), volume)
       }
-    }
-  }
-  
-  private func writeBuffer() {
-    var updatedBuffer: [Float] = Array(repeating: 0, count: buffer.validFrames.pointee)
-    for callback in buffer.callbacks {
-      callback(&updatedBuffer)
+    
+    let downbeatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
+    downbeatClip.initialize(to: Clip(sample: samples["downbeat"]!, startFrame: 0, volume: volume!))
+    
+    let subdivisionClips: [UnsafeMutablePointer<Clip>] = subdivisionClipData.map { (startFrame, volume) in
+      let subdivisionClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
+      subdivisionClip.initialize(to: Clip(sample: samples["subdivision"]!, startFrame: startFrame, volume: volume))
+      return subdivisionClip
     }
     
-    buffer.frames.update(from: updatedBuffer, count: buffer.validFrames.pointee)
+    dispatchQueue.pointee.async(flags: .barrier) {
+      clips = clips.filter { $0.pointee.isPlaying }
+      for index in clips.indices { clips[index].pointee.isActive = false }
+      
+      clips.append(downbeatClip)
+      clips.append(contentsOf: subdivisionClips)
+    }
   }
-}
-
-struct RefCon {
-  var nextFrameToCopy: UnsafeMutablePointer<Int>
-  var sourceFrames: UnsafePointer<Float>
-  var validFrames: UnsafePointer<Int>
 }

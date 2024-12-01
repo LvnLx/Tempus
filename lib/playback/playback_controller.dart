@@ -15,6 +15,12 @@ class PlaybackControllerState extends State<PlaybackController> {
   bool playback = false;
   String feedback = "";
 
+  @override
+  void initState() {
+    super.initState();
+    setBpm(bpm);
+  }
+
   onDialChanged(int change) {
     setBpm(bpm + change);
   }

@@ -16,6 +16,12 @@ class SubdivisionControllerState extends State<SubdivisionController> {
   double volume = 1.0;
   late IconData volumeIcon;
 
+  @override // Instead of initState, since we need access to context
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    setVolume(context, volume);
+  }
+
   void addSubdivision() {
     var key = UniqueKey();
     var subdivision =
@@ -53,7 +59,6 @@ class SubdivisionControllerState extends State<SubdivisionController> {
 
   @override
   Widget build(BuildContext context) {
-    setVolume(context, volume);
     return Align(
       alignment: Alignment.centerLeft,
       child: SingleChildScrollView(

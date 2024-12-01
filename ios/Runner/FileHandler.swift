@@ -1,6 +1,6 @@
 import AudioToolbox
 
-var audioData: [String:[Float]] = [:]
+var samples: [String:UnsafePointer<Sample>] = [:]
 
 func loadAudioFile(_ fileName: String, _ key: String) {
   let path: String = Bundle.main.path(forResource: key, ofType: nil)!
@@ -32,6 +32,11 @@ func loadAudioFile(_ fileName: String, _ key: String) {
     print("Failed to read audio file")
   }
   
-  audioData[fileName] = buffer
+  let sample = UnsafeMutablePointer<Sample>.allocate(capacity: 1)
+  sample.pointee.data = UnsafeMutablePointer<Float>.allocate(capacity: buffer.count)
+  sample.pointee.data.update(from: buffer, count: buffer.count)
+  sample.pointee.length = buffer.count
+
+  samples[fileName] = UnsafePointer(sample)
 }
 
