@@ -9,7 +9,7 @@ class Metronome {
   private var volume: Float?
 
   init() {
-    dispatchQueue.initialize(to: DispatchQueue(label: "com.lvnlx.tempus", attributes: .concurrent))
+    dispatchQueue.initialize(to: DispatchQueue(label: "com.lvnlx.tempus"))
     
     var audioComponentDescription: AudioComponentDescription = AudioComponentDescription(
       componentType: kAudioUnitType_Output,
@@ -45,13 +45,11 @@ class Metronome {
       let dispatchQueue = inRefCon.dispatchQueue
       let validFrameCount = inRefCon.validFrameCount.pointee
       
-      for index in 0..<inNumberFrames {
-        ioData.advanced(by: index).pointee = 0
-      }
-      
       dispatchQueue.pointee.sync {
         for index in 0..<inNumberFrames {
           inRefCon.nextFrame.pointee = inRefCon.nextFrame.pointee % validFrameCount
+
+          ioData.advanced(by: index).pointee = 0
         
           for clip in clips {
             if (clip.pointee.isActive && !clip.pointee.isPlaying && clip.pointee.startFrame == inRefCon.nextFrame.pointee) {
@@ -116,7 +114,6 @@ class Metronome {
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
     validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
-    
     updateClips()
   }
   
@@ -178,7 +175,7 @@ class Metronome {
       return subdivisionClip
     }
     
-    dispatchQueue.pointee.async(flags: .barrier) {
+    dispatchQueue.pointee.async {
       clips = clips.filter { $0.pointee.isPlaying }
       for index in clips.indices { clips[index].pointee.isActive = false }
       

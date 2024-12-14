@@ -49,7 +49,7 @@ extern "C" {
     Java_com_lvnlx_tempus_MainActivity_loadAudioFrames(JNIEnv* env, jobject, jstring fileName, jfloatArray audioFrames) {
         jsize arrayFramesLength = env->GetArrayLength(audioFrames);
         jfloat* arrayFramesPointer = env->GetFloatArrayElements(audioFrames, nullptr);
-        metronome.audioFrames[env->GetStringUTFChars(fileName, nullptr)] = std::vector<float>(arrayFramesPointer, arrayFramesPointer + arrayFramesLength);
+        metronome.audioFrames[env->GetStringUTFChars(fileName, nullptr)] = Sample(std::vector<float>(arrayFramesPointer, arrayFramesPointer + arrayFramesLength), arrayFramesLength);
         env->ReleaseFloatArrayElements(audioFrames, arrayFramesPointer, 0);
     }
 }

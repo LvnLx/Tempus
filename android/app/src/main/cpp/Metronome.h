@@ -7,14 +7,15 @@
 #include <vector>
 
 #include "Subdivision.h"
-#include "MetronomeBuffer.h"
+#include "Sample.h"
+#include "Clip.h"
 
 class Metronome : public oboe::AudioStreamDataCallback {
 public:
     Metronome();
     ~Metronome() override = default;
 
-    std::unordered_map<std::string, std::vector<float>> audioFrames;
+    std::unordered_map<std::string, Sample> audioFrames;
 
     void addSubdivision(const std::string& key, int option, float volume);
     void removeSubdivision(const std::string& key);
@@ -29,16 +30,15 @@ private:
     int sampleRate = 44100;
 
     std::shared_ptr<oboe::AudioStream> audioStream;
-    MetronomeBuffer buffer = MetronomeBuffer(sampleRate * 60);
-    int nextFrameToCopy = 0;
+    std::vector<Clip> clips;
+    std::mutex mutex;
+    int nextFrame = 0;
     std::unordered_map<std::string, Subdivision> subdivisions;
+    int validFrameCount{};
     float volume{};
 
-    void initializeBuffer();
     oboe::DataCallbackResult onAudioReady(oboe::AudioStream* oboeAudioStream, void* audioData, int numFrames) override;
-    void setupAudioStream();
-    void setupCallbacks();
-    void writeBuffer();
+    void updateClips();
 };
 
 

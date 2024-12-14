@@ -6,75 +6,6 @@
 #include "Subdivision.h"
 
 Metronome::Metronome() {
-    initializeBuffer();
-    setupAudioStream();
-    setupCallbacks();
-}
-
-void Metronome::addSubdivision(const std::string& key, int option, float subdivisionVolume) {
-    subdivisions.emplace(key, Subdivision(option, subdivisionVolume));
-    writeBuffer();
-}
-
-void Metronome::removeSubdivision(const std::string& key) {
-    subdivisions.erase(key);
-    writeBuffer();
-}
-
-void Metronome::setBpm(int bpm) {
-    double beatsPerSecond = bpm / (double) 60;
-    double beatDurationSeconds = 1 / beatsPerSecond;
-    buffer.validFrames = round(beatDurationSeconds * sampleRate); // NOLINT(cppcoreguidelines-narrowing-conversions)
-    writeBuffer();
-}
-
-void Metronome::setSubdivisionOption(const std::string& key, int option) {
-    subdivisions.at(key).option = option;
-    writeBuffer();
-}
-
-void Metronome::setSubdivisionVolume(const std::string& key, float subdivisionVolume) {
-    subdivisions.at(key).volume = subdivisionVolume;
-    writeBuffer();
-}
-
-void Metronome::setVolume(float updatedVolume) {
-    this->volume = updatedVolume;
-    writeBuffer();
-}
-
-void Metronome::startPlayback() {
-    audioStream->start();
-}
-
-void Metronome::stopPlayback() {
-    audioStream->stop();
-}
-
-void Metronome::initializeBuffer() {
-    double beatsPerSecond = 120 / (double) 60;
-    double beatDurationSeconds = 1 / beatsPerSecond;
-    buffer.validFrames = round(beatDurationSeconds * sampleRate); // NOLINT(cppcoreguidelines-narrowing-conversions)
-    writeBuffer();
-}
-
-oboe::DataCallbackResult Metronome::onAudioReady(oboe::AudioStream* oboeAudioStream, void* audioData, int numFrames) {
-    auto* floatData = (float*) audioData;
-    int offset = nextFrameToCopy;
-    for (int i = 0; i < numFrames; i++) {
-        if (nextFrameToCopy + i > buffer.validFrames) {
-            nextFrameToCopy = 0;
-        }
-
-        floatData[i] = buffer.frames[offset + i];
-
-        nextFrameToCopy++;
-    }
-
-    return oboe::DataCallbackResult::Continue;
-}
-
-void Metronome::setupAudioStream() {
     oboe::AudioStreamBuilder builder;
     builder.setChannelConversionAllowed(true)
         ->setChannelCount(1)
@@ -87,53 +18,118 @@ void Metronome::setupAudioStream() {
         ->openStream(audioStream);
 }
 
-void Metronome::setupCallbacks() {
-    buffer.callbacks.emplace_back([this](std::vector<float>& metronomeBufferFrames) {
-        std::vector<float> downbeatAudioFrames = audioFrames["downbeat"];
-        for (int i = 0; i < downbeatAudioFrames.size(); i ++) {
-            metronomeBufferFrames[i] += downbeatAudioFrames[i] * volume;
-        }
-    });
+void Metronome::addSubdivision(const std::string& key, int option, float subdivisionVolume) {
+    subdivisions.emplace(key, Subdivision(option, subdivisionVolume));
+    updateClips();
+}
 
-    buffer.callbacks.emplace_back([this](std::vector<float>& metronomeBufferFrames) {
-        std::vector<Subdivision> subdivisionsValues;
-        subdivisionsValues.reserve(subdivisions.size());
+void Metronome::removeSubdivision(const std::string& key) {
+    subdivisions.erase(key);
+    updateClips();
+}
 
-        for (const auto& keyValuePair : subdivisions) {
-            subdivisionsValues.push_back(keyValuePair.second);
-        }
+void Metronome::setBpm(int bpm) {
+    double beatsPerSecond = bpm / (double) 60;
+    double beatDurationSeconds = 1 / beatsPerSecond;
+    validFrameCount = round(beatDurationSeconds * sampleRate); // NOLINT(cppcoreguidelines-narrowing-conversions)
+    updateClips();
+}
 
-        std::unordered_map<float, float> locationVolumes;
-        for (const auto& subdivision : subdivisionsValues) {
-            for (auto location : subdivision.getLocations()) {
-                auto locationVolume = locationVolumes.find(location);
-                if (locationVolume != locationVolumes.end() && locationVolume->second > subdivision.volume) {
-                    continue;
+void Metronome::setSubdivisionOption(const std::string& key, int option) {
+    subdivisions.at(key).option = option;
+    updateClips();
+}
+
+void Metronome::setSubdivisionVolume(const std::string& key, float subdivisionVolume) {
+    subdivisions.at(key).volume = subdivisionVolume;
+    updateClips();
+}
+
+void Metronome::setVolume(float updatedVolume) {
+    this->volume = updatedVolume;
+    updateClips();
+}
+
+void Metronome::startPlayback() {
+    audioStream->start();
+}
+
+void Metronome::stopPlayback() {
+    nextFrame = 0;
+
+    audioStream->stop();
+}
+
+oboe::DataCallbackResult Metronome::onAudioReady(oboe::AudioStream* oboeAudioStream, void* audioData, int numFrames) {
+    auto* floatData = (float*) audioData;
+
+    std::lock_guard<std::mutex> lock(mutex);
+
+    for (int i = 0; i < numFrames; i++) {
+        nextFrame = nextFrame % validFrameCount;
+
+        floatData[i] = 0;
+
+        for (Clip &clip : clips) {
+            if (clip.isActive && !clip.isPlaying && clip.startFrame == nextFrame) {
+                clip.isPlaying = true;
+            }
+
+            if (clip.isPlaying) {
+                if (clip.nextFrame < clip.sample.length) {
+                    floatData[i] += clip.sample.data[clip.nextFrame] * volume;
+                    clip.nextFrame++;
                 } else {
-                    locationVolumes[location] = subdivision.volume;
+                    clip.isPlaying = false;
+                    clip.nextFrame = 0;
                 }
             }
         }
 
-        std::vector<float> subdivisionAudioFrames = audioFrames["subdivision"];
-        for (auto keyValuePair : locationVolumes) {
-            double exactLocation = (double) metronomeBufferFrames.size() * keyValuePair.first;
-            int startFrame = std::round(exactLocation / sizeof(float)) * sizeof(float); // NOLINT(cppcoreguidelines-narrowing-conversions)
-
-            for (int i = 0; i < subdivisionAudioFrames.size(); i++) {
-                if (startFrame + i < metronomeBufferFrames.size())
-                    metronomeBufferFrames[startFrame + i] += subdivisionAudioFrames[i] * keyValuePair.second * volume;
-            }
-        }
-    });
-}
-
-void Metronome::writeBuffer() {
-    std::vector<float> updatedFrames(buffer.validFrames, 0);
-
-    for (auto& callback : buffer.callbacks) {
-        callback(updatedFrames);
+        nextFrame++;
     }
 
-    std::copy(updatedFrames.begin(), updatedFrames.begin() + buffer.validFrames, buffer.frames.begin());
+    return oboe::DataCallbackResult::Continue;
+}
+
+void Metronome::updateClips() {
+    std::unordered_map<float, float> subdivisionLocationVolumes;
+    subdivisionLocationVolumes.reserve(subdivisions.size());
+    for (const auto& keyValuePair : subdivisions) {
+        for (float location : keyValuePair.second.getLocations()) {
+            if (keyValuePair.second.volume >= (subdivisionLocationVolumes.find(location) == subdivisionLocationVolumes.end() ? 0 : subdivisionLocationVolumes[location])) {
+                subdivisionLocationVolumes[location] = keyValuePair.second.volume;
+            }
+        }
+    }
+
+    std::vector<std::tuple<int, float>> subdivisionClipData;
+    subdivisionClipData.reserve(subdivisions.size());
+    for (const auto& keyValuePair : subdivisionLocationVolumes) {
+        float exactLocation = validFrameCount * keyValuePair.first; // NOLINT(cppcoreguidelines-narrowing-conversions)
+        subdivisionClipData.emplace_back(std::round(exactLocation / sizeof(float)) * sizeof(float), keyValuePair.second);
+    }
+
+    Clip downbeatClip = Clip(audioFrames["downbeat"], 0, volume);
+
+    std::vector<Clip> subdivisionClips;
+    subdivisionClips.reserve(subdivisionClipData.size());
+    for (const auto& keyValuePair : subdivisionClipData) {
+        subdivisionClips.emplace_back(audioFrames["sample"], std::get<0>(keyValuePair), std::get<1>(keyValuePair));
+    }
+
+    std::lock_guard<std::mutex> lock(mutex);
+
+    std::vector<Clip> updatedClips;
+    for (Clip clip : clips) {
+        if (clip.isPlaying) {
+            clip.isActive = false;
+            updatedClips.emplace_back(clip);
+        }
+    }
+
+    updatedClips.emplace_back(downbeatClip);
+    updatedClips.insert(updatedClips.end(), subdivisionClips.begin(), subdivisionClips.end());
+
+    clips = updatedClips;
 }
