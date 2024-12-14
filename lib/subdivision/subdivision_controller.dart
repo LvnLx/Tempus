@@ -12,6 +12,7 @@ class SubdivisionController extends StatefulWidget {
 
 class SubdivisionControllerState extends State<SubdivisionController> {
   final Map<Key, Subdivision> subdivisions = <Key, Subdivision>{};
+  final ScrollController scrollController = ScrollController();
 
   double volume = 1.0;
   late IconData volumeIcon;
@@ -61,51 +62,55 @@ class SubdivisionControllerState extends State<SubdivisionController> {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Expanded(
-                      child: RotatedBox(
-                    quarterTurns: 3,
-                    child: PlatformSlider(
-                      activeColor: Theme.of(context).colorScheme.primary,
-                      onChanged: (double value) => setVolume(context, value),
-                      onChangeEnd: (double value) =>
-                          setVolume(context, value, false),
-                      value: volume,
+      child: Scrollbar(
+        controller: scrollController,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Expanded(
+                        child: RotatedBox(
+                      quarterTurns: 3,
+                      child: PlatformSlider(
+                        activeColor: Theme.of(context).colorScheme.primary,
+                        onChanged: (double value) => setVolume(context, value),
+                        onChangeEnd: (double value) =>
+                            setVolume(context, value, false),
+                        value: volume,
+                      ),
+                    )),
+                    SizedBox(
+                      child: Center(
+                        child: PlatformIconButton(
+                            icon: Icon(
+                          volumeIcon,
+                          size: 35,
+                          color: Theme.of(context).colorScheme.primary,
+                        )),
+                      ),
                     ),
-                  )),
-                  SizedBox(
-                    child: Center(
-                      child: PlatformIconButton(
-                          icon: Icon(
-                        volumeIcon,
-                        size: 35,
-                        color: Theme.of(context).colorScheme.primary,
-                      )),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            ...subdivisions.values,
-            VerticalDivider(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            if (subdivisions.length <= subdivisionOptions.length)
-              PlatformIconButton(
-                  onPressed: addSubdivision,
-                  icon: Icon(
-                    PlatformIcons(context).add,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 35,
-                  ))
-          ],
+              ...subdivisions.values,
+              VerticalDivider(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              if (subdivisions.length <= subdivisionOptions.length)
+                PlatformIconButton(
+                    onPressed: addSubdivision,
+                    icon: Icon(
+                      PlatformIcons(context).add,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 35,
+                    ))
+            ],
+          ),
         ),
       ),
     );

@@ -48,99 +48,105 @@ class PlaybackControllerState extends State<PlaybackController> {
 
   @override
   Widget build(BuildContext context) {
-    return Flex(
-      direction: Axis.vertical,
-      children: [
-        Expanded(
-          flex: 1,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              PlatformIconButton(
-                icon: Icon(
-                  PlatformIcons(context).remove,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 35,
-                ),
-                onPressed: () => setBpm(bpm - 1),
-              ),
-              Container(
-                  padding: EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: Theme.of(context).colorScheme.primary),
-                      borderRadius: BorderRadius.circular(8.0)),
-                  width: 100,
-                  height: 60,
-                  child: Center(
-                      child: Text(
-                    bpm.toString(),
-                    style: TextStyle(
-                        fontSize: 35,
-                        color: Theme.of(context).colorScheme.primary),
-                    textAlign: TextAlign.center,
-                  ))),
-              PlatformIconButton(
-                  icon: Icon(PlatformIcons(context).add,
-                      color: Theme.of(context).colorScheme.primary, size: 35),
-                  onPressed: () => setBpm(bpm + 1)),
-            ],
-          ),
-        ),
-        Expanded(
-            flex: 4,
-            child: Stack(
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+      return Flex(
+        direction: Axis.vertical,
+        children: [
+          Expanded(
+            flex: 1,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Flex(
-                  direction: Axis.vertical,
-                  children: [
-                    Expanded(
-                      flex: 9,
-                      child: Center(
-                        child: SizedBox(
-                            width: 250,
-                            height: 250,
-                            child: BpmDial(
-                                callbackThreshold: 20,
-                                callback: onDialChanged)),
-                      ),
-                    ),
-                    Expanded(flex: 1, child: Container())
-                  ],
+                PlatformIconButton(
+                  icon: Icon(
+                    PlatformIcons(context).remove,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 35,
+                  ),
+                  onPressed: () => setBpm(bpm - 1),
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            PlatformIconButton(
-                                icon: Icon(
-                                  PlatformIcons(context).edit,
-                                  size: 40,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                onPressed: () => showFeedbackDialog(
-                                    context, setFeedback, sendFeedback)),
-                            PlatformIconButton(
-                              icon: Icon(
-                                  size: 40,
-                                  playback
-                                      ? PlatformIcons(context).pause
-                                      : PlatformIcons(context).playArrowSolid,
-                                  color: Theme.of(context).colorScheme.primary),
-                              onPressed: togglePlayback,
-                            )
-                          ]),
-                    ),
-                  ],
-                )
+                Container(
+                    padding: EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            color: Theme.of(context).colorScheme.primary),
+                        borderRadius: BorderRadius.circular(8.0)),
+                    width: 100,
+                    height: 60,
+                    child: Center(
+                        child: Text(
+                      bpm.toString(),
+                      style: TextStyle(
+                          fontSize: 35,
+                          color: Theme.of(context).colorScheme.primary),
+                      textAlign: TextAlign.center,
+                    ))),
+                PlatformIconButton(
+                    icon: Icon(PlatformIcons(context).add,
+                        color: Theme.of(context).colorScheme.primary, size: 35),
+                    onPressed: () => setBpm(bpm + 1)),
               ],
-            )),
-      ],
-    );
+            ),
+          ),
+          Expanded(
+              flex: 4,
+              child: Stack(
+                children: [
+                  Flex(
+                    direction: Axis.vertical,
+                    children: [
+                      Expanded(
+                        flex: 9,
+                        child: Center(
+                          child: SizedBox(
+                              width: constraints.maxHeight / 3 * 2,
+                              height: constraints.maxWidth / 3 * 2,
+                              child: BpmDial(
+                                  callbackThreshold: 20,
+                                  callback: onDialChanged)),
+                        ),
+                      ),
+                      Expanded(flex: 1, child: Container())
+                    ],
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding:
+                            const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              PlatformIconButton(
+                                  icon: Icon(
+                                    PlatformIcons(context).edit,
+                                    size: 40,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                  onPressed: () => showFeedbackDialog(
+                                      context, setFeedback, sendFeedback)),
+                              PlatformIconButton(
+                                icon: Icon(
+                                    size: 40,
+                                    playback
+                                        ? PlatformIcons(context).pause
+                                        : PlatformIcons(context).playArrowSolid,
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                                onPressed: togglePlayback,
+                              )
+                            ]),
+                      ),
+                    ],
+                  )
+                ],
+              )),
+        ],
+      );
+    });
   }
 }
 
