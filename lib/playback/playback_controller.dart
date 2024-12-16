@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:provider/provider.dart';
+import 'package:tempus/app_state.dart';
 import 'package:tempus/audio.dart';
 import 'package:tempus/playback/bpm_dial.dart';
+import 'package:tempus/settings/settings.dart';
 
 class PlaybackController extends StatefulWidget {
   const PlaybackController({super.key});
@@ -90,26 +93,26 @@ class PlaybackControllerState extends State<PlaybackController> {
             ),
           ),
           Expanded(
-              flex: 4,
+              flex: 3,
               child: Stack(
                 children: [
-                  Flex(
-                    direction: Axis.vertical,
-                    children: [
-                      Expanded(
-                        flex: 9,
-                        child: Center(
-                          child: SizedBox(
-                              width: constraints.maxHeight / 3 * 2,
-                              height: constraints.maxWidth / 3 * 2,
-                              child: BpmDial(
-                                  callbackThreshold: 20,
-                                  callback: onDialChanged)),
-                        ),
-                      ),
-                      Expanded(flex: 1, child: Container())
-                    ],
+                  Center(
+                    child: SizedBox(
+                        width: constraints.maxHeight / 3 * 2,
+                        height: constraints.maxWidth / 3 * 2,
+                        child: BpmDial(
+                            callbackThreshold: 20, callback: onDialChanged)),
                   ),
+                  Center(
+                      child: PlatformIconButton(
+                    icon: Icon(
+                        size: 80,
+                        playback
+                            ? PlatformIcons(context).pause
+                            : PlatformIcons(context).playArrowSolid,
+                        color: Theme.of(context).colorScheme.primary),
+                    onPressed: togglePlayback,
+                  )),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -121,23 +124,28 @@ class PlaybackControllerState extends State<PlaybackController> {
                             children: [
                               PlatformIconButton(
                                   icon: Icon(
-                                    PlatformIcons(context).edit,
+                                    PlatformIcons(context).settings,
                                     size: 40,
                                     color:
-                                        Theme.of(context).colorScheme.primary,
+                                        Theme.of(context).colorScheme.secondary,
+                                  ),
+                                  onPressed: () {
+                                    showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        useSafeArea: true,
+                                        builder: (BuildContext context) =>
+                                            Settings());
+                                  }),
+                              PlatformIconButton(
+                                  icon: Icon(
+                                    PlatformIcons(context).help,
+                                    size: 40,
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
                                   ),
                                   onPressed: () => showFeedbackDialog(
                                       context, setFeedback, sendFeedback)),
-                              PlatformIconButton(
-                                icon: Icon(
-                                    size: 40,
-                                    playback
-                                        ? PlatformIcons(context).pause
-                                        : PlatformIcons(context).playArrowSolid,
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
-                                onPressed: togglePlayback,
-                              )
                             ]),
                       ),
                     ],
