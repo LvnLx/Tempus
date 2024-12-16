@@ -48,7 +48,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> setThemeMode(ThemeMode themeMode) async {
-    themeMode = themeMode;
+    _themeMode = themeMode;
 
     notifyListeners();
 
