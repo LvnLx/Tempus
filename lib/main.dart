@@ -23,11 +23,7 @@ class Main extends StatefulWidget {
 
 class MainState extends State<Main> {
   Future<void> initializeApp() async {
-    try {
-      await Provider.of<AppState>(context, listen: false).loadPreferences();
-    } catch (error) {
-      print(error);
-    }
+    await Provider.of<AppState>(context, listen: false).loadPreferences();
   }
 
   @override
