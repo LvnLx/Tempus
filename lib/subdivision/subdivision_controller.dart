@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:provider/provider.dart';
+import 'package:tempus/app_state.dart';
 import 'package:tempus/audio.dart';
 import 'package:tempus/subdivision/subdivision.dart';
 
@@ -14,13 +16,12 @@ class SubdivisionControllerState extends State<SubdivisionController> {
   final Map<Key, Subdivision> subdivisions = <Key, Subdivision>{};
   final ScrollController scrollController = ScrollController();
 
-  double volume = 1.0;
   late IconData volumeIcon;
 
   @override // Instead of initState, since we need access to context
   void didChangeDependencies() {
     super.didChangeDependencies();
-    setVolume(context, volume);
+    setVolume(context, Provider.of<AppState>(context, listen: false).getVolume());
   }
 
   void addSubdivision() {
@@ -42,14 +43,14 @@ class SubdivisionControllerState extends State<SubdivisionController> {
   }
 
   void setVolume(BuildContext context, double newVolume,
-      [bool useThrottling = true]) {
+      [bool useThrottling = true]) async {
+    await Provider.of<AppState>(context, listen: false).setVolume(newVolume);
     setState(() {
-      volume = newVolume;
-      if (volume > 0.66) {
+      if (newVolume > 0.66) {
         volumeIcon = PlatformIcons(context).volumeUp;
-      } else if (volume > 0.33) {
+      } else if (newVolume > 0.33) {
         volumeIcon = PlatformIcons(context).volumeDown;
-      } else if (volume > 0.0) {
+      } else if (newVolume > 0.0) {
         volumeIcon = PlatformIcons(context).volumeMute;
       } else {
         volumeIcon = PlatformIcons(context).volumeOff;
@@ -81,7 +82,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                         onChanged: (double value) => setVolume(context, value),
                         onChangeEnd: (double value) =>
                             setVolume(context, value, false),
-                        value: volume,
+                        value: Provider.of<AppState>(context, listen: false).getVolume(),
                       ),
                     )),
                     SizedBox(

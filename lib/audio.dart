@@ -7,6 +7,8 @@ enum Action {
   addSubdivision,
   removeSubdivision,
   setBpm,
+  setSample,
+  setState,
   setSubdivisionOption,
   setSubdivisionVolume,
   setVolume,
@@ -49,6 +51,23 @@ class Audio {
   static Future<void> setBpm(int bpm) async {
     final result =
         await methodChannel.invokeMethod(Action.setBpm.name, [bpm.toString()]);
+    print(result);
+  }
+
+  static Future<void> setSample(bool isDownbeat, Sample sample) async {
+    final result = await methodChannel.invokeMethod(
+        Action.setSample.name, [isDownbeat.toString(), sample.name]);
+    print(result);
+  }
+
+  static Future<void> setState(int bpm, Sample downbeatSample,
+      Sample subdivisionSample, double volume) async {
+    final result = await methodChannel.invokeMethod(Action.setState.name, [
+      bpm.toString(),
+      downbeatSample.name,
+      subdivisionSample.name,
+      volume.toString()
+    ]);
     print(result);
   }
 

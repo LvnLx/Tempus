@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:provider/provider.dart';
+import 'package:tempus/app_state.dart';
 import 'package:tempus/audio.dart';
 import 'package:tempus/playback/bpm_dial.dart';
 import 'package:tempus/settings/settings.dart';
@@ -12,23 +14,17 @@ class PlaybackController extends StatefulWidget {
 }
 
 class PlaybackControllerState extends State<PlaybackController> {
-  int bpm = 120;
   bool playback = false;
   String feedback = "";
 
-  @override
-  void initState() {
-    super.initState();
-    setBpm(bpm);
-  }
-
   onDialChanged(int change) {
-    setBpm(bpm + change);
+    setBpm(Provider.of<AppState>(context, listen: false).getBpm() + change);
   }
 
-  setBpm(int newBpm) {
-    setState(() => newBpm > 0 ? bpm = newBpm : 1);
-    Audio.setBpm(bpm);
+  setBpm(int newBpm) async {
+    await Provider.of<AppState>(context, listen: false).setBpm(newBpm);
+    await Audio.setBpm(newBpm);
+    setState(() {});
   }
 
   sendFeedback() {
@@ -65,7 +61,8 @@ class PlaybackControllerState extends State<PlaybackController> {
                     color: Theme.of(context).colorScheme.primary,
                     size: 35,
                   ),
-                  onPressed: () => setBpm(bpm - 1),
+                  onPressed: () =>
+                      setBpm(Provider.of<AppState>(context, listen: false).getBpm() - 1),
                 ),
                 Container(
                     padding: EdgeInsets.all(8.0),
@@ -77,7 +74,7 @@ class PlaybackControllerState extends State<PlaybackController> {
                     height: 60,
                     child: Center(
                         child: Text(
-                      bpm.toString(),
+                      Provider.of<AppState>(context).getBpm().toString(),
                       style: TextStyle(
                           fontSize: 35,
                           color: Theme.of(context).colorScheme.primary),
@@ -86,7 +83,8 @@ class PlaybackControllerState extends State<PlaybackController> {
                 PlatformIconButton(
                     icon: Icon(PlatformIcons(context).add,
                         color: Theme.of(context).colorScheme.primary, size: 35),
-                    onPressed: () => setBpm(bpm + 1)),
+                    onPressed: () =>
+                        setBpm(Provider.of<AppState>(context, listen: false).getBpm() + 1)),
               ],
             ),
           ),

@@ -2,9 +2,11 @@ import AVFoundation
 
 class Metronome {
   private var audioUnit: AudioUnit?
+  private var downbeatSample: UnsafePointer<Sample>?
   private var dispatchQueue: UnsafeMutablePointer<DispatchQueue> = UnsafeMutablePointer<DispatchQueue>.allocate(capacity: 1)
   private let nextFrame: UnsafeMutablePointer<Int> = UnsafeMutablePointer.allocate(capacity: 1)
   private var subdivisions: [String: Subdivision] = [:]
+  private var subdivisionSample: UnsafePointer<Sample>?
   private let validFrameCount: UnsafeMutablePointer<Int> = UnsafeMutablePointer<Int>.allocate(capacity: 1)
   private var volume: Float?
 
@@ -117,6 +119,29 @@ class Metronome {
     updateClips()
   }
   
+  func setSample(_ isDownbeat: Bool, _ sampleName: String) {
+    switch isDownbeat {
+    case true:
+      downbeatSample = samples[sampleName]!
+    case false:
+      subdivisionSample = samples[sampleName]!
+    }
+    updateClips()
+  }
+  
+  func setState(_ bpm: UInt16, _ downbeatSampleName: String, _ subdivisionSampleName: String, _ volume: Float) {
+    let bps: Double = Double(bpm) / 60.0
+    let beatDurationSeconds: Double = 1.0 / bps
+    validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
+    
+    downbeatSample = samples[downbeatSampleName]!
+    subdivisionSample = samples[subdivisionSampleName]!
+    
+    self.volume = volume
+    
+    updateClips()
+  }
+  
   func setSubdivisionOption(_ key: String, _ option: Int) {
     subdivisions[key]!.option = option
     updateClips()
@@ -167,11 +192,11 @@ class Metronome {
       }
     
     let downbeatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-    downbeatClip.initialize(to: Clip(sample: samples["downbeat"]!, startFrame: 0, volume: volume!))
+    downbeatClip.initialize(to: Clip(sample: downbeatSample!, startFrame: 0, volume: volume!))
     
     let subdivisionClips: [UnsafeMutablePointer<Clip>] = subdivisionClipData.map { (startFrame, volume) in
       let subdivisionClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-      subdivisionClip.initialize(to: Clip(sample: samples["subdivision"]!, startFrame: startFrame, volume: volume))
+      subdivisionClip.initialize(to: Clip(sample: subdivisionSample!, startFrame: startFrame, volume: volume))
       return subdivisionClip
     }
     

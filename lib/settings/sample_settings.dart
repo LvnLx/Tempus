@@ -69,8 +69,10 @@ enum SampleSetting {
     switch (this) {
       case SampleSetting.downbeat:
         await provider.setDownbeatSample(sample);
+        await Audio.setSample(true, sample);
       case SampleSetting.subdivision:
         await provider.setSubdivisionSample(sample);
+        await Audio.setSample(false, sample);
     }
   }
 }

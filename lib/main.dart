@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/app_state.dart';
+import 'package:tempus/audio.dart';
 import 'package:tempus/subdivision/subdivision_controller.dart';
 import 'package:tempus/playback/playback_controller.dart';
 
@@ -22,18 +23,14 @@ class Main extends StatefulWidget {
 }
 
 class MainState extends State<Main> {
-  Future<void> initializeApp() async {
-    try {
+
+  Future<void> initializeAppState() async =>
       await Provider.of<AppState>(context, listen: false).loadPreferences();
-    } catch (error) {
-      print(error);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: initializeApp(),
+      future: initializeAppState(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return PlatformProvider(

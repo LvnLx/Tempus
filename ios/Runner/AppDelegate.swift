@@ -32,6 +32,18 @@ import AVFoundation
         let bpm: UInt16 = UInt16(arguments[0])!
         self.metronome.setBpm(bpm)
         result("Set BPM")
+      case "setSample":
+        let isDownbeat: Bool = Bool(arguments[0])!
+        let sampleName: String = arguments[1]
+        self.metronome.setSample(isDownbeat, sampleName)
+        result("Set Sample")
+      case "setState":
+        let bpm: UInt16 = UInt16(arguments[0])!
+        let downbeatSampleName: String = arguments[1]
+        let subdivisionSampleName: String = arguments[2]
+        let volume: Float = Float(arguments[3])!
+        self.metronome.setState(bpm, downbeatSampleName, subdivisionSampleName, volume)
+        result("Set State")
       case "setSubdivisionOption":
         let key: String = arguments[0]
         let option: Int = Int(arguments[1])!
