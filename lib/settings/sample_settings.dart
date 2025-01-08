@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:settings_ui/settings_ui.dart';
 import 'package:tempus/app_state.dart';
+import 'package:tempus/audio.dart';
+import 'package:tempus/settings/settings.dart';
+import 'package:tempus/util.dart';
 
 class SampleSettings extends StatelessWidget {
   final SampleSetting sampleSetting;
@@ -24,6 +28,24 @@ class SampleSettings extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             )),
       ),
+      body: SettingsList(
+          applicationType: ApplicationType.both,
+          darkTheme: getSettingsThemeData(context),
+          lightTheme: getSettingsThemeData(context),
+          sections: [
+            SettingsSection(
+              tiles: Sample.values
+                  .map((sample) => SettingsTile(
+                        title: Text(capitalizeFirst(sample.name)),
+                        trailing: sampleSetting.getSample(context) == sample
+                            ? Icon(PlatformIcons(context).checkMark)
+                            : null,
+                        onPressed: (context) async =>
+                            sampleSetting.setSample(context, sample),
+                      ))
+                  .toList(),
+            )
+          ]),
     );
   }
 }
@@ -32,7 +54,17 @@ enum SampleSetting {
   downbeat,
   subdivision;
 
-  Future<void> saveSample(BuildContext context, String sample) async {
+  Sample getSample(BuildContext context) {
+    final AppState provider = Provider.of<AppState>(context);
+    switch (this) {
+      case SampleSetting.downbeat:
+        return provider.getDownbeatSample();
+      case SampleSetting.subdivision:
+        return provider.getSubdivisionSample();
+    }
+  }
+
+  Future<void> setSample(BuildContext context, Sample sample) async {
     final AppState provider = Provider.of<AppState>(context, listen: false);
     switch (this) {
       case SampleSetting.downbeat:

@@ -15,6 +15,8 @@ enum Action {
   writeBuffer
 }
 
+enum Sample { downbeat, subdivision }
+
 class Audio {
   static MethodChannel methodChannel = MethodChannel('audio');
   static Map<Action, bool> throttles =
@@ -45,7 +47,8 @@ class Audio {
   }
 
   static Future<void> setBpm(int bpm) async {
-    final result = await methodChannel.invokeMethod(Action.setBpm.name, [bpm.toString()]);
+    final result =
+        await methodChannel.invokeMethod(Action.setBpm.name, [bpm.toString()]);
     print(result);
   }
 

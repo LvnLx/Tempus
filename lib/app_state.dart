@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tempus/audio.dart';
 
 class AppState extends ChangeNotifier {
-  final List<String> samples = ['downbeat', 'subdivision'];
+  final SharedPreferencesAsync sharedPreferencesAsync =
+      SharedPreferencesAsync();
 
-  String? _downbeatSample = 'downbeat';
-  String? _subdivisionSample = 'subdivision';
+  Sample? _downbeatSample;
+  Sample? _subdivisionSample;
   ThemeMode? _themeMode;
 
-  String getDownbeatSample() {
+  Sample getDownbeatSample() {
     return _downbeatSample!;
   }
 
-  String getSubdivisionSample() {
+  Sample getSubdivisionSample() {
     return _subdivisionSample!;
   }
 
@@ -20,31 +22,30 @@ class AppState extends ChangeNotifier {
     return _themeMode!;
   }
 
-  Future<void> setDownbeatSample(String downbeatSample) async {
-    if (!samples.contains(downbeatSample)) {
-      throw ArgumentError.value(downbeatSample);
+  Future<void> setDownbeatSample(Sample sample) async {
+    if (!Sample.values.contains(sample)) {
+      throw ArgumentError.value(sample);
     }
 
-    _downbeatSample = downbeatSample;
+    _downbeatSample = sample;
 
     notifyListeners();
 
-    SharedPreferencesAsync sharedPreferencesAsync = SharedPreferencesAsync();
-    await sharedPreferencesAsync.setString('downbeatSample', downbeatSample);
+    await sharedPreferencesAsync.setString(
+        Preference.downbeatSample.name, sample.name);
   }
 
-  Future<void> setSubdivisionSample(String subdivisionSample) async {
-    if (!samples.contains(subdivisionSample)) {
-      throw ArgumentError.value(subdivisionSample);
+  Future<void> setSubdivisionSample(Sample sample) async {
+    if (!Sample.values.contains(sample)) {
+      throw ArgumentError.value(sample);
     }
 
-    _subdivisionSample = subdivisionSample;
+    _subdivisionSample = sample;
 
     notifyListeners();
 
-    SharedPreferencesAsync sharedPreferencesAsync = SharedPreferencesAsync();
     await sharedPreferencesAsync.setString(
-        'subdivisionSample', subdivisionSample);
+        Preference.subdivisionSample.name, sample.name);
   }
 
   Future<void> setThemeMode(ThemeMode themeMode) async {
@@ -52,17 +53,39 @@ class AppState extends ChangeNotifier {
 
     notifyListeners();
 
-    SharedPreferencesAsync sharedPreferencesAsync = SharedPreferencesAsync();
-    await sharedPreferencesAsync.setString('themeMode', themeMode.toString());
+    await sharedPreferencesAsync.setString(
+        Preference.themeMode.name, themeMode.toString());
   }
 
   Future<void> loadPreferences() async {
-    SharedPreferencesAsync sharedPreferencesAsync = SharedPreferencesAsync();
-    String? themeModeString =
-        await sharedPreferencesAsync.getString('themeMode');
-    _themeMode = ThemeMode.values.firstWhere((element) =>
-        element.toString() == (themeModeString ?? ThemeMode.system.toString()));
+    _themeMode = await _getOrElse<ThemeMode>(
+        Preference.themeMode.name,
+        ThemeMode.values,
+        ThemeMode.system.toString(),
+        (themeMode) => themeMode.toString());
+    _downbeatSample = await _getOrElse<Sample>(
+        Preference.downbeatSample.name,
+        Sample.values,
+        Sample.downbeat.name,
+        (downbeatSample) => downbeatSample.name);
+    _subdivisionSample = await _getOrElse<Sample>(
+        Preference.subdivisionSample.name,
+        Sample.values,
+        Sample.subdivision.name,
+        (subdivisionSample) => subdivisionSample.name);
 
     notifyListeners();
   }
+
+  Future<T> _getOrElse<T>(
+    String key,
+    List<T> possibleValues,
+    String defaultValue,
+    String Function(T) comparator,
+  ) async {
+    String value = await sharedPreferencesAsync.getString(key) ?? defaultValue;
+    return possibleValues.firstWhere((element) => comparator(element) == value);
+  }
 }
+
+enum Preference { downbeatSample, subdivisionSample, themeMode }

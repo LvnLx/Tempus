@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:provider/provider.dart';
-import 'package:tempus/app_state.dart';
 import 'package:tempus/audio.dart';
 import 'package:tempus/playback/bpm_dial.dart';
 import 'package:tempus/settings/settings.dart';
