@@ -15,7 +15,6 @@ class PlaybackController extends StatefulWidget {
 
 class PlaybackControllerState extends State<PlaybackController> {
   bool playback = false;
-  String feedback = "";
 
   onDialChanged(int change) {
     setBpm(Provider.of<AppState>(context, listen: false).getBpm() + change);
@@ -24,15 +23,6 @@ class PlaybackControllerState extends State<PlaybackController> {
   setBpm(int newBpm) async {
     await Provider.of<AppState>(context, listen: false).setBpm(newBpm);
     await Audio.setBpm(newBpm);
-  }
-
-  sendFeedback() {
-    print("Sent feedback \"$feedback\"");
-    Navigator.pop(context);
-  }
-
-  setFeedback(String feedback) {
-    this.feedback = feedback;
   }
 
   togglePlayback() {
@@ -60,8 +50,9 @@ class PlaybackControllerState extends State<PlaybackController> {
                     color: Theme.of(context).colorScheme.primary,
                     size: 35,
                   ),
-                  onPressed: () =>
-                      setBpm(Provider.of<AppState>(context, listen: false).getBpm() - 1),
+                  onPressed: () => setBpm(
+                      Provider.of<AppState>(context, listen: false).getBpm() -
+                          1),
                 ),
                 Container(
                     padding: EdgeInsets.all(8.0),
@@ -82,8 +73,9 @@ class PlaybackControllerState extends State<PlaybackController> {
                 PlatformIconButton(
                     icon: Icon(PlatformIcons(context).add,
                         color: Theme.of(context).colorScheme.primary, size: 35),
-                    onPressed: () =>
-                        setBpm(Provider.of<AppState>(context, listen: false).getBpm() + 1)),
+                    onPressed: () => setBpm(
+                        Provider.of<AppState>(context, listen: false).getBpm() +
+                            1)),
               ],
             ),
           ),
@@ -132,15 +124,6 @@ class PlaybackControllerState extends State<PlaybackController> {
                                         builder: (BuildContext context) =>
                                             Settings());
                                   }),
-                              PlatformIconButton(
-                                  icon: Icon(
-                                    PlatformIcons(context).help,
-                                    size: 40,
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
-                                  ),
-                                  onPressed: () => showFeedbackDialog(
-                                      context, setFeedback, sendFeedback)),
                             ]),
                       ),
                     ],
@@ -151,30 +134,4 @@ class PlaybackControllerState extends State<PlaybackController> {
       );
     });
   }
-}
-
-showFeedbackDialog(BuildContext context, Function setFeedbackCallback,
-    Function sendFeedbackCallback) {
-  showPlatformDialog(
-      context: context,
-      builder: (context) => PlatformAlertDialog(
-              title: Text("Feedback Form"),
-              content: Padding(
-                  padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
-                  child: PlatformTextField(
-                    hintText: "Issues, feature requests, ...",
-                    onChanged: (text) => setFeedbackCallback(text),
-                  )),
-              actions: [
-                PlatformDialogAction(
-                    child: Text("Close"),
-                    onPressed: () => Navigator.pop(context),
-                    cupertino: (context, platform) =>
-                        CupertinoDialogActionData(isDestructiveAction: true)),
-                PlatformDialogAction(
-                    child: Text("Submit"),
-                    onPressed: () => sendFeedbackCallback(),
-                    cupertino: (context, platform) =>
-                        CupertinoDialogActionData(isDefaultAction: true))
-              ]));
 }

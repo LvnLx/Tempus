@@ -3,18 +3,26 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tempus/audio.dart';
 
-enum Preference { bpm, downbeatSample, subdivisionSample, themeMode, volume }
+enum Preference {
+  bpm(true),
+  downbeatSample(false),
+  subdivisionSample(false),
+  themeMode(false),
+  volume(true);
+
+  final bool isMetronomeSetting;
+  const Preference(this.isMetronomeSetting);
+}
 
 class AppState extends ChangeNotifier {
-
   final SharedPreferencesAsync _sharedPreferencesAsync =
       SharedPreferencesAsync();
 
-  int _bpm = 120;
+  late int _bpm;
   late String _downbeatSampleName;
   late String _subdivisionSampleName;
-  ThemeMode _themeMode = ThemeMode.system;
-  double _volume = 1.0;
+  late ThemeMode _themeMode;
+  late double _volume;
 
   int getBpm() {
     return _bpm;
@@ -97,11 +105,12 @@ class AppState extends ChangeNotifier {
         .map((string) => string.split("/").last.split(".").first)
         .toSet();
 
-    _bpm = await _sharedPreferencesAsync.getInt(Preference.bpm.name) ?? _bpm;
+    _bpm = await _sharedPreferencesAsync.getInt(Preference.bpm.name) ??
+        Defaults.bpm;
     _themeMode = await _getOrElse<ThemeMode>(
         Preference.themeMode.name,
         ThemeMode.values,
-        _themeMode.toString(),
+        Defaults.themeMode.toString(),
         (themeMode) => themeMode.toString());
     _downbeatSampleName = await _getOrElse<String>(
         Preference.downbeatSample.name,
@@ -114,12 +123,25 @@ class AppState extends ChangeNotifier {
         sampleNames.last,
         (subdivisionSampleName) => subdivisionSampleName);
     _volume = await _sharedPreferencesAsync.getDouble(Preference.volume.name) ??
-        _volume;
+        Defaults.volume;
 
     notifyListeners();
 
     Audio.setSampleNames(sampleNames);
     Audio.setState(_bpm, _downbeatSampleName, _subdivisionSampleName, _volume);
+  }
+
+  Future<void> resetMetronome() async {
+    _sharedPreferencesAsync.clear(
+        allowList: Set.from(Preference.values
+            .where((preference) => preference.isMetronomeSetting)
+            .map((preference) => preference.name)));
+    await loadPreferences();
+  }
+
+  Future<void> resetApp() async {
+    _sharedPreferencesAsync.clear();
+    await loadPreferences();
   }
 
   Future<T> _getOrElse<T>(
@@ -131,4 +153,10 @@ class AppState extends ChangeNotifier {
     String value = await _sharedPreferencesAsync.getString(key) ?? defaultValue;
     return possibleValues.firstWhere((element) => comparator(element) == value);
   }
+}
+
+class Defaults {
+  static const int bpm = 120;
+  static const ThemeMode themeMode = ThemeMode.system;
+  static const double volume = 1.0;
 }

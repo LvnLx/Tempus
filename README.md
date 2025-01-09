@@ -20,9 +20,11 @@ Current implementation is for iOS (Swift) and Android (C++/Kotlin).
   - [x] Playback Controller
   - [x] Subdivision Controller
   - [ ] Settings
-    - [ ] Sample selection
+    - [ ] Feedback
+    - [x] Sample selection
+    - [ ] Persistence
+    - [x] Reset options
     - [x] Theme selection
-    - [x] Persistence
 - [x] Native Implementations
   - [x] iOS
     - [x] Method channels

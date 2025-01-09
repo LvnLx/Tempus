@@ -7,8 +7,24 @@ import 'package:tempus/settings/sample_settings.dart';
 import 'package:tempus/settings/theme_settings.dart';
 import 'package:tempus/util.dart';
 
-class Settings extends StatelessWidget {
+class Settings extends StatefulWidget {
   Settings({super.key});
+
+  @override
+  State<Settings> createState() => _SettingsState();
+}
+
+class _SettingsState extends State<Settings> {
+  String feedback = "";
+
+  sendFeedback() {
+    print("Sent feedback \"$feedback\"");
+    Navigator.pop(context);
+  }
+
+  setFeedback(String feedback) {
+    this.feedback = feedback;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,15 +54,21 @@ class Settings extends StatelessWidget {
                 title: Text("Downbeat sample"),
                 value: Text(capitalizeFirst(
                     Provider.of<AppState>(context).getDownbeatSampleName())),
-                onPressed: (context) => Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SampleSettings(sampleSetting: SampleSetting.downbeat))),
+                onPressed: (context) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SampleSettings(
+                            sampleSetting: SampleSetting.downbeat))),
               ),
               SettingsTile.navigation(
-                  title: Text("Subdivision sample"),
-                  value: Text(capitalizeFirst(
-                      Provider.of<AppState>(context).getSubdivisionSampleName())),
-                onPressed: (context) => Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SampleSettings(sampleSetting: SampleSetting.subdivision))),
+                title: Text("Subdivision sample"),
+                value: Text(capitalizeFirst(
+                    Provider.of<AppState>(context).getSubdivisionSampleName())),
+                onPressed: (context) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SampleSettings(
+                            sampleSetting: SampleSetting.subdivision))),
               )
             ],
           ),
@@ -58,11 +80,82 @@ class Settings extends StatelessWidget {
               onPressed: (context) => Navigator.push(context,
                   MaterialPageRoute(builder: (context) => ThemeSettings())),
             )
+          ]),
+          SettingsSection(title: Text("Other"), tiles: [
+            SettingsTile(
+                title: Text("Feedback"),
+                onPressed: (context) =>
+                    showFeedbackDialog(context, setFeedback, sendFeedback)),
+            SettingsTile(
+                title: Text("Reset metronome"),
+                onPressed: (context) => showResetDialog(
+                    context,
+                    "Reset metronome?",
+                    "This will reset the BPM & volume of the downbeat",
+                    Provider.of<AppState>(context, listen: false)
+                        .resetMetronome)),
+            SettingsTile(
+                title: Text("Reset app"),
+                onPressed: (context) => showResetDialog(
+                    context,
+                    "Reset app?",
+                    "This will reset the app to it's default state",
+                    Provider.of<AppState>(context, listen: false).resetApp))
           ])
         ],
       ),
     );
   }
+}
+
+showFeedbackDialog(BuildContext context, Function setFeedbackCallback,
+    Function sendFeedbackCallback) {
+  showPlatformDialog(
+      context: context,
+      builder: (context) => PlatformAlertDialog(
+              title: Text("Feedback Form"),
+              content: Padding(
+                  padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
+                  child: PlatformTextField(
+                    hintText: "Issues, feature requests, ...",
+                    onChanged: (text) => setFeedbackCallback(text),
+                  )),
+              actions: [
+                PlatformDialogAction(
+                    child: Text("Cancel"),
+                    onPressed: () => Navigator.pop(context),
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDestructiveAction: true)),
+                PlatformDialogAction(
+                    child: Text("Submit"),
+                    onPressed: () => sendFeedbackCallback(),
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDefaultAction: true))
+              ]));
+}
+
+showResetDialog(BuildContext context, String title, String content,
+    Function resetCallback) {
+  showPlatformDialog(
+      context: context,
+      builder: (context) => PlatformAlertDialog(
+              title: Text(title),
+              content: Text(content),
+              actions: [
+                PlatformDialogAction(
+                    child: Text("Cancel"),
+                    onPressed: () => Navigator.pop(context),
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDestructiveAction: true)),
+                PlatformDialogAction(
+                    child: Text("Ok"),
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      await resetCallback();
+                    },
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDefaultAction: true))
+              ]));
 }
 
 SettingsThemeData getSettingsThemeData(context) {
