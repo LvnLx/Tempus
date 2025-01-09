@@ -5,6 +5,7 @@
 class Subdivision {
 public:
     Subdivision(int option, float volume);
+
     virtual ~Subdivision() = default;
 
     int option;

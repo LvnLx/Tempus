@@ -15,8 +15,6 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
 
         val fileHandler = FileHandler(assets)
-        loadAudioFrames("downbeat", fileHandler.loadAudioFrames("downbeat"))
-        loadAudioFrames("subdivision", fileHandler.loadAudioFrames("subdivision"))
 
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger, "audio"
@@ -46,6 +44,29 @@ class MainActivity : FlutterActivity() {
                         val bpm: Int = arguments[0].toInt()
                         setBpm(bpm)
                         result.success("Set BPM")
+                    }
+
+                    "setSample" -> {
+                        val isDownbeat: Boolean = arguments[0].toBoolean()
+                        val sampleName: String = arguments[1]
+                        setSample(isDownbeat, sampleName)
+                        result.success("Set sample")
+                    }
+
+                    "setSampleNames" -> {
+                        for (sampleName in arguments) {
+                            loadAudioFrames(sampleName, fileHandler.loadAudioFrames(sampleName))
+                        }
+                        result.success("Set sample names")
+                    }
+
+                    "setState" -> {
+                        val bpm: Int = arguments[0].toInt()
+                        val downbeatSampleName: String = arguments[1]
+                        val subdivisionSampleName: String = arguments[2]
+                        val volume: Float = arguments[3].toFloat()
+                        setState(bpm, downbeatSampleName, subdivisionSampleName, volume)
+                        result.success("Set state")
                     }
 
                     "setSubdivisionOption" -> {
@@ -90,6 +111,11 @@ class MainActivity : FlutterActivity() {
     private external fun loadAudioFrames(fileName: String, audioFrames: FloatArray)
     private external fun removeSubdivision(key: String)
     private external fun setBpm(bpm: Int)
+    private external fun setSample(isDownbeat: Boolean, sampleName: String)
+    private external fun setState(
+        bpm: Int, downbeatSampleName: String, subdivisionSampleName: String, volume: Float
+    )
+
     private external fun setSubdivisionOption(key: String, option: Int)
     private external fun setSubdivisionVolume(key: String, volume: Float)
     private external fun setVolume(volume: Float)

@@ -6,7 +6,8 @@
 
 class Clip {
 public:
-    Clip(const Sample& sample, int startFrame, float volume);
+    Clip(const Sample &sample, int startFrame, float volume);
+
     virtual ~Clip() = default;
 
     bool isPlaying = false;

@@ -7,7 +7,9 @@
 class Sample {
 public:
     Sample() = default;
-    Sample(const std::vector<float>& data, int length);
+
+    Sample(const std::vector<float> &data, int length);
+
     virtual ~Sample() = default;
 
     std::vector<float> data;

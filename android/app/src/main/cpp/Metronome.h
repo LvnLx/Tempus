@@ -13,17 +13,31 @@
 class Metronome : public oboe::AudioStreamDataCallback {
 public:
     Metronome();
+
     ~Metronome() override = default;
 
     std::unordered_map<std::string, Sample> audioFrames;
 
-    void addSubdivision(const std::string& key, int option, float volume);
-    void removeSubdivision(const std::string& key);
+    void addSubdivision(const std::string &key, int option, float volume);
+
+    void removeSubdivision(const std::string &key);
+
     void setBpm(int bpm);
-    void setSubdivisionOption(const std::string& key, int option);
-    void setSubdivisionVolume(const std::string& key, float volume);
+
+    void setSample(bool isDownbeat, const std::string &sampleName);
+
+    void setState(int bpm, const std::string &downbeatSampleName,
+                  const std::string &subdivisionSampleName,
+                  float volume);
+
+    void setSubdivisionOption(const std::string &key, int option);
+
+    void setSubdivisionVolume(const std::string &key, float volume);
+
     void setVolume(float volume);
+
     void startPlayback();
+
     void stopPlayback();
 
 private:
@@ -31,13 +45,17 @@ private:
 
     std::shared_ptr<oboe::AudioStream> audioStream;
     std::vector<Clip> clips;
+    Sample *downbeatSample{};
     std::mutex mutex;
     int nextFrame = 0;
     std::unordered_map<std::string, Subdivision> subdivisions;
+    Sample *subdivisionSample{};
     int validFrameCount{};
     float volume{};
 
-    oboe::DataCallbackResult onAudioReady(oboe::AudioStream* oboeAudioStream, void* audioData, int numFrames) override;
+    oboe::DataCallbackResult
+    onAudioReady(oboe::AudioStream *oboeAudioStream, void *audioData, int numFrames) override;
+
     void updateClips();
 };
 
