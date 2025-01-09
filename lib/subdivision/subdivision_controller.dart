@@ -16,12 +16,14 @@ class SubdivisionControllerState extends State<SubdivisionController> {
   final Map<Key, Subdivision> subdivisions = <Key, Subdivision>{};
   final ScrollController scrollController = ScrollController();
 
-  late IconData volumeIcon;
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override // Instead of initState, since we need access to context
   void didChangeDependencies() {
     super.didChangeDependencies();
-    setVolume(context, Provider.of<AppState>(context, listen: false).getVolume());
   }
 
   void addSubdivision() {
@@ -45,17 +47,6 @@ class SubdivisionControllerState extends State<SubdivisionController> {
   void setVolume(BuildContext context, double newVolume,
       [bool useThrottling = true]) async {
     await Provider.of<AppState>(context, listen: false).setVolume(newVolume);
-    setState(() {
-      if (newVolume > 0.66) {
-        volumeIcon = PlatformIcons(context).volumeUp;
-      } else if (newVolume > 0.33) {
-        volumeIcon = PlatformIcons(context).volumeDown;
-      } else if (newVolume > 0.0) {
-        volumeIcon = PlatformIcons(context).volumeMute;
-      } else {
-        volumeIcon = PlatformIcons(context).volumeOff;
-      }
-    });
     Audio.setVolume(newVolume, useThrottling);
   }
 
@@ -82,14 +73,14 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                         onChanged: (double value) => setVolume(context, value),
                         onChangeEnd: (double value) =>
                             setVolume(context, value, false),
-                        value: Provider.of<AppState>(context, listen: false).getVolume(),
+                        value: Provider.of<AppState>(context).getVolume(),
                       ),
                     )),
                     SizedBox(
                       child: Center(
                         child: PlatformIconButton(
                             icon: Icon(
-                          volumeIcon,
+                          volumeIcon(),
                           size: 35,
                           color: Theme.of(context).colorScheme.primary,
                         )),
@@ -115,5 +106,18 @@ class SubdivisionControllerState extends State<SubdivisionController> {
         ),
       ),
     );
+  }
+
+  IconData volumeIcon() {
+    double volume = Provider.of<AppState>(context).getVolume();
+    if (volume > 0.66) {
+      return PlatformIcons(context).volumeUp;
+    } else if (volume > 0.33) {
+      return PlatformIcons(context).volumeDown;
+    } else if (volume > 0.0) {
+      return PlatformIcons(context).volumeMute;
+    } else {
+      return PlatformIcons(context).volumeOff;
+    }
   }
 }

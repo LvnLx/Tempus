@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tempus/audio.dart';
 
 enum Preference { bpm, downbeatSample, subdivisionSample, themeMode, volume }
 
 class AppState extends ChangeNotifier {
+
   final SharedPreferencesAsync _sharedPreferencesAsync =
       SharedPreferencesAsync();
 
   int _bpm = 120;
-  Sample _downbeatSample = Sample.downbeat;
-  Sample _subdivisionSample = Sample.subdivision;
+  late String _downbeatSampleName;
+  late String _subdivisionSampleName;
   ThemeMode _themeMode = ThemeMode.system;
   double _volume = 1.0;
 
@@ -18,12 +20,12 @@ class AppState extends ChangeNotifier {
     return _bpm;
   }
 
-  Sample getDownbeatSample() {
-    return _downbeatSample;
+  String getDownbeatSampleName() {
+    return _downbeatSampleName;
   }
 
-  Sample getSubdivisionSample() {
-    return _subdivisionSample;
+  String getSubdivisionSampleName() {
+    return _subdivisionSampleName;
   }
 
   ThemeMode getThemeMode() {
@@ -44,30 +46,30 @@ class AppState extends ChangeNotifier {
     await _sharedPreferencesAsync.setInt(Preference.bpm.name, validatedBpm);
   }
 
-  Future<void> setDownbeatSample(Sample sample) async {
-    if (!Sample.values.contains(sample)) {
-      throw ArgumentError.value(sample);
+  Future<void> setDownbeatSampleName(String sampleName) async {
+    if (!sampleNames.contains(sampleName)) {
+      throw ArgumentError.value(sampleName);
     }
 
-    _downbeatSample = sample;
+    _downbeatSampleName = sampleName;
 
     notifyListeners();
 
     await _sharedPreferencesAsync.setString(
-        Preference.downbeatSample.name, sample.name);
+        Preference.downbeatSample.name, sampleName);
   }
 
-  Future<void> setSubdivisionSample(Sample sample) async {
-    if (!Sample.values.contains(sample)) {
-      throw ArgumentError.value(sample);
+  Future<void> setSubdivisionSampleName(String sampleName) async {
+    if (!sampleNames.contains(sampleName)) {
+      throw ArgumentError.value(sampleName);
     }
 
-    _subdivisionSample = sample;
+    _subdivisionSampleName = sampleName;
 
     notifyListeners();
 
     await _sharedPreferencesAsync.setString(
-        Preference.subdivisionSample.name, sample.name);
+        Preference.subdivisionSample.name, sampleName);
   }
 
   Future<void> setThemeMode(ThemeMode themeMode) async {
@@ -88,33 +90,41 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> loadPreferences() async {
+    final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+    sampleNames = assetManifest
+        .listAssets()
+        .where((string) => string.startsWith("audio/"))
+        .map((string) => string.split("/").last.split(".").first)
+        .toSet();
+
     _bpm = await _sharedPreferencesAsync.getInt(Preference.bpm.name) ?? _bpm;
     _themeMode = await _getOrElse<ThemeMode>(
         Preference.themeMode.name,
         ThemeMode.values,
         _themeMode.toString(),
         (themeMode) => themeMode.toString());
-    _downbeatSample = await _getOrElse<Sample>(
+    _downbeatSampleName = await _getOrElse<String>(
         Preference.downbeatSample.name,
-        Sample.values,
-        _downbeatSample.name,
-        (downbeatSample) => downbeatSample.name);
-    _subdivisionSample = await _getOrElse<Sample>(
+        sampleNames,
+        sampleNames.first,
+        (downbeatSampleName) => downbeatSampleName);
+    _subdivisionSampleName = await _getOrElse<String>(
         Preference.subdivisionSample.name,
-        Sample.values,
-        _subdivisionSample.name,
-        (subdivisionSample) => subdivisionSample.name);
+        sampleNames,
+        sampleNames.last,
+        (subdivisionSampleName) => subdivisionSampleName);
     _volume = await _sharedPreferencesAsync.getDouble(Preference.volume.name) ??
         _volume;
 
     notifyListeners();
 
-    Audio.setState(_bpm, _downbeatSample, _subdivisionSample, _volume);
+    Audio.setSampleNames(sampleNames);
+    Audio.setState(_bpm, _downbeatSampleName, _subdivisionSampleName, _volume);
   }
 
   Future<T> _getOrElse<T>(
     String key,
-    List<T> possibleValues,
+    Iterable<T> possibleValues,
     String defaultValue,
     String Function(T) comparator,
   ) async {

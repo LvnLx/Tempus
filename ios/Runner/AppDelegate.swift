@@ -36,14 +36,19 @@ import AVFoundation
         let isDownbeat: Bool = Bool(arguments[0])!
         let sampleName: String = arguments[1]
         self.metronome.setSample(isDownbeat, sampleName)
-        result("Set Sample")
+        result("Set sample")
+      case "setSampleNames":
+        for sampleName in arguments {
+          loadAudioFile(sampleName, controller.lookupKey(forAsset: "audio/\(sampleName).wav"))
+        }
+        result("Set sample names")
       case "setState":
         let bpm: UInt16 = UInt16(arguments[0])!
         let downbeatSampleName: String = arguments[1]
         let subdivisionSampleName: String = arguments[2]
         let volume: Float = Float(arguments[3])!
         self.metronome.setState(bpm, downbeatSampleName, subdivisionSampleName, volume)
-        result("Set State")
+        result("Set state")
       case "setSubdivisionOption":
         let key: String = arguments[0]
         let option: Int = Int(arguments[1])!
@@ -74,9 +79,6 @@ import AVFoundation
     } catch {
       print("Failed to set AVAudioSession's shared instance category")
     }
-    
-    loadAudioFile("subdivision", controller.lookupKey(forAsset: "audio/subdivision.wav"))
-    loadAudioFile("downbeat", controller.lookupKey(forAsset: "audio/downbeat.wav"))
     
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

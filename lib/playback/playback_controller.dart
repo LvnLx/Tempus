@@ -24,7 +24,6 @@ class PlaybackControllerState extends State<PlaybackController> {
   setBpm(int newBpm) async {
     await Provider.of<AppState>(context, listen: false).setBpm(newBpm);
     await Audio.setBpm(newBpm);
-    setState(() {});
   }
 
   sendFeedback() {

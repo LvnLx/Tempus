@@ -37,14 +37,14 @@ class Settings extends StatelessWidget {
               SettingsTile.navigation(
                 title: Text("Downbeat sample"),
                 value: Text(capitalizeFirst(
-                    Provider.of<AppState>(context).getDownbeatSample().name)),
+                    Provider.of<AppState>(context).getDownbeatSampleName())),
                 onPressed: (context) => Navigator.push(context,
                     MaterialPageRoute(builder: (context) => SampleSettings(sampleSetting: SampleSetting.downbeat))),
               ),
               SettingsTile.navigation(
                   title: Text("Subdivision sample"),
                   value: Text(capitalizeFirst(
-                      Provider.of<AppState>(context).getSubdivisionSample().name)),
+                      Provider.of<AppState>(context).getSubdivisionSampleName())),
                 onPressed: (context) => Navigator.push(context,
                     MaterialPageRoute(builder: (context) => SampleSettings(sampleSetting: SampleSetting.subdivision))),
               )

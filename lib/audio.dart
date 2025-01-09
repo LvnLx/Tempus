@@ -8,6 +8,7 @@ enum Action {
   removeSubdivision,
   setBpm,
   setSample,
+  setSampleNames,
   setState,
   setSubdivisionOption,
   setSubdivisionVolume,
@@ -17,7 +18,7 @@ enum Action {
   writeBuffer
 }
 
-enum Sample { downbeat, subdivision }
+late Set<String> sampleNames;
 
 class Audio {
   static MethodChannel methodChannel = MethodChannel('audio');
@@ -54,18 +55,24 @@ class Audio {
     print(result);
   }
 
-  static Future<void> setSample(bool isDownbeat, Sample sample) async {
+  static Future<void> setSample(bool isDownbeat, String sampleName) async {
     final result = await methodChannel.invokeMethod(
-        Action.setSample.name, [isDownbeat.toString(), sample.name]);
+        Action.setSample.name, [isDownbeat.toString(), sampleName]);
     print(result);
   }
 
-  static Future<void> setState(int bpm, Sample downbeatSample,
-      Sample subdivisionSample, double volume) async {
+  static Future<void> setSampleNames(Set<String> sampleNames) async {
+    final result = await methodChannel.invokeMethod(
+        Action.setSampleNames.name, sampleNames.toList());
+    print(result);
+  }
+
+  static Future<void> setState(int bpm, String downbeatSampleName,
+      String subdivisionSampleName, double volume) async {
     final result = await methodChannel.invokeMethod(Action.setState.name, [
       bpm.toString(),
-      downbeatSample.name,
-      subdivisionSample.name,
+      downbeatSampleName,
+      subdivisionSampleName,
       volume.toString()
     ]);
     print(result);

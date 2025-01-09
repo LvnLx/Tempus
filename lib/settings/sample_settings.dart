@@ -34,14 +34,14 @@ class SampleSettings extends StatelessWidget {
           lightTheme: getSettingsThemeData(context),
           sections: [
             SettingsSection(
-              tiles: Sample.values
-                  .map((sample) => SettingsTile(
-                        title: Text(capitalizeFirst(sample.name)),
-                        trailing: sampleSetting.getSample(context) == sample
+              tiles: sampleNames
+                  .map((sampleName) => SettingsTile(
+                        title: Text(capitalizeFirst(sampleName)),
+                        trailing: sampleSetting.getSampleName(context) == sampleName
                             ? Icon(PlatformIcons(context).checkMark)
                             : null,
                         onPressed: (context) async =>
-                            sampleSetting.setSample(context, sample),
+                            sampleSetting.setSampleName(context, sampleName),
                       ))
                   .toList(),
             )
@@ -54,25 +54,25 @@ enum SampleSetting {
   downbeat,
   subdivision;
 
-  Sample getSample(BuildContext context) {
+  String getSampleName(BuildContext context) {
     final AppState provider = Provider.of<AppState>(context);
     switch (this) {
       case SampleSetting.downbeat:
-        return provider.getDownbeatSample();
+        return provider.getDownbeatSampleName();
       case SampleSetting.subdivision:
-        return provider.getSubdivisionSample();
+        return provider.getSubdivisionSampleName();
     }
   }
 
-  Future<void> setSample(BuildContext context, Sample sample) async {
+  Future<void> setSampleName(BuildContext context, String sampleName) async {
     final AppState provider = Provider.of<AppState>(context, listen: false);
     switch (this) {
       case SampleSetting.downbeat:
-        await provider.setDownbeatSample(sample);
-        await Audio.setSample(true, sample);
+        await provider.setDownbeatSampleName(sampleName);
+        await Audio.setSample(true, sampleName);
       case SampleSetting.subdivision:
-        await provider.setSubdivisionSample(sample);
-        await Audio.setSample(false, sample);
+        await provider.setSubdivisionSampleName(sampleName);
+        await Audio.setSample(false, sampleName);
     }
   }
 }
