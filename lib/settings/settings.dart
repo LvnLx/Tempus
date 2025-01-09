@@ -74,7 +74,7 @@ SettingsThemeData getSettingsThemeData(context) {
       settingsListBackground: Theme.of(context).colorScheme.surface,
       settingsSectionBackground: Theme.of(context).colorScheme.onSurface,
       settingsTileTextColor: Theme.of(context).colorScheme.primary,
-      tileDescriptionTextColor: Colors.yellow,
+      tileDescriptionTextColor: Theme.of(context).colorScheme.secondary,
       tileHighlightColor: Theme.of(context).colorScheme.secondary,
       titleTextColor: Theme.of(context).colorScheme.secondary,
       trailingTextColor: Theme.of(context).colorScheme.secondary);

@@ -22,72 +22,81 @@ class Main extends StatefulWidget {
 }
 
 class MainState extends State<Main> {
-
-  Future<void> initializeAppState() async {
-    try {
+  Future<void> initializeAppState() async =>
       await Provider.of<AppState>(context, listen: false).loadPreferences();
-    } catch (error) {
-      print(error);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: initializeAppState(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return PlatformProvider(
-              builder: (context) => PlatformTheme(
-                    themeMode: Provider.of<AppState>(context).getThemeMode(),
-                    materialDarkTheme: ThemeData(
-                        colorScheme: ColorScheme(
-                            brightness: Brightness.dark,
-                            primary: Colors.white,
-                            onPrimary: Color.fromRGBO(31, 31, 31, 1.0),
-                            secondary: Color.fromRGBO(112, 112, 112, 1.0),
-                            onSecondary: Colors.white,
-                            error: Colors.red,
-                            onError: Colors.white,
-                            surface: Color.fromRGBO(31, 31, 31, 1.0),
-                            onSurface: Color.fromRGBO(64, 64, 64, 1.0))),
-                    materialLightTheme: ThemeData(
-                        colorScheme: ColorScheme(
-                            brightness: Brightness.light,
-                            primary: Color.fromRGBO(31, 31, 31, 1.0),
-                            onPrimary: Colors.white,
-                            secondary: Color.fromRGBO(147, 147, 147, 1.0),
-                            onSecondary: Color.fromRGBO(31, 31, 31, 1.0),
-                            error: Colors.red,
-                            onError: Color.fromRGBO(31, 31, 31, 1.0),
-                            surface: Colors.white,
-                            onSurface: Color.fromRGBO(211, 211, 211, 1.0))),
-                    builder: (context) => PlatformApp(
-                        localizationsDelegates: <LocalizationsDelegate<
-                            dynamic>>[
-                          DefaultMaterialLocalizations.delegate,
-                          DefaultWidgetsLocalizations.delegate,
-                          DefaultCupertinoLocalizations.delegate,
-                        ],
-                        home: Container(
-                            color: Theme.of(context).colorScheme.surface,
-                            child: SafeArea(
-                                child: Flex(
-                              direction: Axis.vertical,
-                              children: [
-                                Expanded(child: SubdivisionController()),
-                                Divider(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface),
-                                Expanded(child: PlaybackController())
-                              ],
-                            )))),
-                  ));
-        } else {
-          return PlatformCircularProgressIndicator();
-        }
-      },
+    return Material(
+      child: FutureBuilder(
+        future: initializeAppState(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return PlatformProvider(
+                builder: (context) => PlatformTheme(
+                      themeMode: Provider.of<AppState>(context).getThemeMode(),
+                      materialDarkTheme: darkThemeData,
+                      materialLightTheme: lightThemeData,
+                      builder: (context) => PlatformApp(
+                          localizationsDelegates: <LocalizationsDelegate<
+                              dynamic>>[
+                            DefaultMaterialLocalizations.delegate,
+                            DefaultWidgetsLocalizations.delegate,
+                            DefaultCupertinoLocalizations.delegate,
+                          ],
+                          home: Container(
+                              color: Theme.of(context).colorScheme.surface,
+                              child: SafeArea(
+                                  child: Flex(
+                                direction: Axis.vertical,
+                                children: [
+                                  Expanded(child: SubdivisionController()),
+                                  Divider(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface),
+                                  Expanded(child: PlaybackController())
+                                ],
+                              )))),
+                    ));
+          } else {
+            return Card(
+                child: Center(
+                    child: SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: PlatformCircularProgressIndicator(
+                            material: (context, platform) =>
+                                MaterialProgressIndicatorData(
+                                    color:
+                                        lightThemeData.colorScheme.primary)))));
+          }
+        },
+      ),
     );
   }
 }
+
+final ThemeData lightThemeData = ThemeData(
+    colorScheme: ColorScheme(
+        brightness: Brightness.light,
+        primary: Color.fromRGBO(31, 31, 31, 1.0),
+        onPrimary: Colors.white,
+        secondary: Color.fromRGBO(147, 147, 147, 1.0),
+        onSecondary: Color.fromRGBO(31, 31, 31, 1.0),
+        error: Colors.red,
+        onError: Color.fromRGBO(31, 31, 31, 1.0),
+        surface: Colors.white,
+        onSurface: Color.fromRGBO(211, 211, 211, 1.0)));
+
+final ThemeData darkThemeData = ThemeData(
+    colorScheme: ColorScheme(
+        brightness: Brightness.dark,
+        primary: Colors.white,
+        onPrimary: Color.fromRGBO(31, 31, 31, 1.0),
+        secondary: Color.fromRGBO(112, 112, 112, 1.0),
+        onSecondary: Colors.white,
+        error: Colors.red,
+        onError: Colors.white,
+        surface: Color.fromRGBO(31, 31, 31, 1.0),
+        onSurface: Color.fromRGBO(64, 64, 64, 1.0)));
