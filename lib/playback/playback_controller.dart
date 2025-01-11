@@ -16,6 +16,12 @@ class PlaybackController extends StatefulWidget {
 class PlaybackControllerState extends State<PlaybackController> {
   bool playback = false;
 
+  @override
+  void initState() {
+    super.initState();
+    Audio.stopPlayback();
+  }
+
   onDialChanged(int change) {
     setBpm(Provider.of<AppState>(context, listen: false).getBpm() + change);
   }

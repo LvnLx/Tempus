@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "json.hpp"
 #include "Metronome.h"
 #include "Subdivision.h"
 
@@ -43,7 +44,8 @@ void Metronome::setSample(bool isDownbeat, const std::string &sampleName) {
 }
 
 void Metronome::setState(int bpm, const std::string &downbeatSampleName,
-                         const std::string &subdivisionSampleName, float updatedVolume) {
+                         const std::string &subdivisionSampleName,
+                         const std::string &subdivisionsAsJsonString, float updatedVolume) {
     double beatsPerSecond = bpm / (double) 60;
     double beatDurationSeconds = 1 / beatsPerSecond;
     validFrameCount = round( // NOLINT(cppcoreguidelines-narrowing-conversions)
@@ -51,6 +53,14 @@ void Metronome::setState(int bpm, const std::string &downbeatSampleName,
 
     downbeatSample = &audioFrames[downbeatSampleName];
     subdivisionSample = &audioFrames[subdivisionSampleName];
+
+    subdivisions.clear();
+    nlohmann::json subdivisionsAsJson = nlohmann::json::parse(subdivisionsAsJsonString);
+    for (auto &keyValuePair: subdivisionsAsJson.items()) {
+        int subdivisionOption = keyValuePair.value()["option"].get<int>();
+        float subdivisionVolume = keyValuePair.value()["volume"].get<float>();
+        subdivisions.emplace(keyValuePair.key(), Subdivision(subdivisionOption, subdivisionVolume));
+    }
 
     this->volume = updatedVolume;
 

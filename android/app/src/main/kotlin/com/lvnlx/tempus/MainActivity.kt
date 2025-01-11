@@ -64,8 +64,15 @@ class MainActivity : FlutterActivity() {
                         val bpm: Int = arguments[0].toInt()
                         val downbeatSampleName: String = arguments[1]
                         val subdivisionSampleName: String = arguments[2]
-                        val volume: Float = arguments[3].toFloat()
-                        setState(bpm, downbeatSampleName, subdivisionSampleName, volume)
+                        val subdivisionsAsJsonString: String = arguments[3]
+                        val volume: Float = arguments[4].toFloat()
+                        setState(
+                            bpm,
+                            downbeatSampleName,
+                            subdivisionSampleName,
+                            subdivisionsAsJsonString,
+                            volume
+                        )
                         result.success("Set state")
                     }
 
@@ -113,7 +120,11 @@ class MainActivity : FlutterActivity() {
     private external fun setBpm(bpm: Int)
     private external fun setSample(isDownbeat: Boolean, sampleName: String)
     private external fun setState(
-        bpm: Int, downbeatSampleName: String, subdivisionSampleName: String, volume: Float
+        bpm: Int,
+        downbeatSampleName: String,
+        subdivisionSampleName: String,
+        subdivisionsAsJsonString: String,
+        volume: Float
     )
 
     private external fun setSubdivisionOption(key: String, option: Int)

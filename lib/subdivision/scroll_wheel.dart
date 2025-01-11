@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:tempus/subdivision/subdivision.dart';
 
 class ScrollWheel extends StatefulWidget {
-  final Function(String) callback;
+  final int initialItem;
+  final Future<void> Function(int) callback;
 
-  ScrollWheel({super.key, required this.callback});
+  ScrollWheel({super.key, required this.initialItem, required this.callback});
 
   @override
   State<StatefulWidget> createState() => ScrollWheelState();
@@ -22,6 +23,8 @@ class ScrollWheelState extends State<ScrollWheel> {
     super.initState();
     _scrollController = FixedExtentScrollController();
     _scrollController.addListener(_handleScroll);
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _scrollController.jumpTo(widget.initialItem * itemHeight));
   }
 
   @override
@@ -43,7 +46,8 @@ class ScrollWheelState extends State<ScrollWheel> {
         controller: _scrollController,
         itemExtent: itemHeight,
         physics: FixedExtentScrollPhysics(),
-        onSelectedItemChanged: (int value) => {widget.callback(subdivisionOptions[value])},
+        onSelectedItemChanged: (int value) async =>
+            {await widget.callback(subdivisionOptions[value])},
         childDelegate: ListWheelChildBuilderDelegate(
           builder: (context, index) {
             final double scrollOffset = _scrollController.offset;
@@ -61,17 +65,21 @@ class ScrollWheelState extends State<ScrollWheel> {
             }(centerOffset.abs() + 25); // adjust as needed
 
             return AnimatedBuilder(
-              animation: _scrollController,
-              builder: (context, child) {
-                // return Text('offset: $centerOffset,  opacity: $itemOpacity');
-                return Transform.scale(
-                  scale: (enteringScale + exitingScale)
-                      .clamp(0.6, 1.0), // Adjust the range as needed
-                  child: Opacity(opacity: itemOpacity, child: child),
-                );
-              },
-              child: Text(subdivisionOptions[index], style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 35),)
-            );
+                animation: _scrollController,
+                builder: (context, child) {
+                  // return Text('offset: $centerOffset,  opacity: $itemOpacity');
+                  return Transform.scale(
+                    scale: (enteringScale + exitingScale)
+                        .clamp(0.6, 1.0), // Adjust the range as needed
+                    child: Opacity(opacity: itemOpacity, child: child),
+                  );
+                },
+                child: Text(
+                  subdivisionOptions[index].toString(),
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 35),
+                ));
           },
           childCount: itemCount,
         ),

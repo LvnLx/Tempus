@@ -36,10 +36,9 @@ class Audio {
     }
   }
 
-  static Future<void> addSubdivision(
-      Key key, String subdivisionOption, double volume) async {
+  static Future<void> addSubdivision(Key key, int option, double volume) async {
     final result = await methodChannel.invokeMethod(Action.addSubdivision.name,
-        [key.toString(), subdivisionOption, volume.toString()]);
+        [key.toString(), option.toString(), volume.toString()]);
     print(result);
   }
 
@@ -67,21 +66,25 @@ class Audio {
     print(result);
   }
 
-  static Future<void> setState(int bpm, String downbeatSampleName,
-      String subdivisionSampleName, double volume) async {
+  static Future<void> setState(
+      int bpm,
+      String downbeatSampleName,
+      String subdivisionSampleName,
+      String subdivisionsAsJsonString,
+      double volume) async {
     final result = await methodChannel.invokeMethod(Action.setState.name, [
       bpm.toString(),
       downbeatSampleName,
       subdivisionSampleName,
+      subdivisionsAsJsonString,
       volume.toString()
     ]);
     print(result);
   }
 
-  static Future<void> setSubdivisionOption(
-      Key key, String subdivisionOption) async {
+  static Future<void> setSubdivisionOption(Key key, int option) async {
     final result = await methodChannel.invokeMethod(
-        Action.setSubdivisionOption.name, [key.toString(), subdivisionOption]);
+        Action.setSubdivisionOption.name, [key.toString(), option.toString()]);
     print(result);
   }
 

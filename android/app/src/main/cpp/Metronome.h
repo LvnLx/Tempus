@@ -27,6 +27,7 @@ public:
     void setSample(bool isDownbeat, const std::string &sampleName);
 
     void setState(int bpm, const std::string &downbeatSampleName,
+                  const std::string &subdivisionsAsJsonString,
                   const std::string &subdivisionSampleName,
                   float volume);
 

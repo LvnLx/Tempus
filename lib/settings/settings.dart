@@ -91,7 +91,7 @@ class _SettingsState extends State<Settings> {
                 onPressed: (context) => showResetDialog(
                     context,
                     "Reset metronome?",
-                    "This will reset the BPM & volume of the downbeat",
+                    "The BPM and volume of the downbeat will be reset to their default values, and all subdivisions will be removed",
                     Provider.of<AppState>(context, listen: false)
                         .resetMetronome)),
             SettingsTile(
@@ -99,7 +99,7 @@ class _SettingsState extends State<Settings> {
                 onPressed: (context) => showResetDialog(
                     context,
                     "Reset app?",
-                    "This will reset the app to it's default state",
+                    "The app will revert to it's original state, with all default values",
                     Provider.of<AppState>(context, listen: false).resetApp))
           ])
         ],
@@ -146,7 +146,7 @@ showResetDialog(BuildContext context, String title, String content,
                     child: Text("Cancel"),
                     onPressed: () => Navigator.pop(context),
                     cupertino: (context, platform) =>
-                        CupertinoDialogActionData(isDestructiveAction: true)),
+                        CupertinoDialogActionData(isDefaultAction: true)),
                 PlatformDialogAction(
                     child: Text("Ok"),
                     onPressed: () async {
@@ -154,7 +154,7 @@ showResetDialog(BuildContext context, String title, String content,
                       await resetCallback();
                     },
                     cupertino: (context, platform) =>
-                        CupertinoDialogActionData(isDefaultAction: true))
+                        CupertinoDialogActionData(isDestructiveAction: true))
               ]));
 }
 

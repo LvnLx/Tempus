@@ -13,7 +13,6 @@ class SubdivisionController extends StatefulWidget {
 }
 
 class SubdivisionControllerState extends State<SubdivisionController> {
-  final Map<Key, Subdivision> subdivisions = <Key, Subdivision>{};
   final ScrollController scrollController = ScrollController();
 
   @override
@@ -26,21 +25,24 @@ class SubdivisionControllerState extends State<SubdivisionController> {
     super.didChangeDependencies();
   }
 
-  void addSubdivision() {
+  Future<void> addSubdivision() async {
     var key = UniqueKey();
-    var subdivision =
-        Subdivision(key: key, onRemove: (Key key) => removeSubdivison(key));
-    setState(() {
-      subdivisions[key] = subdivision;
-    });
-    Audio.addSubdivision(key, subdivision.getSubdivisionOption(),
-        subdivision.getSubdivisionVolume());
+    Map<Key, SubdivisionData> subdivisions =
+        Provider.of<AppState>(context, listen: false).getSubdivisions();
+    subdivisions = {
+      ...subdivisions,
+      key: SubdivisionData(option: subdivisionOptions[0], volume: 0.0)
+    };
+    await Provider.of<AppState>(context, listen: false)
+        .setSubdivisions(subdivisions);
+    Audio.addSubdivision(
+        key, subdivisions[key]!.option, subdivisions[key]!.volume);
   }
 
-  void removeSubdivison(Key key) {
-    setState(() {
-      subdivisions.remove(key);
-    });
+  Future<void> removeSubdivison(Key key) async {
+    await Provider.of<AppState>(context, listen: false).setSubdivisions({
+      ...Provider.of<AppState>(context, listen: false).getSubdivisions()
+    }..remove(key));
     Audio.removeSubdivision(key);
   }
 
@@ -89,11 +91,18 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                   ],
                 ),
               ),
-              ...subdivisions.values,
+              ...(Provider.of<AppState>(context)
+                  .getSubdivisions()
+                  .keys
+                  .map((key) => Subdivision(
+                      key: key,
+                      onRemove: (Key key) async => await removeSubdivison(key)))
+                  .toList()),
               VerticalDivider(
                 color: Theme.of(context).colorScheme.onSurface,
               ),
-              if (subdivisions.length <= subdivisionOptions.length)
+              if (Provider.of<AppState>(context).getSubdivisions().length <=
+                  subdivisionOptions.length)
                 PlatformIconButton(
                     onPressed: addSubdivision,
                     icon: Icon(

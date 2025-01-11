@@ -1,54 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:provider/provider.dart';
+import 'package:tempus/app_state.dart';
 import 'package:tempus/audio.dart';
 import 'package:tempus/subdivision/scroll_wheel.dart';
 
-typedef SubdivisionCallback = void Function(Key key);
-
-List<String> subdivisionOptions = List.generate(8, (index) => (index + 2).toString());
+final List<int> subdivisionOptions = List.generate(8, (index) => (index + 2));
 
 class Subdivision extends StatefulWidget {
-  final SubdivisionCallback onRemove;
+  final void Function(Key key) onRemove;
 
   Subdivision({required Key key, required this.onRemove}) : super(key: key);
 
   @override
   SubdivisionState createState() => SubdivisionState();
-
-  String getSubdivisionOption() {
-    final SubdivisionState subdivisionState = SubdivisionState();
-    return subdivisionState.option;
-  }
-
-  double getSubdivisionVolume() {
-    final SubdivisionState subdivisionState = SubdivisionState();
-    return subdivisionState.volume;
-  }
 }
 
 class SubdivisionState extends State<Subdivision> {
-  double volume = 0.0;
-  String option = subdivisionOptions[0];
+  late Key key;
   PageController scrollController = PageController(viewportFraction: 0.5);
 
-  void setOption(String newOption) {
-    setState(() {
-      option = newOption;
-    });
-    Audio.setSubdivisionOption(widget.key!, newOption);
+  Future<void> setOption(int option) async {
+    await Provider.of<AppState>(context, listen: false).setSubdivisions({
+      ...Provider.of<AppState>(context, listen: false).getSubdivisions()
+    }..update(
+        key,
+        (subdivisionData) =>
+            SubdivisionData(option: option, volume: subdivisionData.volume)));
+    Audio.setSubdivisionOption(widget.key!, option);
   }
 
-  void setVolume(double newVolume, [bool useThrottling = true]) {
-    setState(() {
-      volume = newVolume;
-    });
-    Audio.setSubdivisionVolume(widget.key!, newVolume, useThrottling);
+  Future<void> setVolume(double volume, [bool useThrottling = true]) async {
+    await Provider.of<AppState>(context, listen: false).setSubdivisions({
+      ...Provider.of<AppState>(context, listen: false).getSubdivisions()
+    }..update(
+        key,
+        (subdivisionData) =>
+            SubdivisionData(option: subdivisionData.option, volume: volume)));
+    Audio.setSubdivisionVolume(widget.key!, volume, useThrottling);
   }
 
   @override
   void initState() {
     super.initState();
 
+    key = widget.key!;
     scrollController.addListener(() {
       if (scrollController.position.isScrollingNotifier.value == false) {
         final int currentPage = scrollController.page!.round();
@@ -76,19 +72,43 @@ class SubdivisionState extends State<Subdivision> {
                     quarterTurns: 3,
                     child: PlatformSlider(
                       activeColor: Theme.of(context).colorScheme.primary,
-                      onChanged: (double value) => setVolume(value),
-                      onChangeEnd: (double value) => setVolume(value, false),
-                      value: volume,
+                      onChanged: (double value) async => await setVolume(value),
+                      onChangeEnd: (double value) async =>
+                          await setVolume(value, false),
+                      value: Provider.of<AppState>(context)
+                          .getSubdivisions()[key]!
+                          .volume,
                     ))),
-            SizedBox(width: 50, height: 120, child: ScrollWheel(callback: setOption)),
+            SizedBox(
+                width: 50,
+                height: 120,
+                child: ScrollWheel(
+                    initialItem: Provider.of<AppState>(context, listen: false)
+                            .getSubdivisions()[key]!
+                            .option -
+                        2,
+                    callback: setOption)),
             SizedBox(
               child: PlatformIconButton(
                   onPressed: () => widget.onRemove(widget.key!),
-                  icon: Icon(PlatformIcons(context).clear, color: Theme.of(context).colorScheme.error, size: 35)),
+                  icon: Icon(PlatformIcons(context).clear,
+                      color: Theme.of(context).colorScheme.error, size: 35)),
             )
           ]),
         ),
       ],
     );
   }
+}
+
+class SubdivisionData {
+  int option;
+  double volume;
+
+  SubdivisionData({required this.option, required this.volume});
+
+  Map<String, dynamic> toJson() => {"option": option, "volume": volume};
+
+  static SubdivisionData fromJson(Map<String, dynamic> json) =>
+      SubdivisionData(option: json["option"], volume: json["volume"]);
 }

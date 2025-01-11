@@ -129,13 +129,20 @@ class Metronome {
     updateClips()
   }
   
-  func setState(_ bpm: UInt16, _ downbeatSampleName: String, _ subdivisionSampleName: String, _ volume: Float) {
+  func setState(_ bpm: UInt16, _ downbeatSampleName: String, _ subdivisionSampleName: String, _ subdivisionsAsJsonString: String, _ volume: Float) {
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
     validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
     
     downbeatSample = samples[downbeatSampleName]!
     subdivisionSample = samples[subdivisionSampleName]!
+    
+    subdivisions.removeAll()
+    let subdivisionsAsData: Data? = subdivisionsAsJsonString.data(using: .utf8)
+    let subdivisionsAsJson: [String: [String: Any]] = try! JSONSerialization.jsonObject(with: subdivisionsAsData!) as! [String: [String: Any]]
+    for (key, fields) in subdivisionsAsJson {
+      subdivisions[key] = Subdivision(fields["option"] as! Int, Float(fields["volume"] as! Double))
+    }
     
     self.volume = volume
     

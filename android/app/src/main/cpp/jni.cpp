@@ -30,9 +30,13 @@ Java_com_lvnlx_tempus_MainActivity_setSample(JNIEnv *env, jobject, jboolean isDo
 JNIEXPORT void JNICALL
 Java_com_lvnlx_tempus_MainActivity_setState(JNIEnv *env, jobject, jint bpm,
                                             jstring downbeatSampleName,
-                                            jstring subdivisionSampleName, jfloat volume) {
+                                            jstring subdivisionSampleName,
+                                            jstring subdivisionsAsJsonString,
+                                            jfloat volume) {
     metronome.setState(bpm, env->GetStringUTFChars(downbeatSampleName, nullptr),
                        env->GetStringUTFChars(subdivisionSampleName,
+                                              nullptr),
+                       env->GetStringUTFChars(subdivisionsAsJsonString,
                                               nullptr), volume);
 }
 
