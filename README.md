@@ -22,7 +22,7 @@ Current implementation is for iOS (Swift) and Android (C++/Kotlin).
   - [ ] Settings
     - [ ] Feedback
     - [x] Sample selection
-    - [ ] Persistence
+    - [x] Persistence
     - [x] Reset options
     - [x] Theme selection
 - [x] Native Implementations
