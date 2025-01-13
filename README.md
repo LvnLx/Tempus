@@ -19,8 +19,8 @@ Current implementation is for iOS (Swift) and Android (C++/Kotlin).
 - [x] UI
   - [x] Playback Controller
   - [x] Subdivision Controller
-  - [ ] Settings
-    - [ ] Feedback
+  - [x] Settings
+    - [x] Feedback
     - [x] Sample selection
     - [x] Persistence
     - [x] Reset options
