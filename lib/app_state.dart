@@ -69,8 +69,6 @@ class AppState extends ChangeNotifier {
 
     notifyListeners();
 
-    print(_getJsonEncodedSubdivisions());
-
     await _sharedPreferencesAsync.setString(
         Preference.subdivisions.name, _getJsonEncodedSubdivisions());
   }

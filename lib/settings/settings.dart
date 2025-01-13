@@ -6,6 +6,9 @@ import 'package:tempus/app_state.dart';
 import 'package:tempus/settings/sample_settings.dart';
 import 'package:tempus/settings/theme_settings.dart';
 import 'package:tempus/util.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+Uri _emailUri = Uri.parse("mailto:noreply.lvnlx@gmail.com?subject=Tempus%20Feedback");
 
 class Settings extends StatefulWidget {
   Settings({super.key});
@@ -15,17 +18,6 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  String feedback = "";
-
-  sendFeedback() {
-    print("Sent feedback \"$feedback\"");
-    Navigator.pop(context);
-  }
-
-  setFeedback(String feedback) {
-    this.feedback = feedback;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,11 +76,10 @@ class _SettingsState extends State<Settings> {
           SettingsSection(title: Text("Other"), tiles: [
             SettingsTile(
                 title: Text("Feedback"),
-                onPressed: (context) =>
-                    showFeedbackDialog(context, setFeedback, sendFeedback)),
+                onPressed: (context) async => await _showEmail()),
             SettingsTile(
                 title: Text("Reset metronome"),
-                onPressed: (context) => showResetDialog(
+                onPressed: (context) => _showResetDialog(
                     context,
                     "Reset metronome?",
                     "The BPM and volume of the downbeat will be reset to their default values, and all subdivisions will be removed",
@@ -96,7 +87,7 @@ class _SettingsState extends State<Settings> {
                         .resetMetronome)),
             SettingsTile(
                 title: Text("Reset app"),
-                onPressed: (context) => showResetDialog(
+                onPressed: (context) => _showResetDialog(
                     context,
                     "Reset app?",
                     "The app will revert to it's original state, with all default values",
@@ -108,33 +99,13 @@ class _SettingsState extends State<Settings> {
   }
 }
 
-showFeedbackDialog(BuildContext context, Function setFeedbackCallback,
-    Function sendFeedbackCallback) {
-  showPlatformDialog(
-      context: context,
-      builder: (context) => PlatformAlertDialog(
-              title: Text("Feedback Form"),
-              content: Padding(
-                  padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
-                  child: PlatformTextField(
-                    hintText: "Issues, feature requests, ...",
-                    onChanged: (text) => setFeedbackCallback(text),
-                  )),
-              actions: [
-                PlatformDialogAction(
-                    child: Text("Cancel"),
-                    onPressed: () => Navigator.pop(context),
-                    cupertino: (context, platform) =>
-                        CupertinoDialogActionData(isDestructiveAction: true)),
-                PlatformDialogAction(
-                    child: Text("Submit"),
-                    onPressed: () => sendFeedbackCallback(),
-                    cupertino: (context, platform) =>
-                        CupertinoDialogActionData(isDefaultAction: true))
-              ]));
+Future<void> _showEmail() async {
+  if (!await launchUrl(_emailUri)) {
+    print("Failed to show email");
+  }
 }
 
-showResetDialog(BuildContext context, String title, String content,
+_showResetDialog(BuildContext context, String title, String content,
     Function resetCallback) {
   showPlatformDialog(
       context: context,
