@@ -22,6 +22,40 @@ dev_dependencies:
 
 flutter:
   assets:
-    - audio/high.wav
-    - audio/low.wav
+    - audio/Bell_A_-_High.wav
+    - audio/Bell_A_-_Low.wav
+    - audio/Bell_B_-_High.wav
+    - audio/Bell_B_-_Low.wav
+    - audio/Block_-_High.wav
+    - audio/Block_-_Low.wav
+    - audio/Can_-_High.wav
+    - audio/Can_-_Low.wav
+    - audio/Castanet_-_High.wav
+    - audio/Castanet_-_Low.wav
+    - audio/Clap_-_High.wav
+    - audio/Clap_-_Low.wav
+    - audio/Digital_-_High.wav
+    - audio/Digital_-_Low.wav
+    - audio/Glass_-_High.wav
+    - audio/Glass_-_Low.wav
+    - audio/Metal_-_High.wav
+    - audio/Metal_-_Low.wav
+    - audio/Sine_A_-_High.wav
+    - audio/Sine_A_-_Low.wav
+    - audio/Sine_B_-_High.wav
+    - audio/Sine_B_-_Low.wav
+    - audio/Snap_-_High.wav
+    - audio/Snap_-_Low.wav
+    - audio/Square_-_High.wav
+    - audio/Square_-_Low.wav
+    - audio/Stick_-_High.wav
+    - audio/Stick_-_Low.wav
+    - audio/Tambourine_A_-_High.wav
+    - audio/Tambourine_A_-_Low.wav
+    - audio/Tambourine_B_-_High.wav
+    - audio/Tambourine_B_-_Low.wav
+    - audio/Tick_-_High.wav
+    - audio/Tick_-_Low.wav
+    - audio/Whistle_-_High.wav
+    - audio/Whistle_-_Low.wav
   uses-material-design: true

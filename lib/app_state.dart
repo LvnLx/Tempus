@@ -121,20 +121,18 @@ class AppState extends ChangeNotifier {
     _downbeatSampleName = await _getOrElse<String>(
         Preference.downbeatSample.name,
         sampleNames,
-        sampleNames.first,
+        Defaults.downbeatSample,
         (downbeatSampleName) => downbeatSampleName);
     _subdivisions = await _getSubdivisions() ?? {};
     _subdivisionSampleName = await _getOrElse<String>(
         Preference.subdivisionSample.name,
         sampleNames,
-        sampleNames.last,
+        Defaults.subdivisionSample,
         (subdivisionSampleName) => subdivisionSampleName);
     _volume = await _sharedPreferencesAsync.getDouble(Preference.volume.name) ??
         Defaults.volume;
 
     notifyListeners();
-
-    print(_getJsonEncodedSubdivisions());
 
     Audio.setSampleNames(sampleNames);
     Audio.setState(_bpm, _downbeatSampleName, _subdivisionSampleName,
@@ -182,8 +180,10 @@ class AppState extends ChangeNotifier {
 
 class Defaults {
   static const int bpm = 120;
+  static const String downbeatSample = "Sine_A_-_High";
   static const ThemeMode themeMode = ThemeMode.system;
   static const double volume = 1.0;
   static int subdivisionOption = subdivisionOptions[0];
+  static const String subdivisionSample = "Sine_A_-_Low";
   static const subdivisionVolume = 0.0;
 }

@@ -8,7 +8,8 @@ import 'package:tempus/settings/theme_settings.dart';
 import 'package:tempus/util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-Uri _emailUri = Uri.parse("mailto:noreply.lvnlx@gmail.com?subject=Tempus%20Feedback");
+Uri _emailUri =
+    Uri.parse("mailto:noreply.lvnlx@gmail.com?subject=Tempus%20Feedback");
 
 class Settings extends StatefulWidget {
   Settings({super.key});
@@ -44,8 +45,9 @@ class _SettingsState extends State<Settings> {
             tiles: [
               SettingsTile.navigation(
                 title: Text("Downbeat sample"),
-                value: Text(capitalizeFirst(
-                    Provider.of<AppState>(context).getDownbeatSampleName())),
+                value: Text(Provider.of<AppState>(context)
+                    .getDownbeatSampleName()
+                    .replaceAll("_", " ")),
                 onPressed: (context) => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -54,8 +56,9 @@ class _SettingsState extends State<Settings> {
               ),
               SettingsTile.navigation(
                 title: Text("Subdivision sample"),
-                value: Text(capitalizeFirst(
-                    Provider.of<AppState>(context).getSubdivisionSampleName())),
+                value: Text(Provider.of<AppState>(context)
+                    .getSubdivisionSampleName()
+                    .replaceAll("_", " ")),
                 onPressed: (context) => Navigator.push(
                     context,
                     MaterialPageRoute(

@@ -5,7 +5,6 @@ import 'package:settings_ui/settings_ui.dart';
 import 'package:tempus/app_state.dart';
 import 'package:tempus/audio.dart';
 import 'package:tempus/settings/settings.dart';
-import 'package:tempus/util.dart';
 
 class SampleSettings extends StatelessWidget {
   final SampleSetting sampleSetting;
@@ -36,7 +35,7 @@ class SampleSettings extends StatelessWidget {
             SettingsSection(
               tiles: sampleNames
                   .map((sampleName) => SettingsTile(
-                        title: Text(capitalizeFirst(sampleName)),
+                        title: Text(sampleName.replaceAll("_", " ")),
                         trailing: sampleSetting.getSampleName(context) == sampleName
                             ? Icon(PlatformIcons(context).checkMark)
                             : null,
