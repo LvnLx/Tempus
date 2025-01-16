@@ -18,13 +18,25 @@ Current implementation is for iOS (Swift) and Android (C++/Kotlin).
   - [ ] Google Play
 - [x] UI
   - [x] Playback Controller
+    - [x] BPM Input
+      - [x] Dial
+      - [x] Manual
+      - [x] Buttons
+    - [x] Playback
+    - [x] Settings
+      - [x] Feedback
+      - [x] Persistence
+      - [x] Reset options
+      - [x] Sample selection
+      - [x] Theme selection
   - [x] Subdivision Controller
-  - [x] Settings
-    - [x] Feedback
-    - [x] Sample selection
-    - [x] Persistence
-    - [x] Reset options
-    - [x] Theme selection
+    - [x] Downbeat
+      - [x] Volume 
+    - [x] Scrolling
+    - [x] Subdivisions
+      - [x] Management
+      - [x] Option
+      - [x] Volume
 - [x] Native Implementations
   - [x] iOS
     - [x] Method channels
