@@ -180,10 +180,10 @@ class AppState extends ChangeNotifier {
 
 class Defaults {
   static const int bpm = 120;
-  static const String downbeatSample = "Sine_A_-_High";
+  static const String downbeatSample = "Sine_-_High";
   static const ThemeMode themeMode = ThemeMode.system;
   static const double volume = 1.0;
   static int subdivisionOption = subdivisionOptions[0];
-  static const String subdivisionSample = "Sine_A_-_Low";
+  static const String subdivisionSample = "Sine_-_Low";
   static const subdivisionVolume = 0.0;
 }

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
@@ -60,22 +62,26 @@ class PlaybackControllerState extends State<PlaybackController> {
                       Provider.of<AppState>(context, listen: false).getBpm() -
                           1),
                 ),
-                Container(
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                        border: Border.all(
+                GestureDetector(
+                  onTap: () => showBpmDialog(context, setBpm,
+                      Provider.of<AppState>(context, listen: false).getBpm()),
+                  child: Container(
+                      padding: EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              color: Theme.of(context).colorScheme.primary),
+                          borderRadius: BorderRadius.circular(8.0)),
+                      width: 100,
+                      height: 60,
+                      child: Center(
+                          child: Text(
+                        Provider.of<AppState>(context).getBpm().toString(),
+                        style: TextStyle(
+                            fontSize: 35,
                             color: Theme.of(context).colorScheme.primary),
-                        borderRadius: BorderRadius.circular(8.0)),
-                    width: 100,
-                    height: 60,
-                    child: Center(
-                        child: Text(
-                      Provider.of<AppState>(context).getBpm().toString(),
-                      style: TextStyle(
-                          fontSize: 35,
-                          color: Theme.of(context).colorScheme.primary),
-                      textAlign: TextAlign.center,
-                    ))),
+                        textAlign: TextAlign.center,
+                      ))),
+                ),
                 PlatformIconButton(
                     icon: Icon(PlatformIcons(context).add,
                         color: Theme.of(context).colorScheme.primary, size: 35),
@@ -140,4 +146,40 @@ class PlaybackControllerState extends State<PlaybackController> {
       );
     });
   }
+}
+
+showBpmDialog(BuildContext context, Function(int bpm) setBpm, int initialBpm) {
+  String bpm = initialBpm.toString();
+  showPlatformDialog(
+      context: context,
+      builder: (context) => PlatformAlertDialog(
+              title: Text("BPM"),
+              content: Padding(
+                  padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
+                  child: PlatformTextField(
+                    autofocus: true,
+                    cursorColor: Colors.transparent,
+                    hintText: initialBpm.toString(),
+                    keyboardType: TextInputType.number,
+                    makeCupertinoDecorationNull: true,
+                    maxLength: 3,
+                    onChanged: (text) => bpm = text,
+                    style: TextStyle(fontSize: 35),
+                    textAlign: TextAlign.center,
+                  )),
+              actions: [
+                PlatformDialogAction(
+                    child: Text("Cancel"),
+                    onPressed: () => Navigator.pop(context),
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDestructiveAction: true)),
+                PlatformDialogAction(
+                    child: Text("Set"),
+                    onPressed: () {
+                      setBpm(max(int.parse(bpm), 1));
+                      Navigator.pop(context);
+                    },
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDefaultAction: true))
+              ]));
 }
