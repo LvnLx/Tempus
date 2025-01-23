@@ -39,7 +39,7 @@ import AVFoundation
         result("Set sample")
       case "setSampleNames":
         for sampleName in arguments {
-          loadAudioFile(sampleName, controller.lookupKey(forAsset: "audio/\(sampleName).wav"))
+          loadAudioFile(sampleName, controller.lookupKey(forAsset: sampleName))
         }
         result("Set sample names")
       case "setState":

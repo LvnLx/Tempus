@@ -22,14 +22,14 @@ dev_dependencies:
 
 flutter:
   assets:
-    - audio/Bell_-_High.wav
-    - audio/Bell_-_Low.wav
-    - audio/Digital_-_High.wav
-    - audio/Digital_-_Low.wav
-    - audio/Sine_-_High.wav
-    - audio/Sine_-_Low.wav
-    - audio/Square_-_High.wav
-    - audio/Square_-_Low.wav
-    - audio/Tambourine_-_High.wav
-    - audio/Tambourine_-_Low.wav
+    - audio/Bell/downbeat.wav
+    - audio/Bell/subdivision.wav
+    - audio/Digital/downbeat.wav
+    - audio/Digital/subdivision.wav
+    - audio/Sine/downbeat.wav
+    - audio/Sine/subdivision.wav
+    - audio/Square/downbeat.wav
+    - audio/Square/subdivision.wav
+    - audio/Tambourine/downbeat.wav
+    - audio/Tambourine/subdivision.wav
   uses-material-design: true

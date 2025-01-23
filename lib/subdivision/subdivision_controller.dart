@@ -101,8 +101,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
               VerticalDivider(
                 color: Theme.of(context).colorScheme.onSurface,
               ),
-              if (Provider.of<AppState>(context).getSubdivisions().length <=
-                  subdivisionOptions.length)
+              if (Provider.of<AppState>(context).getSubdivisions().isEmpty)
                 PlatformIconButton(
                     onPressed: addSubdivision,
                     icon: Icon(

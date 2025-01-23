@@ -44,26 +44,11 @@ class _SettingsState extends State<Settings> {
             title: Text("Audio"),
             tiles: [
               SettingsTile.navigation(
-                title: Text("Downbeat sample"),
-                value: Text(Provider.of<AppState>(context)
-                    .getDownbeatSampleName()
-                    .replaceAll("_", " ")),
-                onPressed: (context) => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => SampleSettings(
-                            sampleSetting: SampleSetting.downbeat))),
-              ),
-              SettingsTile.navigation(
-                title: Text("Subdivision sample"),
-                value: Text(Provider.of<AppState>(context)
-                    .getSubdivisionSampleName()
-                    .replaceAll("_", " ")),
-                onPressed: (context) => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => SampleSettings(
-                            sampleSetting: SampleSetting.subdivision))),
+                title: Text("Sample"),
+                value:
+                    Text(Provider.of<AppState>(context).getSamplePair().name),
+                onPressed: (context) => Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SampleSettings())),
               )
             ],
           ),

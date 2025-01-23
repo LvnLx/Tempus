@@ -7,9 +7,7 @@ import 'package:tempus/audio.dart';
 import 'package:tempus/settings/settings.dart';
 
 class SampleSettings extends StatelessWidget {
-  final SampleSetting sampleSetting;
-
-  const SampleSettings({super.key, required this.sampleSetting});
+  const SampleSettings({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,45 +31,23 @@ class SampleSettings extends StatelessWidget {
           lightTheme: getSettingsThemeData(context),
           sections: [
             SettingsSection(
-              tiles: sampleNames
-                  .map((sampleName) => SettingsTile(
-                        title: Text(sampleName.replaceAll("_", " ")),
-                        trailing: sampleSetting.getSampleName(context) == sampleName
-                            ? Icon(PlatformIcons(context).checkMark)
-                            : null,
-                        onPressed: (context) async =>
-                            sampleSetting.setSampleName(context, sampleName),
-                      ))
+              tiles: samplePairs
+                  .map((samplePair) => SettingsTile(
+                      title: Text(samplePair.name),
+                      trailing:
+                          Provider.of<AppState>(context).getSamplePair().name ==
+                                  samplePair.name
+                              ? Icon(PlatformIcons(context).checkMark)
+                              : null,
+                      onPressed: (context) async {
+                        await Provider.of<AppState>(context, listen: false)
+                            .setSamplePair(samplePair);
+                        await Audio.setSample(true, samplePair.downbeatSample);
+                        await Audio.setSample(false, samplePair.subdivisionSample);
+                      }))
                   .toList(),
             )
           ]),
     );
-  }
-}
-
-enum SampleSetting {
-  downbeat,
-  subdivision;
-
-  String getSampleName(BuildContext context) {
-    final AppState provider = Provider.of<AppState>(context);
-    switch (this) {
-      case SampleSetting.downbeat:
-        return provider.getDownbeatSampleName();
-      case SampleSetting.subdivision:
-        return provider.getSubdivisionSampleName();
-    }
-  }
-
-  Future<void> setSampleName(BuildContext context, String sampleName) async {
-    final AppState provider = Provider.of<AppState>(context, listen: false);
-    switch (this) {
-      case SampleSetting.downbeat:
-        await provider.setDownbeatSampleName(sampleName);
-        await Audio.setSample(true, sampleName);
-      case SampleSetting.subdivision:
-        await provider.setSubdivisionSampleName(sampleName);
-        await Audio.setSample(false, sampleName);
-    }
   }
 }

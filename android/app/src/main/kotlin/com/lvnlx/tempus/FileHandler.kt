@@ -7,7 +7,7 @@ import java.nio.ByteOrder
 
 class FileHandler(private val assetManager: AssetManager) {
     fun loadAudioFrames(fileName: String): FloatArray {
-        val inputStream: InputStream = assetManager.open("flutter_assets/audio/${fileName}.wav")
+        val inputStream: InputStream = assetManager.open("flutter_assets/$fileName")
 
         val byteArray: ByteArray = inputStream.readBytes()
         inputStream.close()

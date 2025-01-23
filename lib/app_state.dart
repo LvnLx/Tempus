@@ -8,7 +8,7 @@ import 'package:tempus/subdivision/subdivision.dart';
 
 enum Preference {
   bpm(true),
-  downbeatSample(false),
+  samplePair(false),
   subdivisions(true),
   subdivisionSample(false),
   themeMode(false),
@@ -23,19 +23,16 @@ class AppState extends ChangeNotifier {
       SharedPreferencesAsync();
 
   late int _bpm;
-  late String _downbeatSampleName;
+  late SamplePair _samplePair;
   late Map<Key, SubdivisionData> _subdivisions;
-  late String _subdivisionSampleName;
   late ThemeMode _themeMode;
   late double _volume;
 
   int getBpm() => _bpm;
 
-  String getDownbeatSampleName() => _downbeatSampleName;
+  SamplePair getSamplePair() => _samplePair;
 
   Map<Key, SubdivisionData> getSubdivisions() => _subdivisions;
-
-  String getSubdivisionSampleName() => _subdivisionSampleName;
 
   ThemeMode getThemeMode() => _themeMode;
 
@@ -51,17 +48,17 @@ class AppState extends ChangeNotifier {
     await _sharedPreferencesAsync.setInt(Preference.bpm.name, validatedBpm);
   }
 
-  Future<void> setDownbeatSampleName(String sampleName) async {
-    if (!sampleNames.contains(sampleName)) {
-      throw ArgumentError.value(sampleName);
+  Future<void> setSamplePair(SamplePair samplePair) async {
+    if (!samplePairs.contains(samplePair)) {
+      throw ArgumentError.value(samplePair);
     }
 
-    _downbeatSampleName = sampleName;
+    _samplePair = samplePair;
 
     notifyListeners();
 
     await _sharedPreferencesAsync.setString(
-        Preference.downbeatSample.name, sampleName);
+        Preference.samplePair.name, samplePair.name);
   }
 
   Future<void> setSubdivisions(Map<Key, SubdivisionData> subdivisions) async {
@@ -71,19 +68,6 @@ class AppState extends ChangeNotifier {
 
     await _sharedPreferencesAsync.setString(
         Preference.subdivisions.name, _getJsonEncodedSubdivisions());
-  }
-
-  Future<void> setSubdivisionSampleName(String sampleName) async {
-    if (!sampleNames.contains(sampleName)) {
-      throw ArgumentError.value(sampleName);
-    }
-
-    _subdivisionSampleName = sampleName;
-
-    notifyListeners();
-
-    await _sharedPreferencesAsync.setString(
-        Preference.subdivisionSample.name, sampleName);
   }
 
   Future<void> setThemeMode(ThemeMode themeMode) async {
@@ -105,11 +89,13 @@ class AppState extends ChangeNotifier {
 
   Future<void> loadPreferences() async {
     final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-    sampleNames = assetManifest
+    samplePairs = assetManifest
         .listAssets()
         .where((string) => string.startsWith("audio/"))
-        .map((string) => string.split("/").last.split(".").first)
-        .toSet();
+        .fold<Set<String>>(
+            {}, (accumulator, path) => {...accumulator, path.split("/")[1]})
+        .map((samplePairName) => SamplePair(name: samplePairName))
+        .toList();
 
     _bpm = await _sharedPreferencesAsync.getInt(Preference.bpm.name) ??
         Defaults.bpm;
@@ -118,25 +104,26 @@ class AppState extends ChangeNotifier {
         ThemeMode.values,
         Defaults.themeMode.toString(),
         (themeMode) => themeMode.toString());
-    _downbeatSampleName = await _getOrElse<String>(
-        Preference.downbeatSample.name,
-        sampleNames,
-        Defaults.downbeatSample,
-        (downbeatSampleName) => downbeatSampleName);
+    _samplePair = await _getOrElse<SamplePair>(
+        Preference.samplePair.name,
+        samplePairs,
+        Defaults.samplePair.name,
+        (samplePair) => samplePair.name);
     _subdivisions = await _getSubdivisions() ?? {};
-    _subdivisionSampleName = await _getOrElse<String>(
-        Preference.subdivisionSample.name,
-        sampleNames,
-        Defaults.subdivisionSample,
-        (subdivisionSampleName) => subdivisionSampleName);
     _volume = await _sharedPreferencesAsync.getDouble(Preference.volume.name) ??
         Defaults.volume;
 
     notifyListeners();
 
-    Audio.setSampleNames(sampleNames);
-    Audio.setState(_bpm, _downbeatSampleName, _subdivisionSampleName,
-        _getJsonEncodedSubdivisions(), _volume);
+    Audio.setSampleNames(samplePairs.fold<Set<String>>(
+        {},
+        (accumulator, samplePair) => {
+              ...accumulator,
+              samplePair.downbeatSample,
+              samplePair.subdivisionSample
+            }));
+    Audio.setState(_bpm, _samplePair.downbeatSample,
+        _samplePair.subdivisionSample, _getJsonEncodedSubdivisions(), _volume);
   }
 
   Future<void> resetMetronome() async {
@@ -180,10 +167,9 @@ class AppState extends ChangeNotifier {
 
 class Defaults {
   static const int bpm = 120;
-  static const String downbeatSample = "Sine_-_High";
+  static SamplePair samplePair = SamplePair(name: "Sine");
   static const ThemeMode themeMode = ThemeMode.system;
   static const double volume = 1.0;
   static int subdivisionOption = subdivisionOptions[0];
-  static const String subdivisionSample = "Sine_-_Low";
   static const subdivisionVolume = 0.0;
 }

@@ -18,7 +18,19 @@ enum Action {
   writeBuffer
 }
 
-late Set<String> sampleNames;
+class SamplePair {
+  String name;
+
+  late String downbeatSample;
+  late String subdivisionSample;
+
+  SamplePair({required this.name}) {
+    downbeatSample = "audio/$name/downbeat.wav";
+    subdivisionSample = "audio/$name/subdivision.wav";
+  }
+}
+
+late List<SamplePair> samplePairs;
 
 class Audio {
   static MethodChannel methodChannel = MethodChannel('audio');
