@@ -31,6 +31,7 @@ class SampleSettings extends StatelessWidget {
           lightTheme: getSettingsThemeData(context),
           sections: [
             SettingsSection(
+              title: Text("Free"),
               tiles: samplePairs
                   .map((samplePair) => SettingsTile(
                       title: Text(samplePair.name),
@@ -43,10 +44,18 @@ class SampleSettings extends StatelessWidget {
                         await Provider.of<AppState>(context, listen: false)
                             .setSamplePair(samplePair);
                         await Audio.setSample(true, samplePair.downbeatSample);
-                        await Audio.setSample(false, samplePair.subdivisionSample);
+                        await Audio.setSample(
+                            false, samplePair.subdivisionSample);
                       }))
                   .toList(),
-            )
+            ),
+            SettingsSection(
+              title: Text("Premium"),tiles: [
+              SettingsTile(
+                title: Text("Coming soon"),
+                enabled: false,
+              )
+            ])
           ]),
     );
   }

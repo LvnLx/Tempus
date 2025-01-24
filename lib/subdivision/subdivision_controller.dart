@@ -98,9 +98,13 @@ class SubdivisionControllerState extends State<SubdivisionController> {
               VerticalDivider(
                 color: Theme.of(context).colorScheme.onSurface,
               ),
-              if (Provider.of<AppState>(context).getSubdivisions().isEmpty)
+              if (Provider.of<AppState>(context).getSubdivisions().length <
+                  subdivisionOptions.length)
                 PlatformIconButton(
-                    onPressed: addSubdivision,
+                    onPressed:
+                        Provider.of<AppState>(context).getSubdivisions().isEmpty
+                            ? addSubdivision
+                            : () => showPremiumDialog(context),
                     icon: Icon(
                       PlatformIcons(context).add,
                       color: Theme.of(context).colorScheme.primary,
@@ -125,4 +129,24 @@ class SubdivisionControllerState extends State<SubdivisionController> {
       return PlatformIcons(context).volumeOff;
     }
   }
+}
+
+showPremiumDialog(BuildContext context) {
+  showPlatformDialog(
+      context: context,
+      builder: (context) => PlatformAlertDialog(
+              title: Text("Coming Soon"),
+              content: Padding(
+                  padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
+                  child: PlatformText(
+                    "Simultaneous subdivisions will be supported with the premium version",
+                    textAlign: TextAlign.center,
+                  )),
+              actions: [
+                PlatformDialogAction(
+                    child: Text("Ok"),
+                    onPressed: () => Navigator.pop(context),
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDefaultAction: true))
+              ]));
 }
