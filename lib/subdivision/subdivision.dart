@@ -30,14 +30,14 @@ class SubdivisionState extends State<Subdivision> {
     Audio.setSubdivisionOption(widget.key!, option);
   }
 
-  Future<void> setVolume(double volume, [bool useThrottling = true]) async {
+  Future<void> setVolume(double volume) async {
     await Provider.of<AppState>(context, listen: false).setSubdivisions({
       ...Provider.of<AppState>(context, listen: false).getSubdivisions()
     }..update(
         key,
         (subdivisionData) =>
             SubdivisionData(option: subdivisionData.option, volume: volume)));
-    Audio.setSubdivisionVolume(widget.key!, volume, useThrottling);
+    Audio.setSubdivisionVolume(widget.key!, volume);
   }
 
   @override
@@ -73,8 +73,6 @@ class SubdivisionState extends State<Subdivision> {
                     child: PlatformSlider(
                       activeColor: Theme.of(context).colorScheme.primary,
                       onChanged: (double value) async => await setVolume(value),
-                      onChangeEnd: (double value) async =>
-                          await setVolume(value, false),
                       value: Provider.of<AppState>(context)
                           .getSubdivisions()[key]!
                           .volume,

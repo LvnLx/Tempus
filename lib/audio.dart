@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,23 +35,10 @@ late List<SamplePair> samplePairs;
 
 class Audio {
   static MethodChannel methodChannel = MethodChannel('audio');
-  static Map<Action, bool> throttles =
-      Map.fromEntries(Action.values.map((action) => MapEntry(action, false)));
-
-  static bool isThrottled(Action action) {
-    if (throttles[action] ?? false) {
-      return true;
-    } else {
-      throttles[action] = true;
-      Future.delayed(
-          Duration(milliseconds: 100), () => throttles[action] = false);
-      return false;
-    }
-  }
 
   static Future<void> addSubdivision(Key key, int option, double volume) async {
     final result = await methodChannel.invokeMethod(Action.addSubdivision.name,
-        [key.toString(), option.toString(), volume.toString()]);
+        [key.toString(), option.toString(), pow(volume, 2).toString()]);
     print(result);
   }
 
@@ -89,7 +77,7 @@ class Audio {
       downbeatSampleName,
       subdivisionSampleName,
       subdivisionsAsJsonString,
-      volume.toString()
+      pow(volume, 2).toString()
     ]);
     print(result);
   }
@@ -100,19 +88,16 @@ class Audio {
     print(result);
   }
 
-  static Future<void> setSubdivisionVolume(Key key, double volume,
-      [bool useThrottling = true]) async {
-    if (useThrottling && isThrottled(Action.setSubdivisionVolume)) return;
+  static Future<void> setSubdivisionVolume(Key key, double volume) async {
     final result = await methodChannel.invokeMethod(
-        Action.setSubdivisionVolume.name, [key.toString(), volume.toString()]);
+        Action.setSubdivisionVolume.name,
+        [key.toString(), pow(volume, 2).toString()]);
     print(result);
   }
 
-  static Future<void> setVolume(double volume,
-      [bool useThrottling = true]) async {
-    if (useThrottling && isThrottled(Action.setVolume)) return;
+  static Future<void> setVolume(double volume) async {
     final result = await methodChannel
-        .invokeMethod(Action.setVolume.name, [volume.toString()]);
+        .invokeMethod(Action.setVolume.name, [pow(volume, 2).toString()]);
     print(result);
   }
 

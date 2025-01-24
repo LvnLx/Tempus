@@ -46,10 +46,9 @@ class SubdivisionControllerState extends State<SubdivisionController> {
     Audio.removeSubdivision(key);
   }
 
-  void setVolume(BuildContext context, double newVolume,
-      [bool useThrottling = true]) async {
+  void setVolume(BuildContext context, double newVolume) async {
     await Provider.of<AppState>(context, listen: false).setVolume(newVolume);
-    Audio.setVolume(newVolume, useThrottling);
+    Audio.setVolume(newVolume);
   }
 
   @override
@@ -73,8 +72,6 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                       child: PlatformSlider(
                         activeColor: Theme.of(context).colorScheme.primary,
                         onChanged: (double value) => setVolume(context, value),
-                        onChangeEnd: (double value) =>
-                            setVolume(context, value, false),
                         value: Provider.of<AppState>(context).getVolume(),
                       ),
                     )),
