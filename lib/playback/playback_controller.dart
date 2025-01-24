@@ -24,17 +24,12 @@ class PlaybackControllerState extends State<PlaybackController> {
     Audio.stopPlayback();
   }
 
-  onDialChanged(int change) {
-    setBpm(Provider.of<AppState>(context, listen: false).getBpm() + change);
-  }
-
-  setBpm(int newBpm) async {
+  Future<void> setBpm(int newBpm) async {
     await Provider.of<AppState>(context, listen: false).setBpm(newBpm);
-    await Audio.setBpm(newBpm);
   }
 
-  togglePlayback() {
-    playback ? Audio.stopPlayback() : Audio.startPlayback();
+  Future<void> togglePlayback() async {
+    playback ? await Audio.stopPlayback() : await Audio.startPlayback();
     setState(() {
       playback = !playback;
     });
@@ -58,12 +53,12 @@ class PlaybackControllerState extends State<PlaybackController> {
                     color: Theme.of(context).colorScheme.primary,
                     size: 35,
                   ),
-                  onPressed: () => setBpm(
+                  onPressed: () async => await setBpm(
                       Provider.of<AppState>(context, listen: false).getBpm() -
                           1),
                 ),
                 GestureDetector(
-                  onTap: () => showBpmDialog(context, setBpm,
+                  onTap: () async => await showBpmDialog(context, setBpm,
                       Provider.of<AppState>(context, listen: false).getBpm()),
                   child: Container(
                       padding: EdgeInsets.all(8.0),
@@ -85,7 +80,7 @@ class PlaybackControllerState extends State<PlaybackController> {
                 PlatformIconButton(
                     icon: Icon(PlatformIcons(context).add,
                         color: Theme.of(context).colorScheme.primary, size: 35),
-                    onPressed: () => setBpm(
+                    onPressed: () async => await setBpm(
                         Provider.of<AppState>(context, listen: false).getBpm() +
                             1)),
               ],
@@ -100,7 +95,11 @@ class PlaybackControllerState extends State<PlaybackController> {
                         width: constraints.maxHeight / 3 * 2,
                         height: constraints.maxWidth / 3 * 2,
                         child: BpmDial(
-                            callbackThreshold: 20, callback: onDialChanged)),
+                            callbackThreshold: 20,
+                            callback: (int change) async => await setBpm(
+                                Provider.of<AppState>(context, listen: false)
+                                        .getBpm() +
+                                    change))),
                   ),
                   Center(
                       child: PlatformIconButton(
@@ -110,7 +109,7 @@ class PlaybackControllerState extends State<PlaybackController> {
                             ? PlatformIcons(context).pause
                             : PlatformIcons(context).playArrowSolid,
                         color: Theme.of(context).colorScheme.primary),
-                    onPressed: togglePlayback,
+                    onPressed: () async => await togglePlayback(),
                   )),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -148,9 +147,10 @@ class PlaybackControllerState extends State<PlaybackController> {
   }
 }
 
-showBpmDialog(BuildContext context, Function(int bpm) setBpm, int initialBpm) {
+Future<void> showBpmDialog(BuildContext context,
+    Future<void> Function(int bpm) setBpm, int initialBpm) async {
   String bpm = initialBpm.toString();
-  showPlatformDialog(
+  await showPlatformDialog(
       context: context,
       builder: (context) => PlatformAlertDialog(
               title: Text("BPM"),
@@ -175,9 +175,9 @@ showBpmDialog(BuildContext context, Function(int bpm) setBpm, int initialBpm) {
                         CupertinoDialogActionData(isDestructiveAction: true)),
                 PlatformDialogAction(
                     child: Text("Set"),
-                    onPressed: () {
-                      setBpm(max(int.parse(bpm), 1));
+                    onPressed: () async {
                       Navigator.pop(context);
+                      await setBpm(max(int.parse(bpm), 1));
                     },
                     cupertino: (context, platform) =>
                         CupertinoDialogActionData(isDefaultAction: true))

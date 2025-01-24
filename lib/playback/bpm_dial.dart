@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class BpmDial extends StatefulWidget {
   final int callbackThreshold;
-  final Function(int) callback;
+  final Future<void> Function(int) callback;
 
   BpmDial({super.key, required this.callbackThreshold, required this.callback})
       : assert(callbackThreshold >= 1 && callbackThreshold <= 360,
@@ -31,7 +31,7 @@ class BpmDialState extends State<BpmDial> {
                 details.localPosition.dx - origin.x,
                 origin.y - details.localPosition.dy);
           },
-          onPanUpdate: (DragUpdateDetails details) {
+          onPanUpdate: (DragUpdateDetails details) async {
             Point current = Point(details.localPosition.dx - origin.x,
                 origin.y - details.localPosition.dy);
 
@@ -43,7 +43,7 @@ class BpmDialState extends State<BpmDial> {
                 (previousStepDegrees / widget.callbackThreshold / 2).round();
 
             if (change != 0) {
-              widget.callback(change);
+              await widget.callback(change);
               previousIncrement = current;
             }
 

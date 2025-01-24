@@ -39,13 +39,26 @@ class AppState extends ChangeNotifier {
   double getVolume() => _volume;
 
   Future<void> setBpm(int bpm) async {
-    int validatedBpm = bpm > 0 ? bpm : 1;
+    late int validatedBpm;
 
-    _bpm = validatedBpm;
+    if (bpm < 1) {
+      validatedBpm = 1;
+    } else if (bpm > 999) {
+      validatedBpm = 999;
+    } else {
+      validatedBpm = bpm;
+    }
+
+    if (validatedBpm == _bpm) {
+      return;
+    } else {
+      _bpm = validatedBpm;
+    }
 
     notifyListeners();
 
     await _sharedPreferencesAsync.setInt(Preference.bpm.name, validatedBpm);
+    await Audio.setBpm(validatedBpm);
   }
 
   Future<void> setSamplePair(SamplePair samplePair) async {
@@ -104,11 +117,8 @@ class AppState extends ChangeNotifier {
         ThemeMode.values,
         Defaults.themeMode.toString(),
         (themeMode) => themeMode.toString());
-    _samplePair = await _getOrElse<SamplePair>(
-        Preference.samplePair.name,
-        samplePairs,
-        Defaults.samplePair.name,
-        (samplePair) => samplePair.name);
+    _samplePair = await _getOrElse<SamplePair>(Preference.samplePair.name,
+        samplePairs, Defaults.samplePair.name, (samplePair) => samplePair.name);
     _subdivisions = await _getSubdivisions() ?? {};
     _volume = await _sharedPreferencesAsync.getDouble(Preference.volume.name) ??
         Defaults.volume;
