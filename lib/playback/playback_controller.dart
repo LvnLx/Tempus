@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -16,12 +17,38 @@ class PlaybackController extends StatefulWidget {
 }
 
 class PlaybackControllerState extends State<PlaybackController> {
+  late Timer previousTapTimeout;
+
+  int? lastTapTime;
   bool playback = false;
+  bool wasSetByTap = false;
 
   @override
   void initState() {
     super.initState();
     Audio.stopPlayback();
+  }
+
+  void tapTempo() async {
+    if (lastTapTime == null) {
+      setState(() => lastTapTime = DateTime.now().millisecondsSinceEpoch);
+      previousTapTimeout =
+          Timer(Duration(seconds: 3), () => setState(() => lastTapTime = null));
+    } else {
+      setState(() {
+        wasSetByTap = true;
+        int currentTapTime = DateTime.now().millisecondsSinceEpoch;
+        setBpm((1 / ((currentTapTime - lastTapTime!) / 1000) * 60).round());
+        lastTapTime = currentTapTime;
+      });
+      previousTapTimeout.cancel();
+      previousTapTimeout = Timer(
+          Duration(seconds: 3),
+          () => setState(() {
+                lastTapTime = null;
+                wasSetByTap = false;
+              }));
+    }
   }
 
   Future<void> setBpm(int newBpm) async {
@@ -70,7 +97,11 @@ class PlaybackControllerState extends State<PlaybackController> {
                       height: 60,
                       child: Center(
                           child: Text(
-                        Provider.of<AppState>(context).getBpm().toString(),
+                        lastTapTime != null && !wasSetByTap
+                            ? "TAP"
+                            : Provider.of<AppState>(context)
+                                .getBpm()
+                                .toString(),
                         style: TextStyle(
                             fontSize: 35,
                             color: Theme.of(context).colorScheme.primary),
@@ -125,7 +156,7 @@ class PlaybackControllerState extends State<PlaybackController> {
                                     PlatformIcons(context).settings,
                                     size: 40,
                                     color:
-                                        Theme.of(context).colorScheme.secondary,
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                                   onPressed: () {
                                     showModalBottomSheet(
@@ -135,6 +166,14 @@ class PlaybackControllerState extends State<PlaybackController> {
                                         builder: (BuildContext context) =>
                                             Settings());
                                   }),
+                              PlatformIconButton(
+                                  icon: Icon(
+                                    Icons.touch_app,
+                                    size: 40,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                  onPressed: tapTempo)
                             ]),
                       ),
                     ],

@@ -19,9 +19,10 @@ Current implementation is for iOS (Swift) and Android (C++/Kotlin).
 - [x] UI
   - [x] Playback Controller
     - [x] BPM Input
-      - [x] Dial
-      - [x] Manual
       - [x] Buttons
+      - [x] Dial
+      - [x] Input
+      - [x] Tap Tempo
     - [x] Playback
     - [x] Settings
       - [x] Feedback
@@ -39,12 +40,14 @@ Current implementation is for iOS (Swift) and Android (C++/Kotlin).
       - [x] Volume
 - [x] Native Implementations
   - [x] iOS
-    - [x] Method channels
     - [x] Audio file loading
-    - [x] Buffer loop
     - [x] Buffer callbacks
+    - [x] Buffer loop
+    - [ ] Haptics
+    - [x] Method channels
   - [x] Android
     - [x] Method channels
-    - [x] Audio file loading
-    - [x] Buffer loop
     - [x] Buffer callbacks
+    - [x] Buffer loop
+    - [ ] Haptics
+    - [x] Audio file loading
