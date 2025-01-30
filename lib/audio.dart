@@ -37,18 +37,21 @@ class Audio {
   static MethodChannel methodChannel = MethodChannel('audio');
 
   static Future<void> addSubdivision(Key key, int option, double volume) async {
+    await HapticFeedback.mediumImpact();
     final result = await methodChannel.invokeMethod(Action.addSubdivision.name,
         [key.toString(), option.toString(), pow(volume, 2).toString()]);
     print(result);
   }
 
   static Future<void> removeSubdivision(Key key) async {
+    await HapticFeedback.mediumImpact();
     final result = await methodChannel
         .invokeMethod(Action.removeSubdivision.name, [key.toString()]);
     print(result);
   }
 
   static Future<void> setBpm(int bpm) async {
+    await HapticFeedback.lightImpact();
     final result =
         await methodChannel.invokeMethod(Action.setBpm.name, [bpm.toString()]);
     print(result);
@@ -83,6 +86,7 @@ class Audio {
   }
 
   static Future<void> setSubdivisionOption(Key key, int option) async {
+    await HapticFeedback.lightImpact();
     final result = await methodChannel.invokeMethod(
         Action.setSubdivisionOption.name, [key.toString(), option.toString()]);
     print(result);

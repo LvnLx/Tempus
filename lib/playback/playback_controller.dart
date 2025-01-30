@@ -29,7 +29,7 @@ class PlaybackControllerState extends State<PlaybackController> {
     Audio.stopPlayback();
   }
 
-  void tapTempo() async {
+  void tapTempo() {
     if (lastTapTime == null) {
       setState(() => lastTapTime = DateTime.now().millisecondsSinceEpoch);
       previousTapTimeout =
@@ -38,7 +38,8 @@ class PlaybackControllerState extends State<PlaybackController> {
       setState(() {
         wasSetByTap = true;
         int currentTapTime = DateTime.now().millisecondsSinceEpoch;
-        setBpm((1 / ((currentTapTime - lastTapTime!) / 1000) * 60).round());
+        setBpm((1 / ((currentTapTime - lastTapTime!) / 1000) * 60).round(),
+            skipUnchanged: false);
         lastTapTime = currentTapTime;
       });
       previousTapTimeout.cancel();
@@ -51,8 +52,9 @@ class PlaybackControllerState extends State<PlaybackController> {
     }
   }
 
-  Future<void> setBpm(int newBpm) async {
-    await Provider.of<AppState>(context, listen: false).setBpm(newBpm);
+  Future<void> setBpm(int newBpm, {bool skipUnchanged = true}) async {
+    await Provider.of<AppState>(context, listen: false)
+        .setBpm(newBpm, skipUnchanged: skipUnchanged);
   }
 
   Future<void> togglePlayback() async {

@@ -38,7 +38,7 @@ class AppState extends ChangeNotifier {
 
   double getVolume() => _volume;
 
-  Future<void> setBpm(int bpm) async {
+  Future<void> setBpm(int bpm, {bool skipUnchanged = true}) async {
     late int validatedBpm;
 
     if (bpm < 1) {
@@ -49,7 +49,7 @@ class AppState extends ChangeNotifier {
       validatedBpm = bpm;
     }
 
-    if (validatedBpm == _bpm) {
+    if (skipUnchanged && validatedBpm == _bpm) {
       return;
     } else {
       _bpm = validatedBpm;
