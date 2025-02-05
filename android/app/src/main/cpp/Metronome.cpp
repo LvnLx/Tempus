@@ -1,8 +1,8 @@
+#include <nlohmann/json.hpp>
 #include <oboe/Oboe.h>
 #include <unordered_map>
 #include <vector>
 
-#include "json.hpp"
 #include "Metronome.h"
 #include "Subdivision.h"
 
