@@ -47,7 +47,7 @@ class Metronome {
       let dispatchQueue = inRefCon.dispatchQueue
       let validFrameCount = inRefCon.validFrameCount.pointee
       
-      dispatchQueue.pointee.sync {
+      dispatchQueue.pointee.async {
         for index in 0..<inNumberFrames {
           inRefCon.nextFrame.pointee = inRefCon.nextFrame.pointee % validFrameCount
 
@@ -115,7 +115,14 @@ class Metronome {
   func setBpm(_ bpm: UInt16) {
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
-    validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
+    
+    let bufferLocation: Double = Double(nextFrame.pointee) / Double(validFrameCount.pointee)
+    
+    dispatchQueue.pointee.async {
+      self.validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
+      self.nextFrame.pointee = Int(round(Double(self.validFrameCount.pointee) * bufferLocation))
+    }
+    
     updateClips()
   }
   

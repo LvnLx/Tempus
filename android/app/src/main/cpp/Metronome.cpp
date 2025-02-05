@@ -32,8 +32,18 @@ void Metronome::removeSubdivision(const std::string &key) {
 void Metronome::setBpm(int bpm) {
     double beatsPerSecond = bpm / (double) 60;
     double beatDurationSeconds = 1 / beatsPerSecond;
+
+    double bufferLocation = double(nextFrame) / validFrameCount;
+
+    std::lock_guard<std::mutex> lock(mutex);
+
     validFrameCount = round( // NOLINT(cppcoreguidelines-narrowing-conversions)
             beatDurationSeconds * sampleRate);
+    nextFrame = round( // NOLINT(cppcoreguidelines-narrowing-conversions)
+            validFrameCount * bufferLocation);
+
+    std::lock_guard<std::mutex> unlock(mutex);
+
     updateClips();
 }
 
