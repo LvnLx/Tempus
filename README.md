@@ -6,9 +6,10 @@ Current implementation is for iOS (Swift) and Android (C++/Kotlin).
 
 ---
 
-<div align="center">
-  <img src="https://github.com/LvnL/metronomic/assets/39525477/4019440c-07d1-406d-b508-2a16957e7d76" width="300"/>
-</div>
+Light Mode | Dark Mode
+:-:|:-:
+![IMG_8420](https://github.com/user-attachments/assets/f1628d2d-85c9-4f8f-930f-cd923ed68442) |  ![IMG_8419](https://github.com/user-attachments/assets/2e437d2d-00c1-477c-9d5f-63c762c03704)
+
 
 ---
 
