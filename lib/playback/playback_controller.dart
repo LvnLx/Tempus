@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -17,11 +18,12 @@ class PlaybackController extends StatefulWidget {
 }
 
 class PlaybackControllerState extends State<PlaybackController> {
-  late Timer previousTapTimeout;
+  final int maxTapTimeCount = 5;
 
-  int? lastTapTime;
+  late Timer lastTapTimer;
+
+  Queue<int> tapTimes = Queue();
   bool playback = false;
-  bool wasSetByTap = false;
 
   @override
   void initState() {
@@ -29,26 +31,36 @@ class PlaybackControllerState extends State<PlaybackController> {
     Audio.stopPlayback();
   }
 
+  void addTapTime(int tapTime) {
+    if (tapTimes.length >= maxTapTimeCount) {
+      tapTimes.removeFirst();
+    }
+
+    tapTimes.addLast(tapTime);
+  }
+
+  int averageTapDeltaMilliseconds() {
+    List<int> tapTimeDeltas = List.empty(growable: true);
+    for (int i = 1; i < tapTimes.length; i++) {
+      tapTimeDeltas.add(tapTimes.elementAt(i) - tapTimes.elementAt(i - 1));
+    }
+
+    int sum = tapTimeDeltas.reduce((value, element) => value + element);
+    return (sum / tapTimeDeltas.length).round();
+  }
+
   void tapTempo() {
-    if (lastTapTime == null) {
-      setState(() => lastTapTime = DateTime.now().millisecondsSinceEpoch);
-      previousTapTimeout =
-          Timer(Duration(seconds: 3), () => setState(() => lastTapTime = null));
+    if (tapTimes.isEmpty) {
+      setState(() => addTapTime(DateTime.now().millisecondsSinceEpoch));
+      lastTapTimer =
+          Timer(Duration(seconds: 3), () => setState(tapTimes.clear));
     } else {
-      setState(() {
-        wasSetByTap = true;
-        int currentTapTime = DateTime.now().millisecondsSinceEpoch;
-        setBpm((1 / ((currentTapTime - lastTapTime!) / 1000) * 60).round(),
-            skipUnchanged: false);
-        lastTapTime = currentTapTime;
-      });
-      previousTapTimeout.cancel();
-      previousTapTimeout = Timer(
-          Duration(seconds: 3),
-          () => setState(() {
-                lastTapTime = null;
-                wasSetByTap = false;
-              }));
+      setState(() => addTapTime(DateTime.now().millisecondsSinceEpoch));
+      setBpm((1 / (averageTapDeltaMilliseconds() / 1000) * 60).round(),
+          skipUnchanged: false);
+      lastTapTimer.cancel();
+      lastTapTimer =
+          Timer(Duration(seconds: 3), () => setState(tapTimes.clear));
     }
   }
 
@@ -99,7 +111,7 @@ class PlaybackControllerState extends State<PlaybackController> {
                       height: 60,
                       child: Center(
                           child: Text(
-                        lastTapTime != null && !wasSetByTap
+                        tapTimes.length == 1
                             ? "TAP"
                             : Provider.of<AppState>(context)
                                 .getBpm()
