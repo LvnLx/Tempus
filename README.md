@@ -43,11 +43,11 @@ Current implementation is for iOS (Swift) and Android (C++/Kotlin).
     - [x] Audio file loading
     - [x] Buffer callbacks
     - [x] Buffer loop
-    - [ ] Haptics
+    - [x] Haptics
     - [x] Method channels
   - [x] Android
     - [x] Method channels
     - [x] Buffer callbacks
     - [x] Buffer loop
-    - [ ] Haptics
+    - [x] Haptics
     - [x] Audio file loading
