@@ -118,10 +118,8 @@ class Metronome {
     
     let bufferLocation: Double = Double(nextFrame.pointee) / Double(validFrameCount.pointee)
     
-    dispatchQueue.pointee.async {
-      self.validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
-      self.nextFrame.pointee = Int(round(Double(self.validFrameCount.pointee) * bufferLocation))
-    }
+    self.validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
+    self.nextFrame.pointee = Int(round(Double(self.validFrameCount.pointee) * bufferLocation))
     
     updateClips()
   }
