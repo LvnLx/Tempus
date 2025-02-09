@@ -38,7 +38,7 @@ class MainState extends State<Main> {
                       materialDarkTheme: darkThemeData,
                       materialLightTheme: lightThemeData,
                       builder: (context) => PlatformApp(
-                        debugShowCheckedModeBanner: false,
+                          debugShowCheckedModeBanner: false,
                           localizationsDelegates: <LocalizationsDelegate<
                               dynamic>>[
                             DefaultMaterialLocalizations.delegate,
