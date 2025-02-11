@@ -47,7 +47,7 @@ class Metronome {
       let dispatchQueue = inRefCon.dispatchQueue
       let validFrameCount = inRefCon.validFrameCount.pointee
       
-      dispatchQueue.pointee.async {
+      dispatchQueue.pointee.sync {
         for index in 0..<inNumberFrames {
           inRefCon.nextFrame.pointee = inRefCon.nextFrame.pointee % validFrameCount
 

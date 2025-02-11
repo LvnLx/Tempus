@@ -15,7 +15,7 @@ Light Mode | Dark Mode
 
 ## Feature Roadmap
 - [ ] Publish
-  - [ ] App Store
+  - [x] App Store
   - [ ] Google Play
 - [x] UI
   - [x] Playback Controller
