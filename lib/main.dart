@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/app_state.dart';
+import 'package:tempus/store.dart';
 import 'package:tempus/subdivision/subdivision_controller.dart';
 import 'package:tempus/playback/playback_controller.dart';
 
@@ -24,6 +26,14 @@ class Main extends StatefulWidget {
 class MainState extends State<Main> {
   Future<void> initializeAppState() async =>
       await Provider.of<AppState>(context, listen: false).loadPreferences();
+
+  @override
+  void initState() {
+    Store.init((purchaseDetailsList) => SchedulerBinding.instance
+        .addPostFrameCallback((_) =>
+            Store.handlePurchaseStreamOnData(context, purchaseDetailsList)));
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

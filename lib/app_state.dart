@@ -8,6 +8,7 @@ import 'package:tempus/subdivision/subdivision.dart';
 
 enum Preference {
   bpm(true),
+  isPremium(false),
   samplePair(false),
   subdivisions(true),
   subdivisionSample(false),
@@ -23,12 +24,15 @@ class AppState extends ChangeNotifier {
       SharedPreferencesAsync();
 
   late int _bpm;
+  late bool _isPremium;
   late SamplePair _samplePair;
   late Map<Key, SubdivisionData> _subdivisions;
   late ThemeMode _themeMode;
   late double _volume;
 
   int getBpm() => _bpm;
+
+  bool getIsPremium() => _isPremium;
 
   SamplePair getSamplePair() => _samplePair;
 
@@ -59,6 +63,14 @@ class AppState extends ChangeNotifier {
 
     await _sharedPreferencesAsync.setInt(Preference.bpm.name, validatedBpm);
     await Audio.setBpm(validatedBpm);
+  }
+
+  Future<void> setIsPremium(bool value) async {
+    _isPremium = value;
+
+    notifyListeners();
+
+    await _sharedPreferencesAsync.setBool(Preference.isPremium.name, value);
   }
 
   Future<void> setSamplePair(SamplePair samplePair) async {
@@ -112,6 +124,9 @@ class AppState extends ChangeNotifier {
 
     _bpm = await _sharedPreferencesAsync.getInt(Preference.bpm.name) ??
         Defaults.bpm;
+    _isPremium =
+        await _sharedPreferencesAsync.getBool(Preference.isPremium.name) ??
+            Defaults.isPremium;
     _themeMode = await _getOrElse<ThemeMode>(
         Preference.themeMode.name,
         ThemeMode.values,
@@ -125,14 +140,14 @@ class AppState extends ChangeNotifier {
 
     notifyListeners();
 
-    Audio.setSampleNames(samplePairs.fold<Set<String>>(
+    await Audio.setSampleNames(samplePairs.fold<Set<String>>(
         {},
         (accumulator, samplePair) => {
               ...accumulator,
               samplePair.downbeatSample,
               samplePair.subdivisionSample
             }));
-    Audio.setState(_bpm, _samplePair.downbeatSample,
+    await Audio.setState(_bpm, _samplePair.downbeatSample,
         _samplePair.subdivisionSample, _getJsonEncodedSubdivisions(), _volume);
   }
 
@@ -177,6 +192,7 @@ class AppState extends ChangeNotifier {
 
 class Defaults {
   static const int bpm = 120;
+  static const bool isPremium = false;
   static SamplePair samplePair = SamplePair(name: "Sine");
   static const ThemeMode themeMode = ThemeMode.system;
   static const double volume = 1.0;
