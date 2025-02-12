@@ -3,7 +3,6 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/app_state.dart';
 import 'package:tempus/audio.dart';
-import 'package:tempus/store.dart';
 import 'package:tempus/subdivision/subdivision.dart';
 import 'package:tempus/util.dart';
 
@@ -27,24 +26,41 @@ class SubdivisionControllerState extends State<SubdivisionController> {
     super.didChangeDependencies();
   }
 
-  Future<void> _addSubdivision(BuildContext context) async {
-    if (Provider.of<AppState>(context, listen: false)
-            .getSubdivisions()
-            .isEmpty ||
-        Provider.of<AppState>(context, listen: false).getIsPremium()) {
-      UniqueKey key = UniqueKey();
-      Map<Key, SubdivisionData> subdivisions =
-          Provider.of<AppState>(context, listen: false).getSubdivisions();
-      subdivisions = {
-        ...subdivisions,
-        key: SubdivisionData(option: subdivisionOptions[0], volume: 0.0)
-      };
-
-      await Provider.of<AppState>(context, listen: false)
-          .setSubdivisions(subdivisions);
-      await Audio.addSubdivision(
-          key, subdivisions[key]!.option, subdivisions[key]!.volume);
+  Future<void> _handleAddSubdivisionPressed(BuildContext context) async {
+    if (_canAddSubdivison()) {
+      await _addSubdivision();
     } else {
+      await _showPremiumDialog();
+    }
+  }
+
+  Future<void> _handleOnRemovePressed(Key key) async {
+    await Provider.of<AppState>(context, listen: false).setSubdivisions({
+      ...Provider.of<AppState>(context, listen: false).getSubdivisions()
+    }..remove(key));
+    Audio.removeSubdivision(key);
+  }
+
+  bool _canAddSubdivison() =>
+      Provider.of<AppState>(context, listen: false).getSubdivisions().isEmpty ||
+      Provider.of<AppState>(context, listen: false).getIsPremium();
+
+  Future<void> _addSubdivision() async {
+    UniqueKey key = UniqueKey();
+    Map<Key, SubdivisionData> subdivisions =
+        Provider.of<AppState>(context, listen: false).getSubdivisions();
+    subdivisions = {
+      ...subdivisions,
+      key: SubdivisionData(option: subdivisionOptions[0], volume: 0.0)
+    };
+
+    await Provider.of<AppState>(context, listen: false)
+        .setSubdivisions(subdivisions);
+    await Audio.addSubdivision(
+        key, subdivisions[key]!.option, subdivisions[key]!.volume);
+  }
+
+  Future<void> _showPremiumDialog() async =>
       await showDialog(DialogConfiguration(
           context,
           "Premium Feature",
@@ -64,19 +80,10 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                 cupertino: (context, platform) =>
                     CupertinoDialogActionData(isDefaultAction: true))
           ]));
-    }
-  }
 
-  Future<void> removeSubdivison(Key key) async {
-    await Provider.of<AppState>(context, listen: false).setSubdivisions({
-      ...Provider.of<AppState>(context, listen: false).getSubdivisions()
-    }..remove(key));
-    Audio.removeSubdivision(key);
-  }
-
-  void setVolume(BuildContext context, double newVolume) async {
+  void _handleVolumeChanged(BuildContext context, double newVolume) async {
     await Provider.of<AppState>(context, listen: false).setVolume(newVolume);
-    Audio.setVolume(newVolume);
+    await Audio.setVolume(newVolume);
   }
 
   @override
@@ -99,7 +106,8 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                       quarterTurns: 3,
                       child: PlatformSlider(
                         activeColor: Theme.of(context).colorScheme.primary,
-                        onChanged: (double value) => setVolume(context, value),
+                        onChanged: (double value) =>
+                            _handleVolumeChanged(context, value),
                         value: Provider.of<AppState>(context).getVolume(),
                       ),
                     )),
@@ -121,7 +129,8 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                   .keys
                   .map((key) => Subdivision(
                       key: key,
-                      onRemove: (Key key) async => await removeSubdivison(key)))
+                      onRemove: (Key key) async =>
+                          await _handleOnRemovePressed(key)))
                   .toList()),
               VerticalDivider(
                 color: Theme.of(context).colorScheme.onSurface,
@@ -129,7 +138,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
               if (Provider.of<AppState>(context).getSubdivisions().length <
                   subdivisionOptions.length)
                 PlatformIconButton(
-                    onPressed: () => _addSubdivision(context),
+                    onPressed: () => _handleAddSubdivisionPressed(context),
                     icon: Icon(
                       PlatformIcons(context).add,
                       color: Theme.of(context).colorScheme.primary,
