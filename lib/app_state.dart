@@ -7,16 +7,17 @@ import 'package:tempus/audio.dart';
 import 'package:tempus/subdivision/subdivision.dart';
 
 enum Preference {
-  bpm(true),
-  isPremium(false),
-  samplePair(false),
-  subdivisions(true),
-  subdivisionSample(false),
-  themeMode(false),
-  volume(true);
+  bpm(true, true),
+  isPremium(false, false),
+  samplePair(true, false),
+  subdivisions(true, true),
+  subdivisionSample(true, false),
+  themeMode(true, false),
+  volume(true, true);
 
+  final bool isAppSetting;
   final bool isMetronomeSetting;
-  const Preference(this.isMetronomeSetting);
+  const Preference(this.isAppSetting, this.isMetronomeSetting);
 }
 
 class AppState extends ChangeNotifier {

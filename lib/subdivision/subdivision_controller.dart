@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide showDialog;
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/app_state.dart';
 import 'package:tempus/audio.dart';
 import 'package:tempus/store.dart';
 import 'package:tempus/subdivision/subdivision.dart';
+import 'package:tempus/util.dart';
 
 class SubdivisionController extends StatefulWidget {
   const SubdivisionController({super.key});
@@ -24,6 +25,46 @@ class SubdivisionControllerState extends State<SubdivisionController> {
   @override // Instead of initState, since we need access to context
   void didChangeDependencies() {
     super.didChangeDependencies();
+  }
+
+  Future<void> _addSubdivision(BuildContext context) async {
+    if (Provider.of<AppState>(context, listen: false)
+            .getSubdivisions()
+            .isEmpty ||
+        Provider.of<AppState>(context, listen: false).getIsPremium()) {
+      UniqueKey key = UniqueKey();
+      Map<Key, SubdivisionData> subdivisions =
+          Provider.of<AppState>(context, listen: false).getSubdivisions();
+      subdivisions = {
+        ...subdivisions,
+        key: SubdivisionData(option: subdivisionOptions[0], volume: 0.0)
+      };
+
+      await Provider.of<AppState>(context, listen: false)
+          .setSubdivisions(subdivisions);
+      await Audio.addSubdivision(
+          key, subdivisions[key]!.option, subdivisions[key]!.volume);
+    } else {
+      await showDialog(DialogConfiguration(
+          context,
+          "Premium Feature",
+          "Simultaneous subdivisions are available with the premium version. Would you like to continue to the purchase?",
+          [
+            PlatformDialogAction(
+                child: Text("Cancel"),
+                onPressed: () => Navigator.pop(context),
+                cupertino: (context, platform) =>
+                    CupertinoDialogActionData(isDestructiveAction: true)),
+            PlatformDialogAction(
+                child: Text("Purchase"),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await Store.purchasePremium();
+                },
+                cupertino: (context, platform) =>
+                    CupertinoDialogActionData(isDefaultAction: true))
+          ]));
+    }
   }
 
   Future<void> removeSubdivison(Key key) async {
@@ -112,49 +153,5 @@ class SubdivisionControllerState extends State<SubdivisionController> {
     } else {
       return PlatformIcons(context).volumeOff;
     }
-  }
-}
-
-Future<void> _addSubdivision(BuildContext context) async {
-  if (Provider.of<AppState>(context, listen: false).getSubdivisions().isEmpty ||
-      Provider.of<AppState>(context, listen: false).getIsPremium()) {
-    UniqueKey key = UniqueKey();
-    Map<Key, SubdivisionData> subdivisions =
-        Provider.of<AppState>(context, listen: false).getSubdivisions();
-    subdivisions = {
-      ...subdivisions,
-      key: SubdivisionData(option: subdivisionOptions[0], volume: 0.0)
-    };
-
-    await Provider.of<AppState>(context, listen: false)
-        .setSubdivisions(subdivisions);
-    await Audio.addSubdivision(
-        key, subdivisions[key]!.option, subdivisions[key]!.volume);
-  } else {
-    await showPlatformDialog(
-        context: context,
-        builder: (context) => PlatformAlertDialog(
-                title: Text("Premium Feature"),
-                content: Padding(
-                    padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
-                    child: PlatformText(
-                      "Simultaneous subdivisions are available with the premium version. Would you like to continue to the purchase?",
-                      textAlign: TextAlign.center,
-                    )),
-                actions: [
-                  PlatformDialogAction(
-                      child: Text("Cancel"),
-                      onPressed: () => Navigator.pop(context),
-                      cupertino: (context, platform) =>
-                          CupertinoDialogActionData(isDestructiveAction: true)),
-                  PlatformDialogAction(
-                      child: Text("Purchase"),
-                      onPressed: () async {
-                        Navigator.pop(context);
-                        await Store.purchasePremium();
-                      },
-                      cupertino: (context, platform) =>
-                          CupertinoDialogActionData(isDefaultAction: true))
-                ]));
   }
 }

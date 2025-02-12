@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_platform_widgets: ^7.0.1
-  in_app_purchase: ^3.2.1
+  purchases_flutter: ^8.4.5
   provider: ^6.1.2
   settings_ui: ^2.0.2
   shared_preferences: ^2.3.3
