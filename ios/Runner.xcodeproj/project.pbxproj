@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0B864CC42B81359000D0AE13 /* Subdivision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B864CC32B81359000D0AE13 /* Subdivision.swift */; };
 		0B864CC62B81625900D0AE13 /* Metronome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B864CC52B81625900D0AE13 /* Metronome.swift */; };
+		0BA906B72D5C3594001D6BBF /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BA906B62D5C3594001D6BBF /* StoreKit.framework */; };
 		0BC3768F2BC234BF00E38D18 /* FileHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BC3768E2BC234BF00E38D18 /* FileHandler.swift */; };
 		0BECC0EE2CFA491300450289 /* Clip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BECC0ED2CFA491300450289 /* Clip.swift */; };
 		0BECC0F02CFA4C7400450289 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BECC0EF2CFA4C7400450289 /* Sample.swift */; };
@@ -51,6 +52,7 @@
 /* Begin PBXFileReference section */
 		0B864CC32B81359000D0AE13 /* Subdivision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subdivision.swift; sourceTree = "<group>"; };
 		0B864CC52B81625900D0AE13 /* Metronome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metronome.swift; sourceTree = "<group>"; };
+		0BA906B62D5C3594001D6BBF /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		0BC3768E2BC234BF00E38D18 /* FileHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHandler.swift; sourceTree = "<group>"; };
 		0BECC0ED2CFA491300450289 /* Clip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clip.swift; sourceTree = "<group>"; };
 		0BECC0EF2CFA4C7400450289 /* Sample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sample.swift; sourceTree = "<group>"; };
@@ -95,6 +97,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A55CBD0B6F04355011D8671 /* Pods_Runner.framework in Frameworks */,
+				0BA906B72D5C3594001D6BBF /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -104,6 +107,7 @@
 		1D39A164D200300BDFC28B02 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0BA906B62D5C3594001D6BBF /* StoreKit.framework */,
 				F78844B566B0EAEE85398570 /* Pods_Runner.framework */,
 				4014A3D4F97DD943EDFF7CF0 /* Pods_RunnerTests.framework */,
 			);
@@ -218,7 +222,7 @@
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
-				D63BC6AF0E0B1E367384957A /* [CP] Embed Pods Frameworks */,
+				A1029F8D69EEA2E51C96C1B6 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -365,7 +369,7 @@
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
 		};
-		D63BC6AF0E0B1E367384957A /* [CP] Embed Pods Frameworks */ = {
+		A1029F8D69EEA2E51C96C1B6 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -507,7 +511,7 @@
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Tempus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -707,7 +711,7 @@
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Tempus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -743,7 +747,7 @@
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Tempus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

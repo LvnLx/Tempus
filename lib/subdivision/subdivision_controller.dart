@@ -3,6 +3,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/app_state.dart';
 import 'package:tempus/audio.dart';
+import 'package:tempus/store.dart';
 import 'package:tempus/subdivision/subdivision.dart';
 import 'package:tempus/util.dart';
 
@@ -75,7 +76,12 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                 child: Text("Purchase"),
                 onPressed: () async {
                   Navigator.pop(context);
-                  await Store.purchasePremium();
+                  try {
+                    await Store.purchasePremium();
+                  } catch (error) {
+                    showDialog(DialogConfiguration(context, "Purchase Error",
+                        "There was an error while completing your purchase. Please contact support if the issue persists"));
+                  }
                 },
                 cupertino: (context, platform) =>
                     CupertinoDialogActionData(isDefaultAction: true))

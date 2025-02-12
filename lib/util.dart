@@ -7,15 +7,16 @@ class DialogConfiguration {
   String message;
   List<Widget>? actions;
 
-  DialogConfiguration(this.context, this.title, this.message, this.actions) {
-    actions = [
-      PlatformDialogAction(
-          child: Text("Ok"),
-          onPressed: () => Navigator.pop(context),
-          cupertino: (context, platform) =>
-              CupertinoDialogActionData(isDefaultAction: true))
-    ];
-  }
+  DialogConfiguration(this.context, this.title, this.message,
+      [List<Widget>? actions])
+      : actions = actions ??
+            [
+              PlatformDialogAction(
+                  child: Text("Ok"),
+                  onPressed: () => Navigator.pop(context),
+                  cupertino: (context, platform) =>
+                      CupertinoDialogActionData(isDefaultAction: true))
+            ];
 }
 
 String capitalizeFirst(String input) {
