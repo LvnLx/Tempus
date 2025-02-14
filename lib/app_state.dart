@@ -161,7 +161,10 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> resetApp() async {
-    _sharedPreferencesAsync.clear();
+    _sharedPreferencesAsync.clear(
+        allowList: Set.from(Preference.values
+            .where((preference) => preference.isAppSetting)
+            .map((preference) => preference.name)));
     await loadPreferences();
   }
 

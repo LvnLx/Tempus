@@ -76,12 +76,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                 child: Text("Purchase"),
                 onPressed: () async {
                   Navigator.pop(context);
-                  try {
-                    await Store.purchasePremium();
-                  } catch (error) {
-                    showDialog(DialogConfiguration(context, "Purchase Error",
-                        "There was an error while completing your purchase. Please contact support if the issue persists"));
-                  }
+                  await Store.purchasePremium(context);
                 },
                 cupertino: (context, platform) =>
                     CupertinoDialogActionData(isDefaultAction: true))

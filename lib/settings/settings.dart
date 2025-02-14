@@ -1,15 +1,16 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart' hide showDialog;
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:settings_ui/settings_ui.dart';
 import 'package:tempus/app_state.dart';
+import 'package:tempus/constants.dart';
 import 'package:tempus/settings/sample_settings.dart';
 import 'package:tempus/settings/theme_settings.dart';
+import 'package:tempus/store.dart';
 import 'package:tempus/util.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-Uri _emailUri =
-    Uri.parse("mailto:noreply.lvnlx@gmail.com?subject=Tempus%20Feedback");
 
 class Settings extends StatefulWidget {
   Settings({super.key});
@@ -40,6 +41,27 @@ class _SettingsState extends State<Settings> {
         darkTheme: getSettingsThemeData(context),
         lightTheme: getSettingsThemeData(context),
         sections: [
+          SettingsSection(title: Text("Premium Access"), tiles: [
+            SettingsTile(
+              title: Text("Status"),
+              trailing: DefaultTextStyle(
+                style: TextStyle(
+                    fontSize: 17,
+                    color: getSettingsThemeData(context).trailingTextColor),
+                child: Text(Provider.of<AppState>(context).getIsPremium()
+                    ? "Active"
+                    : "Inactive"),
+              ),
+            ),
+            SettingsTile(
+                title: Text("Purchase"),
+                onPressed: (context) async =>
+                    await Store.purchasePremium(context)),
+            SettingsTile(
+                title: Text("Restore"),
+                onPressed: (context) async =>
+                    await Store.restorePremium(context))
+          ]),
           SettingsSection(
             title: Text("Audio"),
             tiles: [
@@ -61,25 +83,71 @@ class _SettingsState extends State<Settings> {
                   MaterialPageRoute(builder: (context) => ThemeSettings())),
             )
           ]),
-          SettingsSection(title: Text("Other"), tiles: [
-            SettingsTile(
-                title: Text("Feedback"),
-                onPressed: (context) async => await _showEmail()),
+          SettingsSection(title: Text("App State"), tiles: [
             SettingsTile(
                 title: Text("Reset metronome"),
-                onPressed: (context) => _showResetDialog(
-                    context,
-                    "Reset metronome?",
-                    "The BPM and volume of the downbeat will be reset to their default values, and all subdivisions will be removed",
-                    Provider.of<AppState>(context, listen: false)
-                        .resetMetronome)),
+                onPressed: (context) => showDialog(DialogConfiguration(
+                        context,
+                        "Reset Metronome",
+                        "All of the metronome's settings will be reset to their default values",
+                        [
+                          PlatformDialogAction(
+                              child: Text("Cancel"),
+                              onPressed: () => Navigator.pop(context),
+                              cupertino: (context, platform) =>
+                                  CupertinoDialogActionData(
+                                      isDefaultAction: true)),
+                          PlatformDialogAction(
+                              child: Text("Ok"),
+                              onPressed: () async {
+                                Navigator.pop(context);
+                                await Provider.of<AppState>(context,
+                                        listen: false)
+                                    .resetMetronome();
+                              },
+                              cupertino: (context, platform) =>
+                                  CupertinoDialogActionData(
+                                      isDestructiveAction: true))
+                        ]))),
             SettingsTile(
                 title: Text("Reset app"),
-                onPressed: (context) => _showResetDialog(
-                    context,
-                    "Reset app?",
-                    "The app will revert to it's original state, with all default values",
-                    Provider.of<AppState>(context, listen: false).resetApp))
+                onPressed: (context) => showDialog(DialogConfiguration(
+                        context,
+                        "Reset App",
+                        "All of the app's settings will be reset to their default values, including the metronome's settings",
+                        [
+                          PlatformDialogAction(
+                              child: Text("Cancel"),
+                              onPressed: () => Navigator.pop(context),
+                              cupertino: (context, platform) =>
+                                  CupertinoDialogActionData(
+                                      isDefaultAction: true)),
+                          PlatformDialogAction(
+                              child: Text("Ok"),
+                              onPressed: () async {
+                                Navigator.pop(context);
+                                await Provider.of<AppState>(context,
+                                        listen: false)
+                                    .resetApp();
+                              },
+                              cupertino: (context, platform) =>
+                                  CupertinoDialogActionData(
+                                      isDestructiveAction: true))
+                        ])))
+          ]),
+          SettingsSection(title: Text("Help"), tiles: [
+            SettingsTile(
+                title: Text("Contact"),
+                onPressed: (context) async => await _showEmail(
+                    context, Constants.contactEmail, "Tempus%20Contact")),
+            SettingsTile(
+                title: Text("Feedback"),
+                onPressed: (context) async => await _showEmail(
+                    context, Constants.feedbackEmail, "Tempus%20Feedback")),
+            SettingsTile(
+                title: Text("Support"),
+                onPressed: (context) async => await _showEmail(
+                    context, Constants.supportEmail, "Tempus%20Support")),
           ])
         ],
       ),
@@ -87,39 +155,19 @@ class _SettingsState extends State<Settings> {
   }
 }
 
-Future<void> _showEmail() async {
-  if (!await launchUrl(_emailUri)) {
-    print("Failed to show email");
+Future<void> _showEmail(
+    BuildContext context, String email, String subject) async {
+  if (!await launchUrl(Uri.parse("mailto:$email?subject=$subject"))) {
+    if (context.mounted) {
+      showDialog(DialogConfiguration(context, "Email Failed",
+          "Unable to open the mail app. Please reach out to $email manually"));
+    }
   }
-}
-
-_showResetDialog(BuildContext context, String title, String content,
-    Function resetCallback) {
-  showPlatformDialog(
-      context: context,
-      builder: (context) => PlatformAlertDialog(
-              title: Text(title),
-              content: Text(content),
-              actions: [
-                PlatformDialogAction(
-                    child: Text("Cancel"),
-                    onPressed: () => Navigator.pop(context),
-                    cupertino: (context, platform) =>
-                        CupertinoDialogActionData(isDefaultAction: true)),
-                PlatformDialogAction(
-                    child: Text("Ok"),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      await resetCallback();
-                    },
-                    cupertino: (context, platform) =>
-                        CupertinoDialogActionData(isDestructiveAction: true))
-              ]));
 }
 
 SettingsThemeData getSettingsThemeData(context) {
   return SettingsThemeData(
-      dividerColor: Theme.of(context).colorScheme.onSurface,
+      dividerColor: Theme.of(context).colorScheme.surface,
       inactiveSubtitleColor: Colors.red,
       inactiveTitleColor: Colors.orange,
       leadingIconsColor: Theme.of(context).colorScheme.primary,
