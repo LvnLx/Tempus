@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:tempus/app_state.dart';
 import 'package:tempus/audio.dart';
 import 'package:tempus/settings/settings.dart';
+import 'package:tempus/util.dart';
 
 class SampleSettings extends StatelessWidget {
   const SampleSettings({super.key});
@@ -33,30 +34,42 @@ class SampleSettings extends StatelessWidget {
             SettingsSection(
               title: Text("Free"),
               tiles: samplePairs
-                  .map((samplePair) => SettingsTile(
-                      title: Text(samplePair.name),
-                      trailing:
-                          Provider.of<AppState>(context).getSamplePair().name ==
-                                  samplePair.name
-                              ? Icon(PlatformIcons(context).checkMark)
-                              : null,
-                      onPressed: (context) async {
-                        await Provider.of<AppState>(context, listen: false)
-                            .setSamplePair(samplePair);
-                        await Audio.setSample(true, samplePair.downbeatSample);
-                        await Audio.setSample(
-                            false, samplePair.subdivisionSample);
-                      }))
+                  .where((samplePair) => !samplePair.isPremium)
+                  .map((samplePair) =>
+                      getSamplePairSettingsTiles(context, samplePair, true))
                   .toList(),
             ),
             SettingsSection(
-              title: Text("Premium"),tiles: [
-              SettingsTile(
-                title: Text("Coming soon"),
-                enabled: false,
-              )
-            ])
+                title: Text("Premium"),
+                tiles: samplePairs
+                    .where((samplePair) => samplePair.isPremium)
+                    .map((samplePair) =>
+                        getSamplePairSettingsTiles(context, samplePair, false))
+                    .toList())
           ]),
     );
+  }
+
+  SettingsTile getSamplePairSettingsTiles(
+      BuildContext context, SamplePair samplePair, bool isFree) {
+    return SettingsTile(
+        enabled: isFree || Provider.of<AppState>(context).getIsPremium(),
+        title: Text(capitalizeFirst(samplePair.name)),
+        trailing: () {
+          SamplePair activeSamplePair =
+              Provider.of<AppState>(context).getSamplePair();
+          if (activeSamplePair.name == samplePair.name &&
+              activeSamplePair.isPremium == samplePair.isPremium) {
+            return Icon(PlatformIcons(context).checkMark);
+          } else {
+            return null;
+          }
+        }(),
+        onPressed: (context) async {
+          await Provider.of<AppState>(context, listen: false)
+              .setSamplePair(samplePair);
+          await Audio.setSample(true, samplePair.downbeatSample);
+          await Audio.setSample(false, samplePair.subdivisionSample);
+        });
   }
 }

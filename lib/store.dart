@@ -64,7 +64,7 @@ class Store {
         default:
           rethrow;
       }
-    } catch (error) {
+    } catch (_) {
       if (context.mounted) {
         await showDialog(DialogConfiguration(context, "Purchase Failed",
             "There was an error completing your purchase. Please contact support if the issue persists"));
@@ -103,7 +103,7 @@ class Store {
           ));
         }
       }
-    } catch (error) {
+    } catch (_) {
       if (context.mounted) {
         await showDialog(DialogConfiguration(
           context,
