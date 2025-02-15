@@ -28,8 +28,11 @@ Light Mode | Dark Mode
     - [x] Settings
       - [x] Feedback
       - [x] Persistence
+      - [x] Premium access
       - [x] Reset options
       - [x] Sample selection
+        - [x] Free
+        - [x] Premium
       - [x] Theme selection
   - [x] Subdivision Controller
     - [x] Downbeat
@@ -37,6 +40,8 @@ Light Mode | Dark Mode
     - [x] Scrolling
     - [x] Subdivisions
       - [x] Management
+        - [x] Free
+        - [x] Premium
       - [x] Option
       - [x] Volume
 - [x] Native Implementations
