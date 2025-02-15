@@ -7,15 +7,17 @@ import 'package:tempus/audio.dart';
 import 'package:tempus/subdivision/subdivision.dart';
 
 enum Preference {
-  bpm(true),
-  samplePair(false),
-  subdivisions(true),
-  subdivisionSample(false),
-  themeMode(false),
-  volume(true);
+  bpm(true, true),
+  isPremium(false, false),
+  samplePair(true, false),
+  subdivisions(true, true),
+  subdivisionSample(true, false),
+  themeMode(true, false),
+  volume(true, true);
 
+  final bool isAppSetting;
   final bool isMetronomeSetting;
-  const Preference(this.isMetronomeSetting);
+  const Preference(this.isAppSetting, this.isMetronomeSetting);
 }
 
 class AppState extends ChangeNotifier {
@@ -23,12 +25,15 @@ class AppState extends ChangeNotifier {
       SharedPreferencesAsync();
 
   late int _bpm;
+  late bool _isPremium;
   late SamplePair _samplePair;
   late Map<Key, SubdivisionData> _subdivisions;
   late ThemeMode _themeMode;
   late double _volume;
 
   int getBpm() => _bpm;
+
+  bool getIsPremium() => _isPremium;
 
   SamplePair getSamplePair() => _samplePair;
 
@@ -59,6 +64,14 @@ class AppState extends ChangeNotifier {
 
     await _sharedPreferencesAsync.setInt(Preference.bpm.name, validatedBpm);
     await Audio.setBpm(validatedBpm);
+  }
+
+  Future<void> setIsPremium(bool value) async {
+    _isPremium = value;
+
+    notifyListeners();
+
+    await _sharedPreferencesAsync.setBool(Preference.isPremium.name, value);
   }
 
   Future<void> setSamplePair(SamplePair samplePair) async {
@@ -102,39 +115,58 @@ class AppState extends ChangeNotifier {
 
   Future<void> loadPreferences() async {
     final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-    samplePairs = assetManifest
-        .listAssets()
-        .where((string) => string.startsWith("audio/"))
-        .fold<Set<String>>(
-            {}, (accumulator, path) => {...accumulator, path.split("/")[1]})
-        .map((samplePairName) => SamplePair(name: samplePairName))
-        .toList();
+    samplePairs = [
+      ...getSamplePairs(assetManifest, false),
+      ...getSamplePairs(assetManifest, true)
+    ];
 
-    _bpm = await _sharedPreferencesAsync.getInt(Preference.bpm.name) ??
-        Defaults.bpm;
-    _themeMode = await _getOrElse<ThemeMode>(
-        Preference.themeMode.name,
-        ThemeMode.values,
-        Defaults.themeMode.toString(),
-        (themeMode) => themeMode.toString());
-    _samplePair = await _getOrElse<SamplePair>(Preference.samplePair.name,
-        samplePairs, Defaults.samplePair.name, (samplePair) => samplePair.name);
-    _subdivisions = await _getSubdivisions() ?? {};
-    _volume = await _sharedPreferencesAsync.getDouble(Preference.volume.name) ??
-        Defaults.volume;
+    try {
+      _bpm = await _sharedPreferencesAsync.getInt(Preference.bpm.name) ??
+          Defaults.bpm;
+      _isPremium =
+          await _sharedPreferencesAsync.getBool(Preference.isPremium.name) ??
+              Defaults.isPremium;
+      _themeMode = await _getOrElse<ThemeMode>(
+          Preference.themeMode.name,
+          ThemeMode.values,
+          Defaults.themeMode.toString(),
+          (themeMode) => themeMode.toString());
+      _samplePair = await _getOrElse<SamplePair>(
+          Preference.samplePair.name,
+          samplePairs,
+          Defaults.samplePair.name,
+          (samplePair) => samplePair.name);
+      _subdivisions = await _getSubdivisions() ?? {};
+      _volume =
+          await _sharedPreferencesAsync.getDouble(Preference.volume.name) ??
+              Defaults.volume;
+    } catch (_) {
+      await resetApp();
+    }
 
     notifyListeners();
 
-    Audio.setSampleNames(samplePairs.fold<Set<String>>(
+    await Audio.setSampleNames(samplePairs.fold<Set<String>>(
         {},
         (accumulator, samplePair) => {
               ...accumulator,
               samplePair.downbeatSample,
               samplePair.subdivisionSample
             }));
-    Audio.setState(_bpm, _samplePair.downbeatSample,
+    await Audio.setState(_bpm, _samplePair.downbeatSample,
         _samplePair.subdivisionSample, _getJsonEncodedSubdivisions(), _volume);
   }
+
+  List<SamplePair> getSamplePairs(
+          AssetManifest assetManifest, bool isPremiumPath) =>
+      assetManifest
+          .listAssets()
+          .where((string) =>
+              string.startsWith("audio/${isPremiumPath ? "premium" : "free"}/"))
+          .fold<Set<String>>(
+              {}, (accumulator, path) => {...accumulator, path.split("/")[2]})
+          .map((samplePairName) => SamplePair(samplePairName, isPremiumPath))
+          .toList();
 
   Future<void> resetMetronome() async {
     _sharedPreferencesAsync.clear(
@@ -145,7 +177,10 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> resetApp() async {
-    _sharedPreferencesAsync.clear();
+    _sharedPreferencesAsync.clear(
+        allowList: Set.from(Preference.values
+            .where((preference) => preference.isAppSetting)
+            .map((preference) => preference.name)));
     await loadPreferences();
   }
 
@@ -177,7 +212,8 @@ class AppState extends ChangeNotifier {
 
 class Defaults {
   static const int bpm = 120;
-  static SamplePair samplePair = SamplePair(name: "Sine");
+  static const bool isPremium = false;
+  static SamplePair samplePair = SamplePair("sine", false);
   static const ThemeMode themeMode = ThemeMode.system;
   static const double volume = 1.0;
   static int subdivisionOption = subdivisionOptions[0];

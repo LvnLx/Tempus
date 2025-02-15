@@ -10,8 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_platform_widgets: ^7.0.1
+  purchases_flutter: ^8.4.5
   provider: ^6.1.2
-  settings_ui: ^2.0.2
+  flutter_settings_ui: ^3.0.1
   shared_preferences: ^2.3.3
   url_launcher: ^6.3.1
 
@@ -22,14 +23,34 @@ dev_dependencies:
 
 flutter:
   assets:
-    - audio/Bell/downbeat.wav
-    - audio/Bell/subdivision.wav
-    - audio/Digital/downbeat.wav
-    - audio/Digital/subdivision.wav
-    - audio/Sine/downbeat.wav
-    - audio/Sine/subdivision.wav
-    - audio/Square/downbeat.wav
-    - audio/Square/subdivision.wav
-    - audio/Tambourine/downbeat.wav
-    - audio/Tambourine/subdivision.wav
+    - audio/free/bell/downbeat.wav
+    - audio/free/bell/subdivision.wav
+    - audio/free/digital/downbeat.wav
+    - audio/free/digital/subdivision.wav
+    - audio/free/sine/downbeat.wav
+    - audio/free/sine/subdivision.wav
+    - audio/free/square/downbeat.wav
+    - audio/free/square/subdivision.wav
+    - audio/free/tambourine/downbeat.wav
+    - audio/free/tambourine/subdivision.wav
+    - audio/premium/bell/downbeat.wav
+    - audio/premium/bell/subdivision.wav
+    - audio/premium/block/downbeat.wav
+    - audio/premium/block/subdivision.wav
+    - audio/premium/castanet/downbeat.wav
+    - audio/premium/castanet/subdivision.wav
+    - audio/premium/clap/downbeat.wav
+    - audio/premium/clap/subdivision.wav
+    - audio/premium/glass/downbeat.wav
+    - audio/premium/glass/subdivision.wav
+    - audio/premium/snap/downbeat.wav
+    - audio/premium/snap/subdivision.wav
+    - audio/premium/square/downbeat.wav
+    - audio/premium/square/subdivision.wav
+    - audio/premium/tick/downbeat.wav
+    - audio/premium/tick/subdivision.wav
+    - audio/premium/weird/downbeat.wav
+    - audio/premium/weird/subdivision.wav
+    - audio/premium/whistle/downbeat.wav
+    - audio/premium/whistle/subdivision.wav
   uses-material-design: true

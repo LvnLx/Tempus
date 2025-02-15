@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/app_state.dart';
+import 'package:tempus/store.dart';
 import 'package:tempus/subdivision/subdivision_controller.dart';
 import 'package:tempus/playback/playback_controller.dart';
 
@@ -22,8 +23,15 @@ class Main extends StatefulWidget {
 }
 
 class MainState extends State<Main> {
-  Future<void> initializeAppState() async =>
+  Future<void> initializeAppState() async {
+    try {
       await Provider.of<AppState>(context, listen: false).loadPreferences();
+      await Store.initPurchases();
+    } catch (error) {
+      print(error);
+      rethrow;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

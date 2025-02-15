@@ -21,13 +21,16 @@ enum Action {
 
 class SamplePair {
   String name;
+  bool isPremium;
 
   late String downbeatSample;
   late String subdivisionSample;
 
-  SamplePair({required this.name}) {
-    downbeatSample = "audio/$name/downbeat.wav";
-    subdivisionSample = "audio/$name/subdivision.wav";
+  SamplePair(this.name, this.isPremium) {
+    downbeatSample =
+        "audio/${isPremium ? "premium" : "free"}/$name/downbeat.wav";
+    subdivisionSample =
+        "audio/${isPremium ? "premium" : "free"}/$name/subdivision.wav";
   }
 }
 
