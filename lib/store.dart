@@ -61,6 +61,7 @@ class Store {
     } on PlatformException catch (error) {
       switch (PurchasesErrorHelper.getErrorCode(error)) {
         case PurchasesErrorCode.purchaseCancelledError:
+          return;
         default:
           rethrow;
       }
