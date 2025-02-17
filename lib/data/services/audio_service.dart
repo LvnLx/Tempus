@@ -36,7 +36,7 @@ class SamplePair {
 
 late List<SamplePair> samplePairs;
 
-class Audio {
+class AudioService {
   static MethodChannel methodChannel = MethodChannel('audio');
 
   static Future<void> addSubdivision(Key key, int option, double volume) async {

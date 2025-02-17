@@ -2,15 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/app_state.dart';
-import 'package:tempus/store.dart';
-import 'package:tempus/subdivision/subdivision_controller.dart';
-import 'package:tempus/playback/playback_controller.dart';
+import 'package:tempus/data/services/shared_preferences_service.dart';
+import 'package:tempus/data/services/purchases_service.dart';
+import 'package:tempus/ui/mixer/mixer.dart';
+import 'package:tempus/ui/deck/deck.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  AppState appState = AppState();
+  SharedPreferencesService appState = SharedPreferencesService();
 
   runApp(ChangeNotifierProvider(create: (_) => appState, child: Main()));
 }
@@ -25,8 +25,8 @@ class Main extends StatefulWidget {
 class MainState extends State<Main> {
   Future<void> initializeAppState() async {
     try {
-      await Provider.of<AppState>(context, listen: false).loadPreferences();
-      await Store.initPurchases();
+      await Provider.of<SharedPreferencesService>(context, listen: false).loadPreferences();
+      await PurchasesService.initPurchases();
     } catch (error) {
       print(error);
       rethrow;
@@ -42,7 +42,7 @@ class MainState extends State<Main> {
           if (snapshot.connectionState == ConnectionState.done) {
             return PlatformProvider(
                 builder: (context) => PlatformTheme(
-                      themeMode: Provider.of<AppState>(context).getThemeMode(),
+                      themeMode: Provider.of<SharedPreferencesService>(context).getThemeMode(),
                       materialDarkTheme: darkThemeData,
                       materialLightTheme: lightThemeData,
                       builder: (context) => PlatformApp(
@@ -59,12 +59,12 @@ class MainState extends State<Main> {
                                   child: Flex(
                                 direction: Axis.vertical,
                                 children: [
-                                  Expanded(child: SubdivisionController()),
+                                  Expanded(child: Mixer()),
                                   Divider(
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurface),
-                                  Expanded(child: PlaybackController())
+                                  Expanded(child: Deck())
                                 ],
                               )))),
                     ));

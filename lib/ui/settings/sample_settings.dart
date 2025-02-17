@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/app_state.dart';
-import 'package:tempus/audio.dart';
-import 'package:tempus/settings/settings.dart';
+import 'package:tempus/data/services/shared_preferences_service.dart';
+import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/ui/settings/settings.dart';
 import 'package:tempus/util.dart';
 
 class SampleSettings extends StatelessWidget {
@@ -53,11 +53,11 @@ class SampleSettings extends StatelessWidget {
   SettingsTile getSamplePairSettingsTiles(
       BuildContext context, SamplePair samplePair, bool isFree) {
     return SettingsTile(
-        enabled: isFree || Provider.of<AppState>(context).getIsPremium(),
+        enabled: isFree || Provider.of<SharedPreferencesService>(context).getIsPremium(),
         title: Text(capitalizeFirst(samplePair.name)),
         trailing: () {
           SamplePair activeSamplePair =
-              Provider.of<AppState>(context).getSamplePair();
+              Provider.of<SharedPreferencesService>(context).getSamplePair();
           if (activeSamplePair.name == samplePair.name &&
               activeSamplePair.isPremium == samplePair.isPremium) {
             return Icon(PlatformIcons(context).checkMark);
@@ -66,10 +66,10 @@ class SampleSettings extends StatelessWidget {
           }
         }(),
         onPressed: (context) async {
-          await Provider.of<AppState>(context, listen: false)
+          await Provider.of<SharedPreferencesService>(context, listen: false)
               .setSamplePair(samplePair);
-          await Audio.setSample(true, samplePair.downbeatSample);
-          await Audio.setSample(false, samplePair.subdivisionSample);
+          await AudioService.setSample(true, samplePair.downbeatSample);
+          await AudioService.setSample(false, samplePair.subdivisionSample);
         });
   }
 }

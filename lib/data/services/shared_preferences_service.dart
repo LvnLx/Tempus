@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tempus/audio.dart';
-import 'package:tempus/subdivision/subdivision.dart';
+import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/ui/mixer/subdivision.dart';
 
 enum Preference {
   bpm(true, true),
@@ -20,7 +20,7 @@ enum Preference {
   const Preference(this.isAppSetting, this.isMetronomeSetting);
 }
 
-class AppState extends ChangeNotifier {
+class SharedPreferencesService extends ChangeNotifier {
   final SharedPreferencesAsync _sharedPreferencesAsync =
       SharedPreferencesAsync();
 
@@ -63,7 +63,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     await _sharedPreferencesAsync.setInt(Preference.bpm.name, validatedBpm);
-    await Audio.setBpm(validatedBpm);
+    await AudioService.setBpm(validatedBpm);
   }
 
   Future<void> setIsPremium(bool value) async {
@@ -146,14 +146,14 @@ class AppState extends ChangeNotifier {
 
     notifyListeners();
 
-    await Audio.setSampleNames(samplePairs.fold<Set<String>>(
+    await AudioService.setSampleNames(samplePairs.fold<Set<String>>(
         {},
         (accumulator, samplePair) => {
               ...accumulator,
               samplePair.downbeatSample,
               samplePair.subdivisionSample
             }));
-    await Audio.setState(_bpm, _samplePair.downbeatSample,
+    await AudioService.setState(_bpm, _samplePair.downbeatSample,
         _samplePair.subdivisionSample, _getJsonEncodedSubdivisions(), _volume);
   }
 
