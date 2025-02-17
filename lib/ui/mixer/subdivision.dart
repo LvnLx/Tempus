@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/app_state.dart';
-import 'package:tempus/audio.dart';
-import 'package:tempus/subdivision/scroll_wheel.dart';
+import 'package:tempus/data/services/shared_preferences_service.dart';
+import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/ui/mixer/scroll_wheel.dart';
 
 final List<int> subdivisionOptions = List.generate(8, (index) => (index + 2));
 
@@ -21,23 +21,23 @@ class SubdivisionState extends State<Subdivision> {
   PageController scrollController = PageController(viewportFraction: 0.5);
 
   Future<void> setOption(int option) async {
-    await Provider.of<AppState>(context, listen: false).setSubdivisions({
-      ...Provider.of<AppState>(context, listen: false).getSubdivisions()
+    await Provider.of<SharedPreferencesService>(context, listen: false).setSubdivisions({
+      ...Provider.of<SharedPreferencesService>(context, listen: false).getSubdivisions()
     }..update(
         key,
         (subdivisionData) =>
             SubdivisionData(option: option, volume: subdivisionData.volume)));
-    Audio.setSubdivisionOption(widget.key!, option);
+    AudioService.setSubdivisionOption(widget.key!, option);
   }
 
   Future<void> setVolume(double volume) async {
-    await Provider.of<AppState>(context, listen: false).setSubdivisions({
-      ...Provider.of<AppState>(context, listen: false).getSubdivisions()
+    await Provider.of<SharedPreferencesService>(context, listen: false).setSubdivisions({
+      ...Provider.of<SharedPreferencesService>(context, listen: false).getSubdivisions()
     }..update(
         key,
         (subdivisionData) =>
             SubdivisionData(option: subdivisionData.option, volume: volume)));
-    Audio.setSubdivisionVolume(widget.key!, volume);
+    AudioService.setSubdivisionVolume(widget.key!, volume);
   }
 
   @override
@@ -73,7 +73,7 @@ class SubdivisionState extends State<Subdivision> {
                     child: PlatformSlider(
                       activeColor: Theme.of(context).colorScheme.primary,
                       onChanged: (double value) async => await setVolume(value),
-                      value: Provider.of<AppState>(context)
+                      value: Provider.of<SharedPreferencesService>(context)
                           .getSubdivisions()[key]!
                           .volume,
                     ))),
@@ -81,7 +81,7 @@ class SubdivisionState extends State<Subdivision> {
                 width: 50,
                 height: 120,
                 child: ScrollWheel(
-                    initialItem: Provider.of<AppState>(context, listen: false)
+                    initialItem: Provider.of<SharedPreferencesService>(context, listen: false)
                             .getSubdivisions()[key]!
                             .option -
                         2,

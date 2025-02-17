@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tempus/subdivision/subdivision.dart';
+import 'package:tempus/ui/mixer/subdivision.dart';
 
 class ScrollWheel extends StatefulWidget {
   final int initialItem;

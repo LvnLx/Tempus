@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart' hide showDialog;
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/app_state.dart';
-import 'package:tempus/audio.dart';
-import 'package:tempus/store.dart';
-import 'package:tempus/subdivision/subdivision.dart';
+import 'package:tempus/data/services/shared_preferences_service.dart';
+import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/data/services/purchases_service.dart';
+import 'package:tempus/ui/mixer/subdivision.dart';
 import 'package:tempus/util.dart';
 
-class SubdivisionController extends StatefulWidget {
-  const SubdivisionController({super.key});
+class Mixer extends StatefulWidget {
+  const Mixer({super.key});
 
   @override
-  State<StatefulWidget> createState() => SubdivisionControllerState();
+  State<StatefulWidget> createState() => MixerState();
 }
 
-class SubdivisionControllerState extends State<SubdivisionController> {
+class MixerState extends State<Mixer> {
   final ScrollController scrollController = ScrollController();
 
   @override
@@ -36,28 +36,28 @@ class SubdivisionControllerState extends State<SubdivisionController> {
   }
 
   Future<void> _handleOnRemovePressed(Key key) async {
-    await Provider.of<AppState>(context, listen: false).setSubdivisions({
-      ...Provider.of<AppState>(context, listen: false).getSubdivisions()
+    await Provider.of<SharedPreferencesService>(context, listen: false).setSubdivisions({
+      ...Provider.of<SharedPreferencesService>(context, listen: false).getSubdivisions()
     }..remove(key));
-    Audio.removeSubdivision(key);
+    AudioService.removeSubdivision(key);
   }
 
   bool _canAddSubdivison() =>
-      Provider.of<AppState>(context, listen: false).getSubdivisions().isEmpty ||
-      Provider.of<AppState>(context, listen: false).getIsPremium();
+      Provider.of<SharedPreferencesService>(context, listen: false).getSubdivisions().isEmpty ||
+      Provider.of<SharedPreferencesService>(context, listen: false).getIsPremium();
 
   Future<void> _addSubdivision() async {
     UniqueKey key = UniqueKey();
     Map<Key, SubdivisionData> subdivisions =
-        Provider.of<AppState>(context, listen: false).getSubdivisions();
+        Provider.of<SharedPreferencesService>(context, listen: false).getSubdivisions();
     subdivisions = {
       ...subdivisions,
       key: SubdivisionData(option: subdivisionOptions[0], volume: 0.0)
     };
 
-    await Provider.of<AppState>(context, listen: false)
+    await Provider.of<SharedPreferencesService>(context, listen: false)
         .setSubdivisions(subdivisions);
-    await Audio.addSubdivision(
+    await AudioService.addSubdivision(
         key, subdivisions[key]!.option, subdivisions[key]!.volume);
   }
 
@@ -76,15 +76,15 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                 child: Text("Purchase"),
                 onPressed: () async {
                   Navigator.pop(context);
-                  await Store.purchasePremium(context);
+                  await PurchasesService.purchasePremium(context);
                 },
                 cupertino: (context, platform) =>
                     CupertinoDialogActionData(isDefaultAction: true))
           ]));
 
   void _handleVolumeChanged(BuildContext context, double newVolume) async {
-    await Provider.of<AppState>(context, listen: false).setVolume(newVolume);
-    await Audio.setVolume(newVolume);
+    await Provider.of<SharedPreferencesService>(context, listen: false).setVolume(newVolume);
+    await AudioService.setVolume(newVolume);
   }
 
   @override
@@ -109,7 +109,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                         activeColor: Theme.of(context).colorScheme.primary,
                         onChanged: (double value) =>
                             _handleVolumeChanged(context, value),
-                        value: Provider.of<AppState>(context).getVolume(),
+                        value: Provider.of<SharedPreferencesService>(context).getVolume(),
                       ),
                     )),
                     SizedBox(
@@ -125,7 +125,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
                   ],
                 ),
               ),
-              ...(Provider.of<AppState>(context)
+              ...(Provider.of<SharedPreferencesService>(context)
                   .getSubdivisions()
                   .keys
                   .map((key) => Subdivision(
@@ -136,7 +136,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
               VerticalDivider(
                 color: Theme.of(context).colorScheme.onSurface,
               ),
-              if (Provider.of<AppState>(context).getSubdivisions().length <
+              if (Provider.of<SharedPreferencesService>(context).getSubdivisions().length <
                   subdivisionOptions.length)
                 PlatformIconButton(
                     onPressed: () => _handleAddSubdivisionPressed(context),
@@ -153,7 +153,7 @@ class SubdivisionControllerState extends State<SubdivisionController> {
   }
 
   IconData volumeIcon() {
-    double volume = Provider.of<AppState>(context).getVolume();
+    double volume = Provider.of<SharedPreferencesService>(context).getVolume();
     if (volume > 0.66) {
       return PlatformIcons(context).volumeUp;
     } else if (volume > 0.33) {

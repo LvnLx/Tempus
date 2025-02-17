@@ -5,19 +5,19 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/app_state.dart';
-import 'package:tempus/audio.dart';
-import 'package:tempus/playback/bpm_dial.dart';
-import 'package:tempus/settings/settings.dart';
+import 'package:tempus/data/services/shared_preferences_service.dart';
+import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/ui/deck/bpm_dial.dart';
+import 'package:tempus/ui/settings/settings.dart';
 
-class PlaybackController extends StatefulWidget {
-  const PlaybackController({super.key});
+class Deck extends StatefulWidget {
+  const Deck({super.key});
 
   @override
-  State<StatefulWidget> createState() => PlaybackControllerState();
+  State<StatefulWidget> createState() => DeckState();
 }
 
-class PlaybackControllerState extends State<PlaybackController> {
+class DeckState extends State<Deck> {
   final int maxTapTimeCount = 5;
 
   late Timer lastTapTimer;
@@ -28,7 +28,7 @@ class PlaybackControllerState extends State<PlaybackController> {
   @override
   void initState() {
     super.initState();
-    Audio.stopPlayback();
+    AudioService.stopPlayback();
   }
 
   void addTapTime(int tapTime) {
@@ -65,12 +65,12 @@ class PlaybackControllerState extends State<PlaybackController> {
   }
 
   Future<void> setBpm(int newBpm, {bool skipUnchanged = true}) async {
-    await Provider.of<AppState>(context, listen: false)
+    await Provider.of<SharedPreferencesService>(context, listen: false)
         .setBpm(newBpm, skipUnchanged: skipUnchanged);
   }
 
   Future<void> togglePlayback() async {
-    playback ? await Audio.stopPlayback() : await Audio.startPlayback();
+    playback ? await AudioService.stopPlayback() : await AudioService.startPlayback();
     setState(() {
       playback = !playback;
     });
@@ -95,12 +95,12 @@ class PlaybackControllerState extends State<PlaybackController> {
                     size: 35,
                   ),
                   onPressed: () async => await setBpm(
-                      Provider.of<AppState>(context, listen: false).getBpm() -
+                      Provider.of<SharedPreferencesService>(context, listen: false).getBpm() -
                           1),
                 ),
                 GestureDetector(
                   onTap: () async => await showBpmDialog(context, setBpm,
-                      Provider.of<AppState>(context, listen: false).getBpm()),
+                      Provider.of<SharedPreferencesService>(context, listen: false).getBpm()),
                   child: Container(
                       padding: EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
@@ -113,7 +113,7 @@ class PlaybackControllerState extends State<PlaybackController> {
                           child: Text(
                         tapTimes.length == 1
                             ? "TAP"
-                            : Provider.of<AppState>(context)
+                            : Provider.of<SharedPreferencesService>(context)
                                 .getBpm()
                                 .toString(),
                         style: TextStyle(
@@ -126,7 +126,7 @@ class PlaybackControllerState extends State<PlaybackController> {
                     icon: Icon(PlatformIcons(context).add,
                         color: Theme.of(context).colorScheme.primary, size: 35),
                     onPressed: () async => await setBpm(
-                        Provider.of<AppState>(context, listen: false).getBpm() +
+                        Provider.of<SharedPreferencesService>(context, listen: false).getBpm() +
                             1)),
               ],
             ),
@@ -142,7 +142,7 @@ class PlaybackControllerState extends State<PlaybackController> {
                         child: BpmDial(
                             callbackThreshold: 20,
                             callback: (int change) async => await setBpm(
-                                Provider.of<AppState>(context, listen: false)
+                                Provider.of<SharedPreferencesService>(context, listen: false)
                                         .getBpm() +
                                     change))),
                   ),
