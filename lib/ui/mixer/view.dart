@@ -36,26 +36,26 @@ class MixerState extends State<Mixer> {
   }
 
   Future<void> _handleOnRemovePressed(Key key) async {
-    await Provider.of<PreferenceService>(context, listen: false).setSubdivisions({
-      ...Provider.of<PreferenceService>(context, listen: false).getSubdivisions()
+    await context.read<PreferenceService>().setSubdivisions({
+      ...context.read<PreferenceService>().getSubdivisions()
     }..remove(key));
     AudioService.removeSubdivision(key);
   }
 
   bool _canAddSubdivison() =>
-      Provider.of<PreferenceService>(context, listen: false).getSubdivisions().isEmpty ||
-      Provider.of<PreferenceService>(context, listen: false).getIsPremium();
+      context.read<PreferenceService>().getSubdivisions().isEmpty ||
+      context.read<PreferenceService>().getIsPremium();
 
   Future<void> _addSubdivision() async {
     UniqueKey key = UniqueKey();
     Map<Key, SubdivisionData> subdivisions =
-        Provider.of<PreferenceService>(context, listen: false).getSubdivisions();
+        context.read<PreferenceService>().getSubdivisions();
     subdivisions = {
       ...subdivisions,
       key: SubdivisionData(option: subdivisionOptions[0], volume: 0.0)
     };
 
-    await Provider.of<PreferenceService>(context, listen: false)
+    await context.read<PreferenceService>()
         .setSubdivisions(subdivisions);
     await AudioService.addSubdivision(
         key, subdivisions[key]!.option, subdivisions[key]!.volume);
@@ -83,7 +83,7 @@ class MixerState extends State<Mixer> {
           ]));
 
   void _handleVolumeChanged(BuildContext context, double newVolume) async {
-    await Provider.of<PreferenceService>(context, listen: false).setVolume(newVolume);
+    await context.read<PreferenceService>().setVolume(newVolume);
     await AudioService.setVolume(newVolume);
   }
 
@@ -109,7 +109,7 @@ class MixerState extends State<Mixer> {
                         activeColor: Theme.of(context).colorScheme.primary,
                         onChanged: (double value) =>
                             _handleVolumeChanged(context, value),
-                        value: Provider.of<PreferenceService>(context).getVolume(),
+                        value: context.watch<PreferenceService>().getVolume(),
                       ),
                     )),
                     SizedBox(
@@ -125,7 +125,7 @@ class MixerState extends State<Mixer> {
                   ],
                 ),
               ),
-              ...(Provider.of<PreferenceService>(context)
+              ...(context.watch<PreferenceService>()
                   .getSubdivisions()
                   .keys
                   .map((key) => Channel(
@@ -136,7 +136,7 @@ class MixerState extends State<Mixer> {
               VerticalDivider(
                 color: Theme.of(context).colorScheme.onSurface,
               ),
-              if (Provider.of<PreferenceService>(context).getSubdivisions().length <
+              if (context.watch<PreferenceService>().getSubdivisions().length <
                   subdivisionOptions.length)
                 PlatformIconButton(
                     onPressed: () => _handleAddSubdivisionPressed(context),
@@ -153,7 +153,7 @@ class MixerState extends State<Mixer> {
   }
 
   IconData volumeIcon() {
-    double volume = Provider.of<PreferenceService>(context).getVolume();
+    double volume = context.watch<PreferenceService>().getVolume();
     if (volume > 0.66) {
       return PlatformIcons(context).volumeUp;
     } else if (volume > 0.33) {

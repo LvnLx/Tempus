@@ -21,8 +21,8 @@ class ChannelState extends State<Channel> {
   PageController scrollController = PageController(viewportFraction: 0.5);
 
   Future<void> setOption(int option) async {
-    await Provider.of<PreferenceService>(context, listen: false).setSubdivisions({
-      ...Provider.of<PreferenceService>(context, listen: false).getSubdivisions()
+    await context.read<PreferenceService>().setSubdivisions({
+      ...context.read<PreferenceService>().getSubdivisions()
     }..update(
         key,
         (subdivisionData) =>
@@ -31,8 +31,8 @@ class ChannelState extends State<Channel> {
   }
 
   Future<void> setVolume(double volume) async {
-    await Provider.of<PreferenceService>(context, listen: false).setSubdivisions({
-      ...Provider.of<PreferenceService>(context, listen: false).getSubdivisions()
+    await context.read<PreferenceService>().setSubdivisions({
+      ...context.read<PreferenceService>().getSubdivisions()
     }..update(
         key,
         (subdivisionData) =>
@@ -73,7 +73,7 @@ class ChannelState extends State<Channel> {
                     child: PlatformSlider(
                       activeColor: Theme.of(context).colorScheme.primary,
                       onChanged: (double value) async => await setVolume(value),
-                      value: Provider.of<PreferenceService>(context)
+                      value: context.watch<PreferenceService>()
                           .getSubdivisions()[key]!
                           .volume,
                     ))),
@@ -81,7 +81,7 @@ class ChannelState extends State<Channel> {
                 width: 50,
                 height: 120,
                 child: Selector(
-                    initialItem: Provider.of<PreferenceService>(context, listen: false)
+                    initialItem: context.read<PreferenceService>()
                             .getSubdivisions()[key]!
                             .option -
                         2,

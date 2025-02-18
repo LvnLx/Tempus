@@ -33,30 +33,30 @@ class ThemeSettings extends StatelessWidget {
               tiles: [
                 SettingsTile(
                     title: Text("System"),
-                    trailing: Provider.of<PreferenceService>(context).getThemeMode() ==
+                    trailing: context.watch<PreferenceService>().getThemeMode() ==
                             ThemeMode.system
                         ? Icon(PlatformIcons(context).checkMark)
                         : null,
                     onPressed: (context) async =>
-                        await Provider.of<PreferenceService>(context, listen: false)
+                        await context.read<PreferenceService>()
                             .setThemeMode(ThemeMode.system)),
                 SettingsTile(
                     title: Text("Light"),
-                    trailing: Provider.of<PreferenceService>(context).getThemeMode() ==
+                    trailing: context.watch<PreferenceService>().getThemeMode() ==
                             ThemeMode.light
                         ? Icon(PlatformIcons(context).checkMark)
                         : null,
                     onPressed: (context) async =>
-                        await Provider.of<PreferenceService>(context, listen: false)
+                        await context.read<PreferenceService>()
                             .setThemeMode(ThemeMode.light)),
                 SettingsTile(
                     title: Text("Dark"),
-                    trailing: Provider.of<PreferenceService>(context).getThemeMode() ==
+                    trailing: context.watch<PreferenceService>().getThemeMode() ==
                             ThemeMode.dark
                         ? Icon(PlatformIcons(context).checkMark)
                         : null,
                     onPressed: (context) async =>
-                        await Provider.of<PreferenceService>(context, listen: false)
+                        await context.read<PreferenceService>()
                             .setThemeMode(ThemeMode.dark)),
               ],
             ),

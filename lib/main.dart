@@ -25,7 +25,7 @@ class Main extends StatefulWidget {
 class MainState extends State<Main> {
   Future<void> initializeAppState() async {
     try {
-      await Provider.of<PreferenceService>(context, listen: false).loadPreferences();
+      await context.read<PreferenceService>().loadPreferences();
       await PurchaseService.initPurchases();
     } catch (error) {
       print(error);
@@ -42,7 +42,7 @@ class MainState extends State<Main> {
           if (snapshot.connectionState == ConnectionState.done) {
             return PlatformProvider(
                 builder: (context) => PlatformTheme(
-                      themeMode: Provider.of<PreferenceService>(context).getThemeMode(),
+                      themeMode: context.watch<PreferenceService>().getThemeMode(),
                       materialDarkTheme: darkThemeData,
                       materialLightTheme: lightThemeData,
                       builder: (context) => PlatformApp(

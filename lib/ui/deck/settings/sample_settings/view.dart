@@ -54,11 +54,11 @@ class SampleSettings extends StatelessWidget {
   SettingsTile getSamplePairSettingsTiles(
       BuildContext context, SamplePair samplePair, bool isFree) {
     return SettingsTile(
-        enabled: isFree || Provider.of<PreferenceService>(context).getIsPremium(),
+        enabled: isFree || context.watch<PreferenceService>().getIsPremium(),
         title: Text(capitalizeFirst(samplePair.name)),
         trailing: () {
           SamplePair activeSamplePair =
-              Provider.of<PreferenceService>(context).getSamplePair();
+              context.watch<PreferenceService>().getSamplePair();
           if (activeSamplePair.name == samplePair.name &&
               activeSamplePair.isPremium == samplePair.isPremium) {
             return Icon(PlatformIcons(context).checkMark);
@@ -67,7 +67,7 @@ class SampleSettings extends StatelessWidget {
           }
         }(),
         onPressed: (context) async {
-          await Provider.of<PreferenceService>(context, listen: false)
+          await context.read<PreferenceService>()
               .setSamplePair(samplePair);
           await AudioService.setSample(true, samplePair.downbeatSample);
           await AudioService.setSample(false, samplePair.subdivisionSample);

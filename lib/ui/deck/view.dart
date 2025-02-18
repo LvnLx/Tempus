@@ -65,12 +65,15 @@ class DeckState extends State<Deck> {
   }
 
   Future<void> setBpm(int newBpm, {bool skipUnchanged = true}) async {
-    await Provider.of<PreferenceService>(context, listen: false)
+    await context
+        .read<PreferenceService>()
         .setBpm(newBpm, skipUnchanged: skipUnchanged);
   }
 
   Future<void> togglePlayback() async {
-    playback ? await AudioService.stopPlayback() : await AudioService.startPlayback();
+    playback
+        ? await AudioService.stopPlayback()
+        : await AudioService.startPlayback();
     setState(() {
       playback = !playback;
     });
@@ -95,12 +98,11 @@ class DeckState extends State<Deck> {
                     size: 35,
                   ),
                   onPressed: () async => await setBpm(
-                      Provider.of<PreferenceService>(context, listen: false).getBpm() -
-                          1),
+                      context.read<PreferenceService>().getBpm() - 1),
                 ),
                 GestureDetector(
                   onTap: () async => await showBpmDialog(context, setBpm,
-                      Provider.of<PreferenceService>(context, listen: false).getBpm()),
+                      context.read<PreferenceService>().getBpm()),
                   child: Container(
                       padding: EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
@@ -113,7 +115,8 @@ class DeckState extends State<Deck> {
                           child: Text(
                         tapTimes.length == 1
                             ? "TAP"
-                            : Provider.of<PreferenceService>(context)
+                            : context
+                                .watch<PreferenceService>()
                                 .getBpm()
                                 .toString(),
                         style: TextStyle(
@@ -126,8 +129,7 @@ class DeckState extends State<Deck> {
                     icon: Icon(PlatformIcons(context).add,
                         color: Theme.of(context).colorScheme.primary, size: 35),
                     onPressed: () async => await setBpm(
-                        Provider.of<PreferenceService>(context, listen: false).getBpm() +
-                            1)),
+                        context.read<PreferenceService>().getBpm() + 1)),
               ],
             ),
           ),
@@ -142,8 +144,7 @@ class DeckState extends State<Deck> {
                         child: BpmDial(
                             callbackThreshold: 20,
                             callback: (int change) async => await setBpm(
-                                Provider.of<PreferenceService>(context, listen: false)
-                                        .getBpm() +
+                                context.read<PreferenceService>().getBpm() +
                                     change))),
                   ),
                   Center(

@@ -48,7 +48,7 @@ class _SettingsState extends State<Settings> {
                 style: TextStyle(
                     fontSize: 17,
                     color: getSettingsThemeData(context).trailingTextColor),
-                child: Text(Provider.of<PreferenceService>(context).getIsPremium()
+                child: Text(context.watch<PreferenceService>().getIsPremium()
                     ? "Active"
                     : "Inactive"),
               ),
@@ -67,8 +67,8 @@ class _SettingsState extends State<Settings> {
             tiles: [
               SettingsTile.navigation(
                 title: Text("Sample"),
-                value:
-                    Text(capitalizeFirst(Provider.of<PreferenceService>(context).getSamplePair().name)),
+                value: Text(capitalizeFirst(
+                    context.watch<PreferenceService>().getSamplePair().name)),
                 onPressed: (context) => Navigator.push(context,
                     MaterialPageRoute(builder: (context) => SampleSettings())),
               )
@@ -78,7 +78,7 @@ class _SettingsState extends State<Settings> {
             SettingsTile.navigation(
               title: Text("Theme"),
               value: Text(capitalizeFirst(
-                  Provider.of<PreferenceService>(context).getThemeMode().name)),
+                  context.watch<PreferenceService>().getThemeMode().name)),
               onPressed: (context) => Navigator.push(context,
                   MaterialPageRoute(builder: (context) => ThemeSettings())),
             )
@@ -101,8 +101,8 @@ class _SettingsState extends State<Settings> {
                               child: Text("Ok"),
                               onPressed: () async {
                                 Navigator.pop(context);
-                                await Provider.of<PreferenceService>(context,
-                                        listen: false)
+                                await context
+                                    .read<PreferenceService>()
                                     .resetMetronome();
                               },
                               cupertino: (context, platform) =>
@@ -126,8 +126,8 @@ class _SettingsState extends State<Settings> {
                               child: Text("Ok"),
                               onPressed: () async {
                                 Navigator.pop(context);
-                                await Provider.of<PreferenceService>(context,
-                                        listen: false)
+                                await context
+                                    .read<PreferenceService>()
                                     .resetApp();
                               },
                               cupertino: (context, platform) =>

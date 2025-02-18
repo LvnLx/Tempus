@@ -28,13 +28,13 @@ class PurchaseService {
   }
 
   static Future<void> purchasePremium(BuildContext context) async {
-    PreferenceService appState = Provider.of<PreferenceService>(context, listen: false);
+    PreferenceService preferenceService = context.read<PreferenceService>();
 
     Offerings offerings = await Purchases.getOfferings();
     Offering offering = offerings.current!;
     Package package = offering.availablePackages.first;
 
-    if (appState.getIsPremium()) {
+    if (preferenceService.getIsPremium()) {
       if (context.mounted) {
         await showDialog(DialogConfiguration(
             context, "Premium Access", "You already have access to premium"));
@@ -46,7 +46,7 @@ class PurchaseService {
     try {
       CustomerInfo customerInfo = await Purchases.purchasePackage(package);
       if (customerInfo.entitlements.active.containsKey(_entitlementId)) {
-        await appState.setIsPremium(true);
+        await preferenceService.setIsPremium(true);
 
         if (context.mounted) {
           await showDialog(DialogConfiguration(context, "Purchase Succeeded",
@@ -74,9 +74,9 @@ class PurchaseService {
   }
 
   static Future<void> restorePremium(BuildContext context) async {
-    PreferenceService appState = Provider.of<PreferenceService>(context, listen: false);
+    PreferenceService preferenceService = context.read<PreferenceService>();
 
-    if (appState.getIsPremium()) {
+    if (preferenceService.getIsPremium()) {
       await showDialog(DialogConfiguration(
           context, "Premium Access", "You already have access to premium"));
 
@@ -86,7 +86,7 @@ class PurchaseService {
     try {
       CustomerInfo customerInfo = await Purchases.restorePurchases();
       if (customerInfo.entitlements.active.containsKey("premium")) {
-        await appState.setIsPremium(true);
+        await preferenceService.setIsPremium(true);
 
         if (context.mounted) {
           await showDialog(DialogConfiguration(
