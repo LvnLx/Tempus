@@ -28,7 +28,12 @@ class DeckState extends State<Deck> {
   @override
   void initState() {
     super.initState();
-    AudioService.stopPlayback();
+    context.read<AudioService>().stopPlayback();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   void addTapTime(int tapTime) {
@@ -72,8 +77,8 @@ class DeckState extends State<Deck> {
 
   Future<void> togglePlayback() async {
     playback
-        ? await AudioService.stopPlayback()
-        : await AudioService.startPlayback();
+        ? await context.read<AudioService>().stopPlayback()
+        : await context.read<AudioService>().startPlayback();
     setState(() {
       playback = !playback;
     });

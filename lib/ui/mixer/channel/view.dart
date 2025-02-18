@@ -21,23 +21,23 @@ class ChannelState extends State<Channel> {
   PageController scrollController = PageController(viewportFraction: 0.5);
 
   Future<void> setOption(int option) async {
-    await context.read<PreferenceService>().setSubdivisions({
-      ...context.read<PreferenceService>().getSubdivisions()
-    }..update(
-        key,
-        (subdivisionData) =>
-            SubdivisionData(option: option, volume: subdivisionData.volume)));
-    AudioService.setSubdivisionOption(widget.key!, option);
+    context.read<AudioService>().setSubdivisionOption(widget.key!, option);
+    context.read<PreferenceService>().setSubdivisions({
+          ...context.read<PreferenceService>().getSubdivisions()
+        }..update(
+            key,
+            (subdivisionData) => SubdivisionData(
+                option: option, volume: subdivisionData.volume)));
   }
 
   Future<void> setVolume(double volume) async {
-    await context.read<PreferenceService>().setSubdivisions({
-      ...context.read<PreferenceService>().getSubdivisions()
-    }..update(
-        key,
-        (subdivisionData) =>
-            SubdivisionData(option: subdivisionData.option, volume: volume)));
-    AudioService.setSubdivisionVolume(widget.key!, volume);
+    context.read<AudioService>().setSubdivisionVolume(widget.key!, volume);
+    context.read<PreferenceService>().setSubdivisions({
+          ...context.read<PreferenceService>().getSubdivisions()
+        }..update(
+            key,
+            (subdivisionData) => SubdivisionData(
+                option: subdivisionData.option, volume: volume)));
   }
 
   @override
@@ -73,7 +73,8 @@ class ChannelState extends State<Channel> {
                     child: PlatformSlider(
                       activeColor: Theme.of(context).colorScheme.primary,
                       onChanged: (double value) async => await setVolume(value),
-                      value: context.watch<PreferenceService>()
+                      value: context
+                          .watch<PreferenceService>()
                           .getSubdivisions()[key]!
                           .volume,
                     ))),
@@ -81,7 +82,8 @@ class ChannelState extends State<Channel> {
                 width: 50,
                 height: 120,
                 child: Selector(
-                    initialItem: context.read<PreferenceService>()
+                    initialItem: context
+                            .read<PreferenceService>()
                             .getSubdivisions()[key]!
                             .option -
                         2,

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:tempus/data/services/audio_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
@@ -31,7 +32,10 @@ class Main extends StatelessWidget {
     return Material(
       child: MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => PreferenceService()),
+          Provider(create: (_) => AudioService()),
+          ChangeNotifierProvider(
+              create: (context) =>
+                  PreferenceService(context.read<AudioService>())),
           ChangeNotifierProvider(
               create: (context) =>
                   PurchaseService(context.read<PreferenceService>())),

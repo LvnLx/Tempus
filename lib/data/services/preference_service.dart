@@ -23,6 +23,8 @@ enum Preference {
 }
 
 class PreferenceService extends ChangeNotifier {
+  final AudioService _audioService;
+
   final SharedPreferencesAsync _sharedPreferencesAsync =
       SharedPreferencesAsync();
 
@@ -30,6 +32,8 @@ class PreferenceService extends ChangeNotifier {
   late SamplePair _samplePair;
   late Map<Key, SubdivisionData> _subdivisions;
   late double _volume;
+
+  PreferenceService(this._audioService);
 
   int getBpm() => _bpm;
 
@@ -69,7 +73,7 @@ class PreferenceService extends ChangeNotifier {
     notifyListeners();
 
     await _sharedPreferencesAsync.setInt(Preference.bpm.name, validatedBpm);
-    await AudioService.setBpm(validatedBpm);
+    await _audioService.setBpm(validatedBpm);
   }
 
   Future<void> setIsPremium(bool value) async =>
@@ -134,14 +138,14 @@ class PreferenceService extends ChangeNotifier {
 
     notifyListeners();
 
-    await AudioService.setSampleNames(samplePairs.fold<Set<String>>(
+    await _audioService.setSampleNames(samplePairs.fold<Set<String>>(
         {},
         (accumulator, samplePair) => {
               ...accumulator,
               samplePair.getDownbeatSamplePath(),
               samplePair.getSubdivisionSamplePath()
             }));
-    await AudioService.setState(
+    await _audioService.setState(
         _bpm,
         _samplePair.getDownbeatSamplePath(),
         _samplePair.getSubdivisionSamplePath(),

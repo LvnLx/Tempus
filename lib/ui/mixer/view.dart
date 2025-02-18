@@ -36,9 +36,9 @@ class MixerState extends State<Mixer> {
   }
 
   Future<void> _handleOnRemovePressed(Key key) async {
-    await context.read<PreferenceService>().setSubdivisions(
+    context.read<AudioService>().removeSubdivision(key);
+    context.read<PreferenceService>().setSubdivisions(
         {...context.read<PreferenceService>().getSubdivisions()}..remove(key));
-    AudioService.removeSubdivision(key);
   }
 
   bool _canAddSubdivison() =>
@@ -54,9 +54,9 @@ class MixerState extends State<Mixer> {
       key: SubdivisionData(option: subdivisionOptions[0], volume: 0.0)
     };
 
-    await context.read<PreferenceService>().setSubdivisions(subdivisions);
-    await AudioService.addSubdivision(
+    context.read<AudioService>().addSubdivision(
         key, subdivisions[key]!.option, subdivisions[key]!.volume);
+    context.read<PreferenceService>().setSubdivisions(subdivisions);
   }
 
   Future<void> _showPremiumDialog() async =>
@@ -83,8 +83,8 @@ class MixerState extends State<Mixer> {
           ]));
 
   void _handleVolumeChanged(BuildContext context, double newVolume) async {
-    await context.read<PreferenceService>().setVolume(newVolume);
-    await AudioService.setVolume(newVolume);
+    context.read<AudioService>().setVolume(newVolume);
+    context.read<PreferenceService>().setVolume(newVolume);
   }
 
   @override

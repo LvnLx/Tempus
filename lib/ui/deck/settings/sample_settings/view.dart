@@ -68,11 +68,13 @@ class SampleSettings extends StatelessWidget {
           }
         }(),
         onPressed: (context) async {
-          await context.read<PreferenceService>().setSamplePair(samplePair);
-          await AudioService.setSample(
-              true, samplePair.getDownbeatSamplePath());
-          await AudioService.setSample(
-              false, samplePair.getSubdivisionSamplePath());
+          context.read<PreferenceService>().setSamplePair(samplePair);
+          context
+              .read<AudioService>()
+              .setSample(true, samplePair.getDownbeatSamplePath());
+          context
+              .read<AudioService>()
+              .setSample(false, samplePair.getSubdivisionSamplePath());
         });
   }
 }
