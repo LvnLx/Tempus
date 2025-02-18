@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tempus/data/services/audio_service.dart';
-import 'package:tempus/ui/mixer/subdivision.dart';
+import 'package:tempus/domain/models/sample_pair.dart';
+import 'package:tempus/ui/mixer/channel/view.dart';
 
 enum Preference {
   bpm(true, true),
@@ -20,7 +21,7 @@ enum Preference {
   const Preference(this.isAppSetting, this.isMetronomeSetting);
 }
 
-class SharedPreferencesService extends ChangeNotifier {
+class PreferenceService extends ChangeNotifier {
   final SharedPreferencesAsync _sharedPreferencesAsync =
       SharedPreferencesAsync();
 

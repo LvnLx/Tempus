@@ -2,15 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/data/services/shared_preferences_service.dart';
-import 'package:tempus/data/services/purchases_service.dart';
-import 'package:tempus/ui/mixer/mixer.dart';
-import 'package:tempus/ui/deck/deck.dart';
+import 'package:tempus/data/services/preference_service.dart';
+import 'package:tempus/data/services/purchase_service.dart';
+import 'package:tempus/ui/mixer/view.dart';
+import 'package:tempus/ui/deck/view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  SharedPreferencesService appState = SharedPreferencesService();
+  PreferenceService appState = PreferenceService();
 
   runApp(ChangeNotifierProvider(create: (_) => appState, child: Main()));
 }
@@ -25,8 +25,8 @@ class Main extends StatefulWidget {
 class MainState extends State<Main> {
   Future<void> initializeAppState() async {
     try {
-      await Provider.of<SharedPreferencesService>(context, listen: false).loadPreferences();
-      await PurchasesService.initPurchases();
+      await Provider.of<PreferenceService>(context, listen: false).loadPreferences();
+      await PurchaseService.initPurchases();
     } catch (error) {
       print(error);
       rethrow;
@@ -42,7 +42,7 @@ class MainState extends State<Main> {
           if (snapshot.connectionState == ConnectionState.done) {
             return PlatformProvider(
                 builder: (context) => PlatformTheme(
-                      themeMode: Provider.of<SharedPreferencesService>(context).getThemeMode(),
+                      themeMode: Provider.of<PreferenceService>(context).getThemeMode(),
                       materialDarkTheme: darkThemeData,
                       materialLightTheme: lightThemeData,
                       builder: (context) => PlatformApp(

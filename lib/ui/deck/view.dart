@@ -5,10 +5,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/data/services/shared_preferences_service.dart';
+import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/audio_service.dart';
-import 'package:tempus/ui/deck/bpm_dial.dart';
-import 'package:tempus/ui/settings/settings.dart';
+import 'package:tempus/ui/deck/bpm_dial/view.dart';
+import 'package:tempus/ui/deck/settings/view.dart';
 
 class Deck extends StatefulWidget {
   const Deck({super.key});
@@ -65,7 +65,7 @@ class DeckState extends State<Deck> {
   }
 
   Future<void> setBpm(int newBpm, {bool skipUnchanged = true}) async {
-    await Provider.of<SharedPreferencesService>(context, listen: false)
+    await Provider.of<PreferenceService>(context, listen: false)
         .setBpm(newBpm, skipUnchanged: skipUnchanged);
   }
 
@@ -95,12 +95,12 @@ class DeckState extends State<Deck> {
                     size: 35,
                   ),
                   onPressed: () async => await setBpm(
-                      Provider.of<SharedPreferencesService>(context, listen: false).getBpm() -
+                      Provider.of<PreferenceService>(context, listen: false).getBpm() -
                           1),
                 ),
                 GestureDetector(
                   onTap: () async => await showBpmDialog(context, setBpm,
-                      Provider.of<SharedPreferencesService>(context, listen: false).getBpm()),
+                      Provider.of<PreferenceService>(context, listen: false).getBpm()),
                   child: Container(
                       padding: EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
@@ -113,7 +113,7 @@ class DeckState extends State<Deck> {
                           child: Text(
                         tapTimes.length == 1
                             ? "TAP"
-                            : Provider.of<SharedPreferencesService>(context)
+                            : Provider.of<PreferenceService>(context)
                                 .getBpm()
                                 .toString(),
                         style: TextStyle(
@@ -126,7 +126,7 @@ class DeckState extends State<Deck> {
                     icon: Icon(PlatformIcons(context).add,
                         color: Theme.of(context).colorScheme.primary, size: 35),
                     onPressed: () async => await setBpm(
-                        Provider.of<SharedPreferencesService>(context, listen: false).getBpm() +
+                        Provider.of<PreferenceService>(context, listen: false).getBpm() +
                             1)),
               ],
             ),
@@ -142,7 +142,7 @@ class DeckState extends State<Deck> {
                         child: BpmDial(
                             callbackThreshold: 20,
                             callback: (int change) async => await setBpm(
-                                Provider.of<SharedPreferencesService>(context, listen: false)
+                                Provider.of<PreferenceService>(context, listen: false)
                                         .getBpm() +
                                     change))),
                   ),

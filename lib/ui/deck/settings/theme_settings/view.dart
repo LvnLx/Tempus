@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/data/services/shared_preferences_service.dart';
-import 'package:tempus/ui/settings/settings.dart';
+import 'package:tempus/data/services/preference_service.dart';
+import 'package:tempus/ui/deck/settings/view.dart';
 
 class ThemeSettings extends StatelessWidget {
   const ThemeSettings({super.key});
@@ -33,30 +33,30 @@ class ThemeSettings extends StatelessWidget {
               tiles: [
                 SettingsTile(
                     title: Text("System"),
-                    trailing: Provider.of<SharedPreferencesService>(context).getThemeMode() ==
+                    trailing: Provider.of<PreferenceService>(context).getThemeMode() ==
                             ThemeMode.system
                         ? Icon(PlatformIcons(context).checkMark)
                         : null,
                     onPressed: (context) async =>
-                        await Provider.of<SharedPreferencesService>(context, listen: false)
+                        await Provider.of<PreferenceService>(context, listen: false)
                             .setThemeMode(ThemeMode.system)),
                 SettingsTile(
                     title: Text("Light"),
-                    trailing: Provider.of<SharedPreferencesService>(context).getThemeMode() ==
+                    trailing: Provider.of<PreferenceService>(context).getThemeMode() ==
                             ThemeMode.light
                         ? Icon(PlatformIcons(context).checkMark)
                         : null,
                     onPressed: (context) async =>
-                        await Provider.of<SharedPreferencesService>(context, listen: false)
+                        await Provider.of<PreferenceService>(context, listen: false)
                             .setThemeMode(ThemeMode.light)),
                 SettingsTile(
                     title: Text("Dark"),
-                    trailing: Provider.of<SharedPreferencesService>(context).getThemeMode() ==
+                    trailing: Provider.of<PreferenceService>(context).getThemeMode() ==
                             ThemeMode.dark
                         ? Icon(PlatformIcons(context).checkMark)
                         : null,
                     onPressed: (context) async =>
-                        await Provider.of<SharedPreferencesService>(context, listen: false)
+                        await Provider.of<PreferenceService>(context, listen: false)
                             .setThemeMode(ThemeMode.dark)),
               ],
             ),

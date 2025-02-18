@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:tempus/ui/mixer/subdivision.dart';
+import 'package:tempus/ui/mixer/channel/view.dart';
 
-class ScrollWheel extends StatefulWidget {
+class Selector extends StatefulWidget {
   final int initialItem;
   final Future<void> Function(int) callback;
 
-  ScrollWheel({super.key, required this.initialItem, required this.callback});
+  Selector({super.key, required this.initialItem, required this.callback});
 
   @override
-  State<StatefulWidget> createState() => ScrollWheelState();
+  State<StatefulWidget> createState() => SelectorState();
 }
 
-class ScrollWheelState extends State<ScrollWheel> {
+class SelectorState extends State<Selector> {
   late final FixedExtentScrollController _scrollController;
 
   double itemHeight = 40; // Height of each item in the list

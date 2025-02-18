@@ -4,11 +4,11 @@ import 'package:flutter/material.dart' hide showDialog;
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/data/services/shared_preferences_service.dart';
+import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/constants.dart';
-import 'package:tempus/ui/settings/sample_settings.dart';
-import 'package:tempus/ui/settings/theme_settings.dart';
-import 'package:tempus/data/services/purchases_service.dart';
+import 'package:tempus/ui/deck/settings/sample_settings/view.dart';
+import 'package:tempus/ui/deck/settings/theme_settings/view.dart';
+import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -48,7 +48,7 @@ class _SettingsState extends State<Settings> {
                 style: TextStyle(
                     fontSize: 17,
                     color: getSettingsThemeData(context).trailingTextColor),
-                child: Text(Provider.of<SharedPreferencesService>(context).getIsPremium()
+                child: Text(Provider.of<PreferenceService>(context).getIsPremium()
                     ? "Active"
                     : "Inactive"),
               ),
@@ -56,11 +56,11 @@ class _SettingsState extends State<Settings> {
             SettingsTile(
                 title: Text("Purchase"),
                 onPressed: (context) async =>
-                    await PurchasesService.purchasePremium(context)),
+                    await PurchaseService.purchasePremium(context)),
             SettingsTile(
                 title: Text("Restore"),
                 onPressed: (context) async =>
-                    await PurchasesService.restorePremium(context))
+                    await PurchaseService.restorePremium(context))
           ]),
           SettingsSection(
             title: Text("Audio"),
@@ -68,7 +68,7 @@ class _SettingsState extends State<Settings> {
               SettingsTile.navigation(
                 title: Text("Sample"),
                 value:
-                    Text(capitalizeFirst(Provider.of<SharedPreferencesService>(context).getSamplePair().name)),
+                    Text(capitalizeFirst(Provider.of<PreferenceService>(context).getSamplePair().name)),
                 onPressed: (context) => Navigator.push(context,
                     MaterialPageRoute(builder: (context) => SampleSettings())),
               )
@@ -78,7 +78,7 @@ class _SettingsState extends State<Settings> {
             SettingsTile.navigation(
               title: Text("Theme"),
               value: Text(capitalizeFirst(
-                  Provider.of<SharedPreferencesService>(context).getThemeMode().name)),
+                  Provider.of<PreferenceService>(context).getThemeMode().name)),
               onPressed: (context) => Navigator.push(context,
                   MaterialPageRoute(builder: (context) => ThemeSettings())),
             )
@@ -101,7 +101,7 @@ class _SettingsState extends State<Settings> {
                               child: Text("Ok"),
                               onPressed: () async {
                                 Navigator.pop(context);
-                                await Provider.of<SharedPreferencesService>(context,
+                                await Provider.of<PreferenceService>(context,
                                         listen: false)
                                     .resetMetronome();
                               },
@@ -126,7 +126,7 @@ class _SettingsState extends State<Settings> {
                               child: Text("Ok"),
                               onPressed: () async {
                                 Navigator.pop(context);
-                                await Provider.of<SharedPreferencesService>(context,
+                                await Provider.of<PreferenceService>(context,
                                         listen: false)
                                     .resetApp();
                               },

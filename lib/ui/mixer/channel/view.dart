@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:provider/provider.dart';
-import 'package:tempus/data/services/shared_preferences_service.dart';
+import 'package:provider/provider.dart' hide Selector;
+import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/audio_service.dart';
-import 'package:tempus/ui/mixer/scroll_wheel.dart';
+import 'package:tempus/ui/mixer/selector/view.dart';
 
 final List<int> subdivisionOptions = List.generate(8, (index) => (index + 2));
 
-class Subdivision extends StatefulWidget {
+class Channel extends StatefulWidget {
   final void Function(Key key) onRemove;
 
-  Subdivision({required Key key, required this.onRemove}) : super(key: key);
+  Channel({required Key key, required this.onRemove}) : super(key: key);
 
   @override
-  SubdivisionState createState() => SubdivisionState();
+  ChannelState createState() => ChannelState();
 }
 
-class SubdivisionState extends State<Subdivision> {
+class ChannelState extends State<Channel> {
   late Key key;
   PageController scrollController = PageController(viewportFraction: 0.5);
 
   Future<void> setOption(int option) async {
-    await Provider.of<SharedPreferencesService>(context, listen: false).setSubdivisions({
-      ...Provider.of<SharedPreferencesService>(context, listen: false).getSubdivisions()
+    await Provider.of<PreferenceService>(context, listen: false).setSubdivisions({
+      ...Provider.of<PreferenceService>(context, listen: false).getSubdivisions()
     }..update(
         key,
         (subdivisionData) =>
@@ -31,8 +31,8 @@ class SubdivisionState extends State<Subdivision> {
   }
 
   Future<void> setVolume(double volume) async {
-    await Provider.of<SharedPreferencesService>(context, listen: false).setSubdivisions({
-      ...Provider.of<SharedPreferencesService>(context, listen: false).getSubdivisions()
+    await Provider.of<PreferenceService>(context, listen: false).setSubdivisions({
+      ...Provider.of<PreferenceService>(context, listen: false).getSubdivisions()
     }..update(
         key,
         (subdivisionData) =>
@@ -73,15 +73,15 @@ class SubdivisionState extends State<Subdivision> {
                     child: PlatformSlider(
                       activeColor: Theme.of(context).colorScheme.primary,
                       onChanged: (double value) async => await setVolume(value),
-                      value: Provider.of<SharedPreferencesService>(context)
+                      value: Provider.of<PreferenceService>(context)
                           .getSubdivisions()[key]!
                           .volume,
                     ))),
             SizedBox(
                 width: 50,
                 height: 120,
-                child: ScrollWheel(
-                    initialItem: Provider.of<SharedPreferencesService>(context, listen: false)
+                child: Selector(
+                    initialItem: Provider.of<PreferenceService>(context, listen: false)
                             .getSubdivisions()[key]!
                             .option -
                         2,

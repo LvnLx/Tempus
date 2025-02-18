@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tempus/domain/models/sample_pair.dart';
 
 enum Action {
   addSubdivision,
@@ -17,21 +18,6 @@ enum Action {
   startPlayback,
   stopPlayback,
   writeBuffer
-}
-
-class SamplePair {
-  String name;
-  bool isPremium;
-
-  late String downbeatSample;
-  late String subdivisionSample;
-
-  SamplePair(this.name, this.isPremium) {
-    downbeatSample =
-        "audio/${isPremium ? "premium" : "free"}/$name/downbeat.wav";
-    subdivisionSample =
-        "audio/${isPremium ? "premium" : "free"}/$name/subdivision.wav";
-  }
 }
 
 late List<SamplePair> samplePairs;

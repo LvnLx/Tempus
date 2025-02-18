@@ -5,11 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
-import 'package:tempus/data/services/shared_preferences_service.dart';
+import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/constants.dart';
 import 'package:tempus/util.dart';
 
-class PurchasesService {
+class PurchaseService {
   static final String _appleApiKey = "appl_MEccyvrrXhtPGGwyIcFrXUDPwrq";
   static final String _entitlementId = "premium";
 
@@ -28,7 +28,7 @@ class PurchasesService {
   }
 
   static Future<void> purchasePremium(BuildContext context) async {
-    SharedPreferencesService appState = Provider.of<SharedPreferencesService>(context, listen: false);
+    PreferenceService appState = Provider.of<PreferenceService>(context, listen: false);
 
     Offerings offerings = await Purchases.getOfferings();
     Offering offering = offerings.current!;
@@ -74,7 +74,7 @@ class PurchasesService {
   }
 
   static Future<void> restorePremium(BuildContext context) async {
-    SharedPreferencesService appState = Provider.of<SharedPreferencesService>(context, listen: false);
+    PreferenceService appState = Provider.of<PreferenceService>(context, listen: false);
 
     if (appState.getIsPremium()) {
       await showDialog(DialogConfiguration(
