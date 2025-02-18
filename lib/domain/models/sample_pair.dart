@@ -1,14 +1,11 @@
 class SamplePair {
-  String name;
-  bool isPremium;
+  final String name;
+  final bool isPremium;
 
-  late String downbeatSample;
-  late String subdivisionSample;
+  const SamplePair(this.name, this.isPremium);
 
-  SamplePair(this.name, this.isPremium) {
-    downbeatSample =
-        "audio/${isPremium ? "premium" : "free"}/$name/downbeat.wav";
-    subdivisionSample =
-        "audio/${isPremium ? "premium" : "free"}/$name/subdivision.wav";
-  }
+  String getDownbeatSamplePath() =>
+      "audio/${isPremium ? "premium" : "free"}/$name/downbeat.wav";
+  String getSubdivisionSamplePath() =>
+      "audio/${isPremium ? "premium" : "free"}/$name/subdivision.wav";
 }

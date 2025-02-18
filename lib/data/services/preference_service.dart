@@ -8,17 +8,18 @@ import 'package:tempus/domain/models/sample_pair.dart';
 import 'package:tempus/ui/mixer/channel/view.dart';
 
 enum Preference {
-  bpm(true, true),
-  isPremium(false, false),
-  samplePair(true, false),
-  subdivisions(true, true),
-  subdivisionSample(true, false),
-  themeMode(true, false),
-  volume(true, true);
+  bpm(120, true, true),
+  isPremium(false, false, false),
+  samplePair(SamplePair("sine", false), true, false),
+  subdivisions({}, true, true),
+  themeMode(ThemeMode.system, true, false),
+  volume(1.0, true, true);
 
+  final dynamic defaultValue;
   final bool isAppSetting;
   final bool isMetronomeSetting;
-  const Preference(this.isAppSetting, this.isMetronomeSetting);
+  const Preference(
+      this.defaultValue, this.isAppSetting, this.isMetronomeSetting);
 }
 
 class PreferenceService extends ChangeNotifier {
@@ -42,7 +43,7 @@ class PreferenceService extends ChangeNotifier {
   Future<ThemeMode> getThemeMode() async => await _getOrElse<ThemeMode>(
       Preference.themeMode.name,
       ThemeMode.values,
-      Defaults.themeMode.toString(),
+      Preference.themeMode.defaultValue.toString(),
       (themeMode) => themeMode.toString());
 
   double getVolume() => _volume;
@@ -121,19 +122,19 @@ class PreferenceService extends ChangeNotifier {
 
     try {
       _bpm = await _sharedPreferencesAsync.getInt(Preference.bpm.name) ??
-          Defaults.bpm;
+          Preference.bpm.defaultValue;
       _isPremium =
           await _sharedPreferencesAsync.getBool(Preference.isPremium.name) ??
-              Defaults.isPremium;
+              Preference.isPremium.defaultValue;
       _samplePair = await _getOrElse<SamplePair>(
           Preference.samplePair.name,
           samplePairs,
-          Defaults.samplePair.name,
+          Preference.samplePair.defaultValue.name,
           (samplePair) => samplePair.name);
       _subdivisions = await _getSubdivisions() ?? {};
       _volume =
           await _sharedPreferencesAsync.getDouble(Preference.volume.name) ??
-              Defaults.volume;
+              Preference.volume.defaultValue;
     } catch (_) {
       await resetApp();
     }
@@ -144,11 +145,15 @@ class PreferenceService extends ChangeNotifier {
         {},
         (accumulator, samplePair) => {
               ...accumulator,
-              samplePair.downbeatSample,
-              samplePair.subdivisionSample
+              samplePair.getDownbeatSamplePath(),
+              samplePair.getSubdivisionSamplePath()
             }));
-    await AudioService.setState(_bpm, _samplePair.downbeatSample,
-        _samplePair.subdivisionSample, _getJsonEncodedSubdivisions(), _volume);
+    await AudioService.setState(
+        _bpm,
+        _samplePair.getDownbeatSamplePath(),
+        _samplePair.getSubdivisionSamplePath(),
+        _getJsonEncodedSubdivisions(),
+        _volume);
   }
 
   List<SamplePair> getSamplePairs(
@@ -205,11 +210,6 @@ class PreferenceService extends ChangeNotifier {
 }
 
 class Defaults {
-  static const int bpm = 120;
-  static const bool isPremium = false;
-  static SamplePair samplePair = SamplePair("sine", false);
-  static const ThemeMode themeMode = ThemeMode.system;
-  static const double volume = 1.0;
   static int subdivisionOption = subdivisionOptions[0];
   static const subdivisionVolume = 0.0;
 }
