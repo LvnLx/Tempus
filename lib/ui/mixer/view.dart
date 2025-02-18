@@ -36,15 +36,14 @@ class MixerState extends State<Mixer> {
   }
 
   Future<void> _handleOnRemovePressed(Key key) async {
-    await context.read<PreferenceService>().setSubdivisions({
-      ...context.read<PreferenceService>().getSubdivisions()
-    }..remove(key));
+    await context.read<PreferenceService>().setSubdivisions(
+        {...context.read<PreferenceService>().getSubdivisions()}..remove(key));
     AudioService.removeSubdivision(key);
   }
 
   bool _canAddSubdivison() =>
       context.read<PreferenceService>().getSubdivisions().isEmpty ||
-      context.read<PreferenceService>().getIsPremium();
+      context.read<PurchaseService>().isPremium;
 
   Future<void> _addSubdivision() async {
     UniqueKey key = UniqueKey();
@@ -55,8 +54,7 @@ class MixerState extends State<Mixer> {
       key: SubdivisionData(option: subdivisionOptions[0], volume: 0.0)
     };
 
-    await context.read<PreferenceService>()
-        .setSubdivisions(subdivisions);
+    await context.read<PreferenceService>().setSubdivisions(subdivisions);
     await AudioService.addSubdivision(
         key, subdivisions[key]!.option, subdivisions[key]!.volume);
   }
@@ -76,7 +74,9 @@ class MixerState extends State<Mixer> {
                 child: Text("Purchase"),
                 onPressed: () async {
                   Navigator.pop(context);
-                  await PurchaseService.purchasePremium(context);
+                  await context
+                      .read<PurchaseService>()
+                      .purchasePremium(context);
                 },
                 cupertino: (context, platform) =>
                     CupertinoDialogActionData(isDefaultAction: true))
@@ -125,7 +125,8 @@ class MixerState extends State<Mixer> {
                   ],
                 ),
               ),
-              ...(context.watch<PreferenceService>()
+              ...(context
+                  .watch<PreferenceService>()
                   .getSubdivisions()
                   .keys
                   .map((key) => Channel(

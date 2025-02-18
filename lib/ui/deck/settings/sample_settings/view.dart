@@ -4,6 +4,7 @@ import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/domain/models/sample_pair.dart';
 import 'package:tempus/ui/deck/settings/view.dart';
 import 'package:tempus/util.dart';
@@ -54,7 +55,7 @@ class SampleSettings extends StatelessWidget {
   SettingsTile getSamplePairSettingsTiles(
       BuildContext context, SamplePair samplePair, bool isFree) {
     return SettingsTile(
-        enabled: isFree || context.watch<PreferenceService>().getIsPremium(),
+        enabled: isFree || context.watch<PurchaseService>().isPremium,
         title: Text(capitalizeFirst(samplePair.name)),
         trailing: () {
           SamplePair activeSamplePair =

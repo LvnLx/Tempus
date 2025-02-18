@@ -27,14 +27,15 @@ class PreferenceService extends ChangeNotifier {
       SharedPreferencesAsync();
 
   late int _bpm;
-  late bool _isPremium;
   late SamplePair _samplePair;
   late Map<Key, SubdivisionData> _subdivisions;
   late double _volume;
 
   int getBpm() => _bpm;
 
-  bool getIsPremium() => _isPremium;
+  Future<bool> getIsPremium() async =>
+      await _sharedPreferencesAsync.getBool(Preference.isPremium.name) ??
+      Preference.isPremium.defaultValue;
 
   SamplePair getSamplePair() => _samplePair;
 
@@ -71,13 +72,8 @@ class PreferenceService extends ChangeNotifier {
     await AudioService.setBpm(validatedBpm);
   }
 
-  Future<void> setIsPremium(bool value) async {
-    _isPremium = value;
-
-    notifyListeners();
-
-    await _sharedPreferencesAsync.setBool(Preference.isPremium.name, value);
-  }
+  Future<void> setIsPremium(bool value) async =>
+      await _sharedPreferencesAsync.setBool(Preference.isPremium.name, value);
 
   Future<void> setSamplePair(SamplePair samplePair) async {
     if (!samplePairs.contains(samplePair)) {
@@ -123,9 +119,6 @@ class PreferenceService extends ChangeNotifier {
     try {
       _bpm = await _sharedPreferencesAsync.getInt(Preference.bpm.name) ??
           Preference.bpm.defaultValue;
-      _isPremium =
-          await _sharedPreferencesAsync.getBool(Preference.isPremium.name) ??
-              Preference.isPremium.defaultValue;
       _samplePair = await _getOrElse<SamplePair>(
           Preference.samplePair.name,
           samplePairs,

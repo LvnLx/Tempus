@@ -17,9 +17,9 @@ class Main extends StatelessWidget {
 
   Future<void> initializeProviders(BuildContext context) async {
     try {
+      await context.read<PurchaseService>().init();
       await context.read<PreferenceService>().loadPreferences();
       await context.read<ThemeService>().init();
-      await PurchaseService.initPurchases();
     } catch (error) {
       print(error);
       rethrow;
@@ -32,6 +32,9 @@ class Main extends StatelessWidget {
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => PreferenceService()),
+          ChangeNotifierProvider(
+              create: (context) =>
+                  PurchaseService(context.read<PreferenceService>())),
           ChangeNotifierProvider(
               create: (context) =>
                   ThemeService(context.read<PreferenceService>()))

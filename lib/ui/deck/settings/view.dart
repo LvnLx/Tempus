@@ -49,19 +49,21 @@ class _SettingsState extends State<Settings> {
                 style: TextStyle(
                     fontSize: 17,
                     color: getSettingsThemeData(context).trailingTextColor),
-                child: Text(context.watch<PreferenceService>().getIsPremium()
+                child: Text(context.watch<PurchaseService>().isPremium
                     ? "Active"
                     : "Inactive"),
               ),
             ),
             SettingsTile(
                 title: Text("Purchase"),
-                onPressed: (context) async =>
-                    await PurchaseService.purchasePremium(context)),
+                onPressed: (context) async => await context
+                    .read<PurchaseService>()
+                    .purchasePremium(context)),
             SettingsTile(
                 title: Text("Restore"),
-                onPressed: (context) async =>
-                    await PurchaseService.restorePremium(context))
+                onPressed: (context) async => await context
+                    .read<PurchaseService>()
+                    .restorePremium(context))
           ]),
           SettingsSection(
             title: Text("Audio"),
