@@ -6,6 +6,7 @@ import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/constants.dart';
+import 'package:tempus/data/services/theme_service.dart';
 import 'package:tempus/ui/deck/settings/sample_settings/view.dart';
 import 'package:tempus/ui/deck/settings/theme_settings/view.dart';
 import 'package:tempus/data/services/purchase_service.dart';
@@ -78,7 +79,7 @@ class _SettingsState extends State<Settings> {
             SettingsTile.navigation(
               title: Text("Theme"),
               value: Text(capitalizeFirst(
-                  context.watch<PreferenceService>().getThemeMode().name)),
+                  context.watch<ThemeService>().themeMode.name)),
               onPressed: (context) => Navigator.push(context,
                   MaterialPageRoute(builder: (context) => ThemeSettings())),
             )

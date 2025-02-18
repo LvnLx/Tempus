@@ -4,28 +4,21 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
+import 'package:tempus/data/services/theme_service.dart';
 import 'package:tempus/ui/mixer/view.dart';
 import 'package:tempus/ui/deck/view.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  PreferenceService appState = PreferenceService();
-
-  runApp(ChangeNotifierProvider(create: (_) => appState, child: Main()));
+  runApp(Main());
 }
 
-class Main extends StatefulWidget {
+class Main extends StatelessWidget {
   Main({super.key});
 
-  @override
-  State<Main> createState() => MainState();
-}
-
-class MainState extends State<Main> {
-  Future<void> initializeAppState() async {
+  Future<void> initializeProviders(BuildContext context) async {
     try {
       await context.read<PreferenceService>().loadPreferences();
+      await context.read<ThemeService>().init();
       await PurchaseService.initPurchases();
     } catch (error) {
       print(error);
@@ -36,76 +29,65 @@ class MainState extends State<Main> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: FutureBuilder(
-        future: initializeAppState(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return PlatformProvider(
-                builder: (context) => PlatformTheme(
-                      themeMode: context.watch<PreferenceService>().getThemeMode(),
-                      materialDarkTheme: darkThemeData,
-                      materialLightTheme: lightThemeData,
-                      builder: (context) => PlatformApp(
-                          debugShowCheckedModeBanner: false,
-                          localizationsDelegates: <LocalizationsDelegate<
-                              dynamic>>[
-                            DefaultMaterialLocalizations.delegate,
-                            DefaultWidgetsLocalizations.delegate,
-                            DefaultCupertinoLocalizations.delegate,
-                          ],
-                          home: Container(
-                              color: Theme.of(context).colorScheme.surface,
-                              child: SafeArea(
-                                  child: Flex(
-                                direction: Axis.vertical,
-                                children: [
-                                  Expanded(child: Mixer()),
-                                  Divider(
-                                      color: Theme.of(context)
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => PreferenceService()),
+          ChangeNotifierProvider(
+              create: (context) =>
+                  ThemeService(context.read<PreferenceService>()))
+        ],
+        builder: (context, child) => FutureBuilder(
+          future: initializeProviders(context),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return PlatformProvider(
+                  builder: (context) => PlatformTheme(
+                        themeMode: context.watch<ThemeService>().themeMode,
+                        materialDarkTheme:
+                            context.watch<ThemeService>().darkThemeData,
+                        materialLightTheme:
+                            context.watch<ThemeService>().lightThemeData,
+                        builder: (context) => PlatformApp(
+                            debugShowCheckedModeBanner: false,
+                            localizationsDelegates: <LocalizationsDelegate<
+                                dynamic>>[
+                              DefaultMaterialLocalizations.delegate,
+                              DefaultWidgetsLocalizations.delegate,
+                              DefaultCupertinoLocalizations.delegate,
+                            ],
+                            home: Container(
+                                color: Theme.of(context).colorScheme.surface,
+                                child: SafeArea(
+                                    child: Flex(
+                                  direction: Axis.vertical,
+                                  children: [
+                                    Expanded(child: Mixer()),
+                                    Divider(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface),
+                                    Expanded(child: Deck())
+                                  ],
+                                )))),
+                      ));
+            } else {
+              return Card(
+                  child: Center(
+                      child: SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: PlatformCircularProgressIndicator(
+                              material: (context, platform) =>
+                                  MaterialProgressIndicatorData(
+                                      color: context
+                                          .watch<ThemeService>()
+                                          .lightThemeData
                                           .colorScheme
-                                          .onSurface),
-                                  Expanded(child: Deck())
-                                ],
-                              )))),
-                    ));
-          } else {
-            return Card(
-                child: Center(
-                    child: SizedBox(
-                        width: 50,
-                        height: 50,
-                        child: PlatformCircularProgressIndicator(
-                            material: (context, platform) =>
-                                MaterialProgressIndicatorData(
-                                    color:
-                                        lightThemeData.colorScheme.primary)))));
-          }
-        },
+                                          .primary)))));
+            }
+          },
+        ),
       ),
     );
   }
 }
-
-final ThemeData lightThemeData = ThemeData(
-    colorScheme: ColorScheme(
-        brightness: Brightness.light,
-        primary: Color.fromRGBO(31, 31, 31, 1.0),
-        onPrimary: Colors.white,
-        secondary: Color.fromRGBO(147, 147, 147, 1.0),
-        onSecondary: Color.fromRGBO(31, 31, 31, 1.0),
-        error: Colors.red,
-        onError: Color.fromRGBO(31, 31, 31, 1.0),
-        surface: Colors.white,
-        onSurface: Color.fromRGBO(211, 211, 211, 1.0)));
-
-final ThemeData darkThemeData = ThemeData(
-    colorScheme: ColorScheme(
-        brightness: Brightness.dark,
-        primary: Colors.white,
-        onPrimary: Color.fromRGBO(31, 31, 31, 1.0),
-        secondary: Color.fromRGBO(112, 112, 112, 1.0),
-        onSecondary: Colors.white,
-        error: Colors.red,
-        onError: Colors.white,
-        surface: Color.fromRGBO(31, 31, 31, 1.0),
-        onSurface: Color.fromRGBO(64, 64, 64, 1.0)));

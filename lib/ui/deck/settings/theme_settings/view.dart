@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/data/services/preference_service.dart';
+import 'package:tempus/data/services/theme_service.dart';
 import 'package:tempus/ui/deck/settings/view.dart';
 
 class ThemeSettings extends StatelessWidget {
@@ -33,31 +33,31 @@ class ThemeSettings extends StatelessWidget {
               tiles: [
                 SettingsTile(
                     title: Text("System"),
-                    trailing: context.watch<PreferenceService>().getThemeMode() ==
+                    trailing: context.watch<ThemeService>().themeMode ==
                             ThemeMode.system
                         ? Icon(PlatformIcons(context).checkMark)
                         : null,
-                    onPressed: (context) async =>
-                        await context.read<PreferenceService>()
-                            .setThemeMode(ThemeMode.system)),
+                    onPressed: (context) => context
+                        .read<ThemeService>()
+                        .setThemeMode(ThemeMode.system)),
                 SettingsTile(
                     title: Text("Light"),
-                    trailing: context.watch<PreferenceService>().getThemeMode() ==
+                    trailing: context.watch<ThemeService>().themeMode ==
                             ThemeMode.light
                         ? Icon(PlatformIcons(context).checkMark)
                         : null,
-                    onPressed: (context) async =>
-                        await context.read<PreferenceService>()
-                            .setThemeMode(ThemeMode.light)),
+                    onPressed: (context) => context
+                        .read<ThemeService>()
+                        .setThemeMode(ThemeMode.light)),
                 SettingsTile(
                     title: Text("Dark"),
-                    trailing: context.watch<PreferenceService>().getThemeMode() ==
+                    trailing: context.watch<ThemeService>().themeMode ==
                             ThemeMode.dark
                         ? Icon(PlatformIcons(context).checkMark)
                         : null,
-                    onPressed: (context) async =>
-                        await context.read<PreferenceService>()
-                            .setThemeMode(ThemeMode.dark)),
+                    onPressed: (context) => context
+                        .read<ThemeService>()
+                        .setThemeMode(ThemeMode.dark)),
               ],
             ),
           ],

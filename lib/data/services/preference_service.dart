@@ -29,7 +29,6 @@ class PreferenceService extends ChangeNotifier {
   late bool _isPremium;
   late SamplePair _samplePair;
   late Map<Key, SubdivisionData> _subdivisions;
-  late ThemeMode _themeMode;
   late double _volume;
 
   int getBpm() => _bpm;
@@ -40,7 +39,11 @@ class PreferenceService extends ChangeNotifier {
 
   Map<Key, SubdivisionData> getSubdivisions() => _subdivisions;
 
-  ThemeMode getThemeMode() => _themeMode;
+  Future<ThemeMode> getThemeMode() async => await _getOrElse<ThemeMode>(
+      Preference.themeMode.name,
+      ThemeMode.values,
+      Defaults.themeMode.toString(),
+      (themeMode) => themeMode.toString());
 
   double getVolume() => _volume;
 
@@ -97,14 +100,9 @@ class PreferenceService extends ChangeNotifier {
         Preference.subdivisions.name, _getJsonEncodedSubdivisions());
   }
 
-  Future<void> setThemeMode(ThemeMode themeMode) async {
-    _themeMode = themeMode;
-
-    notifyListeners();
-
-    await _sharedPreferencesAsync.setString(
-        Preference.themeMode.name, themeMode.toString());
-  }
+  Future<void> setThemeMode(ThemeMode themeMode) async =>
+      await _sharedPreferencesAsync.setString(
+          Preference.themeMode.name, themeMode.toString());
 
   Future<void> setVolume(double volume) async {
     _volume = volume;
@@ -127,11 +125,6 @@ class PreferenceService extends ChangeNotifier {
       _isPremium =
           await _sharedPreferencesAsync.getBool(Preference.isPremium.name) ??
               Defaults.isPremium;
-      _themeMode = await _getOrElse<ThemeMode>(
-          Preference.themeMode.name,
-          ThemeMode.values,
-          Defaults.themeMode.toString(),
-          (themeMode) => themeMode.toString());
       _samplePair = await _getOrElse<SamplePair>(
           Preference.samplePair.name,
           samplePairs,
