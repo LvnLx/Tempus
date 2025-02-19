@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tempus/data/services/preference_service.dart';
 
-class ThemeService extends ChangeNotifier {
+class ThemeService {
   final PreferenceService _preferenceService;
 
   final ThemeData _darkThemeData = ThemeData(
@@ -27,22 +27,23 @@ class ThemeService extends ChangeNotifier {
           surface: Colors.white,
           onSurface: Color.fromRGBO(211, 211, 211, 1.0)));
 
-  late ThemeMode _themeMode;
+  late ValueNotifier<ThemeMode> _themeModeValueNotifier;
 
   ThemeService(this._preferenceService);
 
   Future<void> init() async {
-    _themeMode = await _preferenceService.getThemeMode();
+    _themeModeValueNotifier =
+        ValueNotifier(await _preferenceService.getThemeMode());
   }
 
   ThemeData get darkThemeData => _darkThemeData;
   ThemeData get lightThemeData => _lightThemeData;
-  ThemeMode get themeMode => _themeMode;
+  ThemeMode get themeMode => _themeModeValueNotifier.value;
+  ValueNotifier<ThemeMode> get themeModeValueNotifier =>
+      _themeModeValueNotifier;
 
   void setThemeMode(ThemeMode themeMode) {
-    _themeMode = themeMode;
+    _themeModeValueNotifier.value = themeMode;
     _preferenceService.setThemeMode(themeMode);
-
-    notifyListeners();
   }
 }

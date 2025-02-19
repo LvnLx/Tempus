@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 class DialogConfiguration {
   BuildContext context;
@@ -23,6 +26,10 @@ String capitalizeFirst(String input) {
   if (input.isEmpty) return input;
   return input[0].toUpperCase() + input.substring(1).toLowerCase();
 }
+
+String jsonEncodeSubdivisions(Map<Key, SubdivisionData> subdivisions) =>
+    jsonEncode(subdivisions
+        .map((key, value) => MapEntry(key.toString(), value.toJson())));
 
 Future<void> showDialog(DialogConfiguration dialogConfiguration) async =>
     await showPlatformDialog(

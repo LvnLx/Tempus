@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:tempus/ui/mixer/channel/view.dart';
+import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 class Selector extends StatefulWidget {
   final int initialItem;
-  final Future<void> Function(int) callback;
+  final Future<void> Function(Key, int) callback;
 
   Selector({super.key, required this.initialItem, required this.callback});
 
@@ -47,7 +47,7 @@ class SelectorState extends State<Selector> {
         itemExtent: itemHeight,
         physics: FixedExtentScrollPhysics(),
         onSelectedItemChanged: (int value) async =>
-            {await widget.callback(subdivisionOptions[value])},
+            {await widget.callback(widget.key!, subdivisionOptions[value])},
         childDelegate: ListWheelChildBuilderDelegate(
           builder: (context, index) {
             final double scrollOffset = _scrollController.offset;

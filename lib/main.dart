@@ -1,13 +1,18 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/data/services/audio_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
-import 'package:tempus/ui/mixer/view.dart';
-import 'package:tempus/ui/deck/view.dart';
+import 'package:tempus/ui/home/deck/settings/sample_settings/view_model.dart';
+import 'package:tempus/ui/home/deck/settings/theme_settings/view_model.dart';
+import 'package:tempus/ui/home/deck/settings/view_model.dart';
+import 'package:tempus/ui/home/deck/view_model.dart';
+import 'package:tempus/ui/home/mixer/channel/view_model.dart';
+import 'package:tempus/ui/home/mixer/view_model.dart';
+import 'package:tempus/ui/home/view.dart';
+import 'package:tempus/ui/home/view_model.dart';
 
 void main() async {
   runApp(Main());
@@ -16,84 +21,49 @@ void main() async {
 class Main extends StatelessWidget {
   Main({super.key});
 
-  Future<void> initializeProviders(BuildContext context) async {
-    try {
-      await context.read<PurchaseService>().init();
-      await context.read<PreferenceService>().loadPreferences();
-      await context.read<ThemeService>().init();
-    } catch (error) {
-      print(error);
-      rethrow;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Material(
       child: MultiProvider(
         providers: [
-          Provider(create: (_) => AudioService()),
-          ChangeNotifierProvider(
+          Provider(create: (_) => AssetService()),
+          Provider(
               create: (context) =>
-                  PreferenceService(context.read<AudioService>())),
-          ChangeNotifierProvider(
+                  PreferenceService(context.read<AssetService>())),
+          Provider(
+              create: (context) => AudioService(context.read<AssetService>(),
+                  context.read<PreferenceService>())),
+          Provider(
               create: (context) =>
                   PurchaseService(context.read<PreferenceService>())),
+          Provider(
+              create: (context) =>
+                  ThemeService(context.read<PreferenceService>())),
           ChangeNotifierProvider(
               create: (context) =>
-                  ThemeService(context.read<PreferenceService>()))
+                  ChannelViewModel(context.read<AudioService>())),
+          ChangeNotifierProvider(
+              create: (context) => DeckViewModel(context.read<AudioService>())),
+          ChangeNotifierProvider(
+              create: (context) => HomeViewModel(context.read<ThemeService>())),
+          ChangeNotifierProvider(
+              create: (context) => MixerViewModel(context.read<AudioService>(),
+                  context.read<PurchaseService>())),
+          ChangeNotifierProvider(
+              create: (context) => SampleSettingsViewModel(
+                  context.read<AssetService>(),
+                  context.read<AudioService>(),
+                  context.read<PurchaseService>())),
+          ChangeNotifierProvider(
+              create: (context) => SettingsViewModel(
+                  context.read<AudioService>(),
+                  context.read<PurchaseService>(),
+                  context.read<ThemeService>())),
+          ChangeNotifierProvider(
+              create: (context) =>
+                  ThemeSettingsViewModel(context.read<ThemeService>()))
         ],
-        builder: (context, child) => FutureBuilder(
-          future: initializeProviders(context),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              return PlatformProvider(
-                  builder: (context) => PlatformTheme(
-                        themeMode: context.watch<ThemeService>().themeMode,
-                        materialDarkTheme:
-                            context.watch<ThemeService>().darkThemeData,
-                        materialLightTheme:
-                            context.watch<ThemeService>().lightThemeData,
-                        builder: (context) => PlatformApp(
-                            debugShowCheckedModeBanner: false,
-                            localizationsDelegates: <LocalizationsDelegate<
-                                dynamic>>[
-                              DefaultMaterialLocalizations.delegate,
-                              DefaultWidgetsLocalizations.delegate,
-                              DefaultCupertinoLocalizations.delegate,
-                            ],
-                            home: Container(
-                                color: Theme.of(context).colorScheme.surface,
-                                child: SafeArea(
-                                    child: Flex(
-                                  direction: Axis.vertical,
-                                  children: [
-                                    Expanded(child: Mixer()),
-                                    Divider(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface),
-                                    Expanded(child: Deck())
-                                  ],
-                                )))),
-                      ));
-            } else {
-              return Card(
-                  child: Center(
-                      child: SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: PlatformCircularProgressIndicator(
-                              material: (context, platform) =>
-                                  MaterialProgressIndicatorData(
-                                      color: context
-                                          .watch<ThemeService>()
-                                          .lightThemeData
-                                          .colorScheme
-                                          .primary)))));
-            }
-          },
-        ),
+        builder: (context, child) => Home(),
       ),
     );
   }

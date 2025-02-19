@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/data/services/preference_service.dart';
-import 'package:tempus/data/services/audio_service.dart';
-import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/domain/models/sample_pair.dart';
-import 'package:tempus/ui/deck/settings/view.dart';
+import 'package:tempus/ui/home/deck/settings/sample_settings/view_model.dart';
+import 'package:tempus/ui/home/deck/settings/view.dart';
 import 'package:tempus/util.dart';
 
 class SampleSettings extends StatelessWidget {
@@ -35,7 +33,9 @@ class SampleSettings extends StatelessWidget {
           sections: [
             SettingsSection(
               title: Text("Free"),
-              tiles: samplePairs
+              tiles: context
+                  .watch<SampleSettingsViewModel>()
+                  .samplePairs
                   .where((samplePair) => !samplePair.isPremium)
                   .map((samplePair) =>
                       getSamplePairSettingsTiles(context, samplePair, true))
@@ -43,7 +43,9 @@ class SampleSettings extends StatelessWidget {
             ),
             SettingsSection(
                 title: Text("Premium"),
-                tiles: samplePairs
+                tiles: context
+                    .watch<SampleSettingsViewModel>()
+                    .samplePairs
                     .where((samplePair) => samplePair.isPremium)
                     .map((samplePair) =>
                         getSamplePairSettingsTiles(context, samplePair, false))
@@ -55,11 +57,11 @@ class SampleSettings extends StatelessWidget {
   SettingsTile getSamplePairSettingsTiles(
       BuildContext context, SamplePair samplePair, bool isFree) {
     return SettingsTile(
-        enabled: isFree || context.watch<PurchaseService>().isPremium,
+        enabled: isFree || context.watch<SampleSettingsViewModel>().isPremium,
         title: Text(capitalizeFirst(samplePair.name)),
         trailing: () {
           SamplePair activeSamplePair =
-              context.watch<PreferenceService>().getSamplePair();
+              context.watch<SampleSettingsViewModel>().samplePair;
           if (activeSamplePair.name == samplePair.name &&
               activeSamplePair.isPremium == samplePair.isPremium) {
             return Icon(PlatformIcons(context).checkMark);
@@ -67,14 +69,8 @@ class SampleSettings extends StatelessWidget {
             return null;
           }
         }(),
-        onPressed: (context) async {
-          context.read<PreferenceService>().setSamplePair(samplePair);
-          context
-              .read<AudioService>()
-              .setSample(true, samplePair.getDownbeatSamplePath());
-          context
-              .read<AudioService>()
-              .setSample(false, samplePair.getSubdivisionSamplePath());
-        });
+        onPressed: (context) async => await context
+            .read<SampleSettingsViewModel>()
+            .setSamplePair(samplePair));
   }
 }

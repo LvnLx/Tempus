@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart' hide Selector;
-import 'package:tempus/data/services/preference_service.dart';
-import 'package:tempus/data/services/audio_service.dart';
-import 'package:tempus/ui/mixer/selector/view.dart';
+import 'package:tempus/ui/home/mixer/channel/view_model.dart';
+import 'package:tempus/ui/home/mixer/selector/view.dart';
 
 final List<int> subdivisionOptions = List.generate(8, (index) => (index + 2));
 
@@ -19,26 +18,6 @@ class Channel extends StatefulWidget {
 class ChannelState extends State<Channel> {
   late Key key;
   PageController scrollController = PageController(viewportFraction: 0.5);
-
-  Future<void> setOption(int option) async {
-    context.read<AudioService>().setSubdivisionOption(widget.key!, option);
-    context.read<PreferenceService>().setSubdivisions({
-          ...context.read<PreferenceService>().getSubdivisions()
-        }..update(
-            key,
-            (subdivisionData) => SubdivisionData(
-                option: option, volume: subdivisionData.volume)));
-  }
-
-  Future<void> setVolume(double volume) async {
-    context.read<AudioService>().setSubdivisionVolume(widget.key!, volume);
-    context.read<PreferenceService>().setSubdivisions({
-          ...context.read<PreferenceService>().getSubdivisions()
-        }..update(
-            key,
-            (subdivisionData) => SubdivisionData(
-                option: subdivisionData.option, volume: volume)));
-  }
 
   @override
   void initState() {
@@ -72,22 +51,26 @@ class ChannelState extends State<Channel> {
                     quarterTurns: 3,
                     child: PlatformSlider(
                       activeColor: Theme.of(context).colorScheme.primary,
-                      onChanged: (double value) async => await setVolume(value),
+                      onChanged: (double value) async => await context
+                          .read<ChannelViewModel>()
+                          .setSubdivisionVolume(widget.key!, value),
                       value: context
-                          .watch<PreferenceService>()
-                          .getSubdivisions()[key]!
+                          .watch<ChannelViewModel>()
+                          .subdivisions[key]!
                           .volume,
                     ))),
             SizedBox(
                 width: 50,
                 height: 120,
                 child: Selector(
+                    key: widget.key!,
                     initialItem: context
-                            .read<PreferenceService>()
-                            .getSubdivisions()[key]!
+                            .read<ChannelViewModel>()
+                            .subdivisions[key]!
                             .option -
                         2,
-                    callback: setOption)),
+                    callback:
+                        context.read<ChannelViewModel>().setSubdivisionOption)),
             SizedBox(
               child: PlatformIconButton(
                   onPressed: () => widget.onRemove(widget.key!),
