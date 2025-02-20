@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart' hide showDialog;
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/data/services/shared_preferences_service.dart';
-import 'package:tempus/data/services/audio_service.dart';
-import 'package:tempus/data/services/purchases_service.dart';
-import 'package:tempus/ui/mixer/subdivision.dart';
+import 'package:tempus/domain/models/purchase_result.dart';
+import 'package:tempus/ui/core/dialogs.dart';
+import 'package:tempus/ui/home/mixer/channel/view.dart';
+import 'package:tempus/ui/home/mixer/view_model.dart';
 import 'package:tempus/util.dart';
 
 class Mixer extends StatefulWidget {
@@ -27,40 +27,6 @@ class MixerState extends State<Mixer> {
     super.didChangeDependencies();
   }
 
-  Future<void> _handleAddSubdivisionPressed(BuildContext context) async {
-    if (_canAddSubdivison()) {
-      await _addSubdivision();
-    } else {
-      await _showPremiumDialog();
-    }
-  }
-
-  Future<void> _handleOnRemovePressed(Key key) async {
-    await Provider.of<SharedPreferencesService>(context, listen: false).setSubdivisions({
-      ...Provider.of<SharedPreferencesService>(context, listen: false).getSubdivisions()
-    }..remove(key));
-    AudioService.removeSubdivision(key);
-  }
-
-  bool _canAddSubdivison() =>
-      Provider.of<SharedPreferencesService>(context, listen: false).getSubdivisions().isEmpty ||
-      Provider.of<SharedPreferencesService>(context, listen: false).getIsPremium();
-
-  Future<void> _addSubdivision() async {
-    UniqueKey key = UniqueKey();
-    Map<Key, SubdivisionData> subdivisions =
-        Provider.of<SharedPreferencesService>(context, listen: false).getSubdivisions();
-    subdivisions = {
-      ...subdivisions,
-      key: SubdivisionData(option: subdivisionOptions[0], volume: 0.0)
-    };
-
-    await Provider.of<SharedPreferencesService>(context, listen: false)
-        .setSubdivisions(subdivisions);
-    await AudioService.addSubdivision(
-        key, subdivisions[key]!.option, subdivisions[key]!.volume);
-  }
-
   Future<void> _showPremiumDialog() async =>
       await showDialog(DialogConfiguration(
           context,
@@ -76,16 +42,15 @@ class MixerState extends State<Mixer> {
                 child: Text("Purchase"),
                 onPressed: () async {
                   Navigator.pop(context);
-                  await PurchasesService.purchasePremium(context);
+                  PurchaseResult purchaseResult =
+                      await context.read<MixerViewModel>().purchasePremium();
+                  if (mounted) {
+                    showPurchaseDialog(context, purchaseResult);
+                  }
                 },
                 cupertino: (context, platform) =>
                     CupertinoDialogActionData(isDefaultAction: true))
           ]));
-
-  void _handleVolumeChanged(BuildContext context, double newVolume) async {
-    await Provider.of<SharedPreferencesService>(context, listen: false).setVolume(newVolume);
-    await AudioService.setVolume(newVolume);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,8 +73,8 @@ class MixerState extends State<Mixer> {
                       child: PlatformSlider(
                         activeColor: Theme.of(context).colorScheme.primary,
                         onChanged: (double value) =>
-                            _handleVolumeChanged(context, value),
-                        value: Provider.of<SharedPreferencesService>(context).getVolume(),
+                            context.read<MixerViewModel>().setVolume(value),
+                        value: context.watch<MixerViewModel>().volume,
                       ),
                     )),
                     SizedBox(
@@ -125,21 +90,29 @@ class MixerState extends State<Mixer> {
                   ],
                 ),
               ),
-              ...(Provider.of<SharedPreferencesService>(context)
-                  .getSubdivisions()
+              ...(context
+                  .watch<MixerViewModel>()
+                  .subdivisions
                   .keys
-                  .map((key) => Subdivision(
+                  .map((key) => Channel(
                       key: key,
-                      onRemove: (Key key) async =>
-                          await _handleOnRemovePressed(key)))
+                      onRemove: (Key key) async => await context
+                          .read<MixerViewModel>()
+                          .removeSubdivision(key)))
                   .toList()),
               VerticalDivider(
                 color: Theme.of(context).colorScheme.onSurface,
               ),
-              if (Provider.of<SharedPreferencesService>(context).getSubdivisions().length <
+              if (context.watch<MixerViewModel>().subdivisions.length <
                   subdivisionOptions.length)
                 PlatformIconButton(
-                    onPressed: () => _handleAddSubdivisionPressed(context),
+                    onPressed: () async {
+                      if (_canAddSubdivison()) {
+                        await context.read<MixerViewModel>().addSubdivision();
+                      } else {
+                        await _showPremiumDialog();
+                      }
+                    },
                     icon: Icon(
                       PlatformIcons(context).add,
                       color: Theme.of(context).colorScheme.primary,
@@ -152,8 +125,12 @@ class MixerState extends State<Mixer> {
     );
   }
 
+  bool _canAddSubdivison() =>
+      context.read<MixerViewModel>().subdivisions.isEmpty ||
+      context.read<MixerViewModel>().isPremium;
+
   IconData volumeIcon() {
-    double volume = Provider.of<SharedPreferencesService>(context).getVolume();
+    double volume = context.watch<MixerViewModel>().volume;
     if (volume > 0.66) {
       return PlatformIcons(context).volumeUp;
     } else if (volume > 0.33) {

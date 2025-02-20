@@ -5,10 +5,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/data/services/shared_preferences_service.dart';
-import 'package:tempus/data/services/audio_service.dart';
-import 'package:tempus/ui/deck/bpm_dial.dart';
-import 'package:tempus/ui/settings/settings.dart';
+import 'package:tempus/ui/home/deck/bpm_dial/view.dart';
+import 'package:tempus/ui/home/deck/settings/view.dart';
+import 'package:tempus/ui/home/deck/view_model.dart';
 
 class Deck extends StatefulWidget {
   const Deck({super.key});
@@ -21,15 +20,7 @@ class DeckState extends State<Deck> {
   final int maxTapTimeCount = 5;
 
   late Timer lastTapTimer;
-
   Queue<int> tapTimes = Queue();
-  bool playback = false;
-
-  @override
-  void initState() {
-    super.initState();
-    AudioService.stopPlayback();
-  }
 
   void addTapTime(int tapTime) {
     if (tapTimes.length >= maxTapTimeCount) {
@@ -56,24 +47,12 @@ class DeckState extends State<Deck> {
           Timer(Duration(seconds: 3), () => setState(tapTimes.clear));
     } else {
       setState(() => addTapTime(DateTime.now().millisecondsSinceEpoch));
-      setBpm((1 / (averageTapDeltaMilliseconds() / 1000) * 60).round(),
-          skipUnchanged: false);
+      context.read<DeckViewModel>().setBpm(
+          (1 / (averageTapDeltaMilliseconds() / 1000) * 60).round(), false);
       lastTapTimer.cancel();
       lastTapTimer =
           Timer(Duration(seconds: 3), () => setState(tapTimes.clear));
     }
-  }
-
-  Future<void> setBpm(int newBpm, {bool skipUnchanged = true}) async {
-    await Provider.of<SharedPreferencesService>(context, listen: false)
-        .setBpm(newBpm, skipUnchanged: skipUnchanged);
-  }
-
-  Future<void> togglePlayback() async {
-    playback ? await AudioService.stopPlayback() : await AudioService.startPlayback();
-    setState(() {
-      playback = !playback;
-    });
   }
 
   @override
@@ -94,13 +73,15 @@ class DeckState extends State<Deck> {
                     color: Theme.of(context).colorScheme.primary,
                     size: 35,
                   ),
-                  onPressed: () async => await setBpm(
-                      Provider.of<SharedPreferencesService>(context, listen: false).getBpm() -
-                          1),
+                  onPressed: () async => await context
+                      .read<DeckViewModel>()
+                      .setBpm(context.read<DeckViewModel>().bpm - 1),
                 ),
                 GestureDetector(
-                  onTap: () async => await showBpmDialog(context, setBpm,
-                      Provider.of<SharedPreferencesService>(context, listen: false).getBpm()),
+                  onTap: () async => await showBpmDialog(
+                      context,
+                      context.read<DeckViewModel>().setBpm,
+                      context.read<DeckViewModel>().bpm),
                   child: Container(
                       padding: EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
@@ -113,9 +94,7 @@ class DeckState extends State<Deck> {
                           child: Text(
                         tapTimes.length == 1
                             ? "TAP"
-                            : Provider.of<SharedPreferencesService>(context)
-                                .getBpm()
-                                .toString(),
+                            : context.watch<DeckViewModel>().bpm.toString(),
                         style: TextStyle(
                             fontSize: 35,
                             color: Theme.of(context).colorScheme.primary),
@@ -125,9 +104,9 @@ class DeckState extends State<Deck> {
                 PlatformIconButton(
                     icon: Icon(PlatformIcons(context).add,
                         color: Theme.of(context).colorScheme.primary, size: 35),
-                    onPressed: () async => await setBpm(
-                        Provider.of<SharedPreferencesService>(context, listen: false).getBpm() +
-                            1)),
+                    onPressed: () async => await context
+                        .read<DeckViewModel>()
+                        .setBpm(context.read<DeckViewModel>().bpm + 1)),
               ],
             ),
           ),
@@ -141,20 +120,21 @@ class DeckState extends State<Deck> {
                         height: constraints.maxWidth / 3 * 2,
                         child: BpmDial(
                             callbackThreshold: 20,
-                            callback: (int change) async => await setBpm(
-                                Provider.of<SharedPreferencesService>(context, listen: false)
-                                        .getBpm() +
+                            callback: (int change) async => await context
+                                .read<DeckViewModel>()
+                                .setBpm(context.read<DeckViewModel>().bpm +
                                     change))),
                   ),
                   Center(
                       child: PlatformIconButton(
                     icon: Icon(
                         size: 80,
-                        playback
+                        context.watch<DeckViewModel>().playback
                             ? PlatformIcons(context).pause
                             : PlatformIcons(context).playArrowSolid,
                         color: Theme.of(context).colorScheme.primary),
-                    onPressed: () async => await togglePlayback(),
+                    onPressed: () async =>
+                        await context.read<DeckViewModel>().togglePlayback(),
                   )),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.end,

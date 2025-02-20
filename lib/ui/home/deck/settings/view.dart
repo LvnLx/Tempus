@@ -4,11 +4,12 @@ import 'package:flutter/material.dart' hide showDialog;
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/data/services/shared_preferences_service.dart';
 import 'package:tempus/constants.dart';
-import 'package:tempus/ui/settings/sample_settings.dart';
-import 'package:tempus/ui/settings/theme_settings.dart';
-import 'package:tempus/data/services/purchases_service.dart';
+import 'package:tempus/domain/models/purchase_result.dart';
+import 'package:tempus/ui/core/dialogs.dart';
+import 'package:tempus/ui/home/deck/settings/sample_settings/view.dart';
+import 'package:tempus/ui/home/deck/settings/theme_settings/view.dart';
+import 'package:tempus/ui/home/deck/settings/view_model.dart';
 import 'package:tempus/util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -48,27 +49,37 @@ class _SettingsState extends State<Settings> {
                 style: TextStyle(
                     fontSize: 17,
                     color: getSettingsThemeData(context).trailingTextColor),
-                child: Text(Provider.of<SharedPreferencesService>(context).getIsPremium()
+                child: Text(context.watch<SettingsViewModel>().isPremium
                     ? "Active"
                     : "Inactive"),
               ),
             ),
             SettingsTile(
                 title: Text("Purchase"),
-                onPressed: (context) async =>
-                    await PurchasesService.purchasePremium(context)),
+                onPressed: (context) async {
+                  PurchaseResult purchaseResult =
+                      await context.read<SettingsViewModel>().purchasePremium();
+                  if (context.mounted) {
+                    await showPurchaseDialog(context, purchaseResult);
+                  }
+                }),
             SettingsTile(
                 title: Text("Restore"),
-                onPressed: (context) async =>
-                    await PurchasesService.restorePremium(context))
+                onPressed: (context) async {
+                  PurchaseResult purchaseResult =
+                      await context.read<SettingsViewModel>().restorePremium();
+                  if (context.mounted) {
+                    await showPurchaseDialog(context, purchaseResult);
+                  }
+                })
           ]),
           SettingsSection(
             title: Text("Audio"),
             tiles: [
               SettingsTile.navigation(
                 title: Text("Sample"),
-                value:
-                    Text(capitalizeFirst(Provider.of<SharedPreferencesService>(context).getSamplePair().name)),
+                value: Text(capitalizeFirst(
+                    context.watch<SettingsViewModel>().samplePair.name)),
                 onPressed: (context) => Navigator.push(context,
                     MaterialPageRoute(builder: (context) => SampleSettings())),
               )
@@ -78,7 +89,7 @@ class _SettingsState extends State<Settings> {
             SettingsTile.navigation(
               title: Text("Theme"),
               value: Text(capitalizeFirst(
-                  Provider.of<SharedPreferencesService>(context).getThemeMode().name)),
+                  context.watch<SettingsViewModel>().themeMode.name)),
               onPressed: (context) => Navigator.push(context,
                   MaterialPageRoute(builder: (context) => ThemeSettings())),
             )
@@ -101,8 +112,8 @@ class _SettingsState extends State<Settings> {
                               child: Text("Ok"),
                               onPressed: () async {
                                 Navigator.pop(context);
-                                await Provider.of<SharedPreferencesService>(context,
-                                        listen: false)
+                                await context
+                                    .read<SettingsViewModel>()
                                     .resetMetronome();
                               },
                               cupertino: (context, platform) =>
@@ -126,8 +137,8 @@ class _SettingsState extends State<Settings> {
                               child: Text("Ok"),
                               onPressed: () async {
                                 Navigator.pop(context);
-                                await Provider.of<SharedPreferencesService>(context,
-                                        listen: false)
+                                await context
+                                    .read<SettingsViewModel>()
                                     .resetApp();
                               },
                               cupertino: (context, platform) =>
