@@ -45,7 +45,7 @@ class AudioService {
         ValueNotifier(await _preferenceService.getSubdivisions());
     _volumeValueNotifier = ValueNotifier(await _preferenceService.getVolume());
 
-    await setSampleNames(_assetService.samplePairs.fold<Set<String>>(
+    await _setSampleNames(_assetService.samplePairs.fold<Set<String>>(
         {},
         (accumulator, samplePair) => {
               ...accumulator,
@@ -53,12 +53,10 @@ class AudioService {
               samplePair.getSubdivisionSamplePath()
             }));
 
-    SamplePair samplePair = await _preferenceService.getSamplePair();
     await setState(
         await _preferenceService.getBpm(),
-        samplePair.getDownbeatSamplePath(),
-        samplePair.getSubdivisionSamplePath(),
-        jsonEncodeSubdivisions(subdivisions),
+        await _preferenceService.getSamplePair(),
+        await _preferenceService.getSubdivisions(),
         await _preferenceService.getVolume());
   }
 
@@ -123,23 +121,18 @@ class AudioService {
     _preferenceService.setBpm(validatedBpm);
   }
 
-  Future<void> setSampleNames(Set<String> sampleNames) async {
-    final result = await methodChannel.invokeMethod(
-        Action.setSampleNames.name, sampleNames.toList());
-    print(result);
-  }
+  Future<void> setState(int bpm, SamplePair samplePair,
+      Map<Key, SubdivisionData> subdivisions, double volume) async {
+    _bpmValueNotifier.value = bpm;
+    _samplePairValueNotifier.value = samplePair;
+    _subdivisionsValueNotifier.value = subdivisions;
+    _volumeValueNotifier.value = volume;
 
-  Future<void> setState(
-      int bpm,
-      String downbeatSampleName,
-      String subdivisionSampleName,
-      String subdivisionsAsJsonString,
-      double volume) async {
     final result = await methodChannel.invokeMethod(Action.setState.name, [
       bpm.toString(),
-      downbeatSampleName,
-      subdivisionSampleName,
-      subdivisionsAsJsonString,
+      samplePair.getDownbeatSamplePath(),
+      samplePair.getSubdivisionSamplePath(),
+      jsonEncodeSubdivisions(subdivisions),
       pow(volume, 2).toString()
     ]);
     print(result);
@@ -206,6 +199,12 @@ class AudioService {
   Future<void> _setSample(bool isDownbeat, String sampleName) async {
     final result = await methodChannel.invokeMethod(
         Action.setSample.name, [isDownbeat.toString(), sampleName]);
+    print(result);
+  }
+
+  Future<void> _setSampleNames(Set<String> sampleNames) async {
+    final result = await methodChannel.invokeMethod(
+        Action.setSampleNames.name, sampleNames.toList());
     print(result);
   }
 

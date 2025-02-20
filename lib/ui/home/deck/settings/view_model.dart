@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
@@ -25,17 +26,17 @@ class SettingsViewModel extends ChangeNotifier {
       await _purchaseService.purchasePremium();
 
   Future<void> resetApp() async {
-    // Reset BPM
-    // Reset sample pair
-    // Reset subdivisions
-    // Reset theme mode
-    // Reset volume
+    _themeService.setThemeMode(Preference.themeMode.defaultValue);
+    await _audioService.setState(
+        Preference.bpm.defaultValue,
+        Preference.samplePair.defaultValue,
+        Preference.subdivisions.defaultValue,
+        Preference.volume.defaultValue);
   }
 
   Future<void> resetMetronome() async {
-    // Reset BPM
-    // Reset subdivisions
-    // Reset volume
+    await _audioService.setState(Preference.bpm.defaultValue, samplePair,
+        Preference.subdivisions.defaultValue, Preference.volume.defaultValue);
   }
 
   Future<PurchaseResult> restorePremium() async =>

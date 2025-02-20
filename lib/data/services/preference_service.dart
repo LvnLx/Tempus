@@ -11,7 +11,7 @@ enum Preference {
   bpm(120),
   isPremium(false),
   samplePair(SamplePair("sine", false)),
-  subdivisions({}),
+  subdivisions(<Key, SubdivisionData>{}),
   themeMode(ThemeMode.system),
   volume(1.0);
 
