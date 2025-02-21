@@ -74,11 +74,12 @@ class SelectorState extends State<Selector> {
                     child: Opacity(opacity: itemOpacity, child: child),
                   );
                 },
-                child: Text(
-                  subdivisionOptions[index].toString(),
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontSize: 35),
+                child: FittedBox(
+                  child: Text(
+                    subdivisionOptions[index].toString(),
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
+                  ),
                 ));
           },
           childCount: itemCount,

@@ -90,13 +90,12 @@ class DeckState extends State<Deck> {
                           borderRadius: BorderRadius.circular(8.0)),
                       width: 100,
                       height: 60,
-                      child: Center(
+                      child: FittedBox(
                           child: Text(
                         tapTimes.length == 1
                             ? "TAP"
                             : context.watch<DeckViewModel>().bpm.toString(),
                         style: TextStyle(
-                            fontSize: 35,
                             color: Theme.of(context).colorScheme.primary),
                         textAlign: TextAlign.center,
                       ))),
@@ -197,7 +196,6 @@ Future<void> showBpmDialog(BuildContext context,
                     makeCupertinoDecorationNull: true,
                     maxLength: 3,
                     onChanged: (text) => bpm = text,
-                    style: TextStyle(fontSize: 35),
                     textAlign: TextAlign.center,
                   )),
               actions: [
