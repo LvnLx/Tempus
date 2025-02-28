@@ -54,7 +54,7 @@ class MixerState extends State<Mixer> {
                         )),
                     Expanded(
                       child: AxisSizedBox(
-                        reference: ReferenceAxis.vertical,
+                        reference: Axis.vertical,
                         child: ScaledPadding(
                           child: Icon(
                             volumeIcon(),
@@ -94,7 +94,7 @@ class MixerState extends State<Mixer> {
                       child: SizedBox(
                         width: constraints.maxHeight / 6,
                         child: AxisSizedBox(
-                          reference: ReferenceAxis.vertical,
+                          reference: Axis.vertical,
                           child: ScaledPadding(
                             child: Icon(
                               PlatformIcons(context).add,

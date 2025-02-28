@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Axis;
+import 'package:flutter/painting.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
 
@@ -14,7 +15,7 @@ class BpmButton extends StatelessWidget {
     return GestureDetector(
       onTap: () async => await callback(),
       child: AxisSizedBox(
-        reference: ReferenceAxis.vertical,
+        reference: Axis.vertical,
         child: ScaledPadding(
           child: Icon(
             iconData,

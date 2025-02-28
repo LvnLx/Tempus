@@ -1,20 +1,18 @@
 import 'package:flutter/widgets.dart';
 
-enum ReferenceAxis { horizontal, vertical }
-
 class AxisSizedBox extends StatelessWidget {
   final Widget child;
-  final ReferenceAxis reference;
+  final Axis reference;
 
   const AxisSizedBox({super.key, required this.child, required this.reference});
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
       builder: (_, constraints) => SizedBox(
-            height: reference == ReferenceAxis.vertical
+            height: reference == Axis.vertical
                 ? constraints.maxHeight
                 : constraints.maxWidth,
-            width: reference == ReferenceAxis.vertical
+            width: reference == Axis.vertical
                 ? constraints.maxHeight
                 : constraints.maxWidth,
             child: child,

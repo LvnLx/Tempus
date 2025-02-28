@@ -71,54 +71,59 @@ class DeckState extends State<Deck> {
                       Expanded(child: SizedBox.expand()),
                       Expanded(
                         flex: 3,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            BpmButton(
-                                callback: () async => await context
-                                    .read<DeckViewModel>()
-                                    .setBpm(
-                                        context.read<DeckViewModel>().bpm - 1),
-                                iconData: PlatformIcons(context).remove),
-                            GestureDetector(
-                              onTap: () async => await showBpmDialog(
-                                  context,
-                                  context.read<DeckViewModel>().setBpm,
-                                  context.read<DeckViewModel>().bpm),
-                              child: Container(
-                                  padding: EdgeInsets.all(8.0),
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurface),
-                                      borderRadius: BorderRadius.circular(8.0)),
-                                  child: SizedBox(
-                                    height: double.infinity,
-                                    child: FittedBox(
-                                        child: Text(
-                                      tapTimes.length == 1
-                                          ? "TAP"
-                                          : context
-                                              .watch<DeckViewModel>()
-                                              .bpm
-                                              .toString(),
-                                      style: TextStyle(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          fontFamily: "SFMono"),
-                                      textAlign: TextAlign.center,
+                        child: LayoutBuilder(
+                          builder: (_, barConstraints) => Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              BpmButton(
+                                  callback: () async => await context
+                                      .read<DeckViewModel>()
+                                      .setBpm(
+                                          context.read<DeckViewModel>().bpm -
+                                              1),
+                                  iconData: PlatformIcons(context).remove),
+                              GestureDetector(
+                                onTap: () async => await showBpmDialog(
+                                    context,
+                                    context.read<DeckViewModel>().setBpm,
+                                    context.read<DeckViewModel>().bpm),
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0)),
+                                    child: SizedBox(
+                                      height: barConstraints.maxHeight,
+                                      width: barConstraints.maxHeight * 2,
+                                      child: FittedBox(
+                                          child: Text(
+                                        tapTimes.length == 1
+                                            ? "TAP"
+                                            : context
+                                                .watch<DeckViewModel>()
+                                                .bpm
+                                                .toString(),
+                                        style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            fontFamily: "SFMono"),
+                                        textAlign: TextAlign.center,
+                                      )),
                                     )),
-                                  )),
-                            ),
-                            BpmButton(
-                                callback: () async => await context
-                                    .read<DeckViewModel>()
-                                    .setBpm(
-                                        context.read<DeckViewModel>().bpm + 1),
-                                iconData: PlatformIcons(context).add)
-                          ],
+                              ),
+                              BpmButton(
+                                  callback: () async => await context
+                                      .read<DeckViewModel>()
+                                      .setBpm(
+                                          context.read<DeckViewModel>().bpm +
+                                              1),
+                                  iconData: PlatformIcons(context).add)
+                            ],
+                          ),
                         ),
                       ),
                       Expanded(child: SizedBox.expand())
@@ -175,7 +180,7 @@ class DeckState extends State<Deck> {
                                       Settings());
                             },
                             child: AxisSizedBox(
-                              reference: ReferenceAxis.vertical,
+                              reference: Axis.vertical,
                               child: FittedBox(
                                 child: Icon(
                                   PlatformIcons(context).settings,
@@ -190,7 +195,7 @@ class DeckState extends State<Deck> {
                           child: GestureDetector(
                             onTap: tapTempo,
                             child: AxisSizedBox(
-                              reference: ReferenceAxis.vertical,
+                              reference: Axis.vertical,
                               child: FittedBox(
                                 child: Icon(
                                   Icons.touch_app,
