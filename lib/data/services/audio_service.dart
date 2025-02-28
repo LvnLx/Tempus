@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
+import 'package:tempus/domain/extensions/subdivisions.dart';
 import 'package:tempus/domain/models/sample_pair.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
-import 'package:tempus/util.dart';
 
 enum Action {
   addSubdivision,
@@ -132,7 +132,7 @@ class AudioService {
       bpm.toString(),
       samplePair.getDownbeatSamplePath(),
       samplePair.getSubdivisionSamplePath(),
-      jsonEncodeSubdivisions(subdivisions),
+      subdivisions.toJsonString(),
       pow(volume, 2).toString()
     ]);
     print(result);

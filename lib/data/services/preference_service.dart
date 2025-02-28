@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tempus/data/services/asset_service.dart';
+import 'package:tempus/domain/extensions/subdivisions.dart';
 import 'package:tempus/domain/models/sample_pair.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
-import 'package:tempus/util.dart';
 
 enum Preference {
   bpm(120),
@@ -27,32 +27,90 @@ class PreferenceService {
 
   PreferenceService(this._assetService);
 
-  Future<int> getBpm() async =>
-      await _sharedPreferencesAsync.getInt(Preference.bpm.name) ??
-      Preference.bpm.defaultValue;
+  Future<int> getBpm() async {
+    try {
+      int? bpm = await _sharedPreferencesAsync.getInt(Preference.bpm.name);
+      return bpm ?? Preference.bpm.defaultValue;
+    } catch (exception) {
+      print("Exception while getting BPM: $exception");
+      return Preference.bpm.defaultValue;
+    }
+  }
 
-  Future<bool> getIsPremium() async =>
-      await _sharedPreferencesAsync.getBool(Preference.isPremium.name) ??
-      Preference.isPremium.defaultValue;
+  Future<bool> getIsPremium() async {
+    try {
+      bool? isPremium =
+          await _sharedPreferencesAsync.getBool(Preference.isPremium.name);
+      return isPremium ?? Preference.isPremium.defaultValue;
+    } catch (exception) {
+      print("Exception while getting premium status: $exception");
+      return Preference.isPremium.defaultValue;
+    }
+  }
 
-  Future<SamplePair> getSamplePair() async => await _getOrElse<SamplePair>(
-      Preference.samplePair.name,
-      _assetService.samplePairs,
-      Preference.samplePair.defaultValue.name,
-      (samplePair) => samplePair.name);
+  Future<SamplePair> getSamplePair() async {
+    try {
+      String? samplePairAsJsonString =
+          await _sharedPreferencesAsync.getString(Preference.samplePair.name);
 
-  Future<Map<Key, SubdivisionData>> getSubdivisions() async =>
-      await _getSubdivisions() ?? {};
+      if (samplePairAsJsonString != null) {
+        return _assetService.samplePairs.firstWhere((samplePair) =>
+            samplePair == SamplePair.fromJsonString(samplePairAsJsonString));
+      } else {
+        return Preference.samplePair.defaultValue;
+      }
+    } catch (exception) {
+      print("Exception while getting sample pair: $exception");
+      return Preference.samplePair.defaultValue;
+    }
+  }
 
-  Future<ThemeMode> getThemeMode() async => await _getOrElse<ThemeMode>(
-      Preference.themeMode.name,
-      ThemeMode.values,
-      Preference.themeMode.defaultValue.toString(),
-      (themeMode) => themeMode.toString());
+  Future<Map<Key, SubdivisionData>> getSubdivisions() async {
+    try {
+      String? subdivisionsAsJsonString =
+          await _sharedPreferencesAsync.getString(Preference.subdivisions.name);
 
-  Future<double> getVolume() async =>
-      await _sharedPreferencesAsync.getDouble(Preference.volume.name) ??
-      Preference.volume.defaultValue;
+      if (subdivisionsAsJsonString != null) {
+        Map<String, dynamic> subdivisionsAsJson =
+            jsonDecode(subdivisionsAsJsonString);
+        return subdivisionsAsJson.map((key, value) =>
+            MapEntry(Key(key), SubdivisionData.fromJson(value)));
+      } else {
+        return Preference.subdivisions.defaultValue;
+      }
+    } catch (exception) {
+      print("Exception while getting subdivisions: $exception");
+      return Preference.subdivisions.defaultValue;
+    }
+  }
+
+  Future<ThemeMode> getThemeMode() async {
+    try {
+      String? themeModeAsString =
+          await _sharedPreferencesAsync.getString(Preference.themeMode.name);
+
+      if (themeModeAsString != null) {
+        return ThemeMode.values
+            .firstWhere((themeMode) => themeMode.name == themeModeAsString);
+      } else {
+        return Preference.themeMode.defaultValue;
+      }
+    } catch (exception) {
+      print("Exception while getting theme mode: $exception");
+      return Preference.themeMode.defaultValue;
+    }
+  }
+
+  Future<double> getVolume() async {
+    try {
+      double? volume =
+          await _sharedPreferencesAsync.getDouble(Preference.volume.name);
+      return volume ?? Preference.volume.defaultValue;
+    } catch (exception) {
+      print("Exception while getting volume: $exception");
+      return Preference.volume.defaultValue;
+    }
+  }
 
   Future<void> setBpm(int bpm) async =>
       await _sharedPreferencesAsync.setInt(Preference.bpm.name, bpm);
@@ -62,38 +120,16 @@ class PreferenceService {
 
   Future<void> setSamplePair(SamplePair samplePair) async =>
       await _sharedPreferencesAsync.setString(
-          Preference.samplePair.name, samplePair.name);
+          Preference.samplePair.name, samplePair.toJsonString());
 
   Future<void> setSubdivisions(Map<Key, SubdivisionData> subdivisions) async =>
       await _sharedPreferencesAsync.setString(
-          Preference.subdivisions.name, jsonEncodeSubdivisions(subdivisions));
+          Preference.subdivisions.name, subdivisions.toJsonString());
 
   Future<void> setThemeMode(ThemeMode themeMode) async =>
       await _sharedPreferencesAsync.setString(
-          Preference.themeMode.name, themeMode.toString());
+          Preference.themeMode.name, themeMode.name);
 
   Future<void> setVolume(double volume) async =>
       await _sharedPreferencesAsync.setDouble(Preference.volume.name, volume);
-
-  Future<T> _getOrElse<T>(
-    String key,
-    Iterable<T> possibleValues,
-    String defaultValue,
-    String Function(T) comparator,
-  ) async {
-    String value = await _sharedPreferencesAsync.getString(key) ?? defaultValue;
-    return possibleValues.firstWhere((element) => comparator(element) == value);
-  }
-
-  Future<Map<Key, SubdivisionData>?> _getSubdivisions() async {
-    String? subdivisionsAsJsonString =
-        await _sharedPreferencesAsync.getString(Preference.subdivisions.name);
-
-    if (subdivisionsAsJsonString == null) return null;
-
-    Map<String, dynamic> subdivisionsAsJson =
-        jsonDecode(subdivisionsAsJsonString);
-    return subdivisionsAsJson.map(
-        (key, value) => MapEntry(Key(key), SubdivisionData.fromJson(value)));
-  }
 }
