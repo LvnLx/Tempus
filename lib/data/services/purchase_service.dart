@@ -65,7 +65,8 @@ class PurchaseService {
           return PurchaseResult(PurchaseResultStatus.purchaseCancelled,
               "The purchase was cancelled");
         default:
-          rethrow;
+          return PurchaseResult(PurchaseResultStatus.purchaseFailed,
+              "There was an error completing your purchase. Please contact support if the issue persists");
       }
     } catch (_) {
       return PurchaseResult(PurchaseResultStatus.purchaseFailed,

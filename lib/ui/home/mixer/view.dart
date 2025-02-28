@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart' hide showDialog;
+import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/domain/models/purchase_result.dart';
+import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/dialogs.dart';
+import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 import 'package:tempus/ui/home/mixer/view_model.dart';
-import 'package:tempus/util.dart';
 
 class Mixer extends StatefulWidget {
   const Mixer({super.key});
@@ -27,98 +27,84 @@ class MixerState extends State<Mixer> {
     super.didChangeDependencies();
   }
 
-  Future<void> _showPremiumDialog() async =>
-      await showDialog(DialogConfiguration(
-          context,
-          "Premium Feature",
-          "Simultaneous subdivisions are available with the premium version. Would you like to continue to the purchase?",
-          [
-            PlatformDialogAction(
-                child: Text("Cancel"),
-                onPressed: () => Navigator.pop(context),
-                cupertino: (context, platform) =>
-                    CupertinoDialogActionData(isDestructiveAction: true)),
-            PlatformDialogAction(
-                child: Text("Purchase"),
-                onPressed: () async {
-                  Navigator.pop(context);
-                  PurchaseResult purchaseResult =
-                      await context.read<MixerViewModel>().purchasePremium();
-                  if (mounted) {
-                    showPurchaseDialog(context, purchaseResult);
-                  }
-                },
-                cupertino: (context, platform) =>
-                    CupertinoDialogActionData(isDefaultAction: true))
-          ]));
-
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Scrollbar(
-        controller: scrollController,
-        child: SingleChildScrollView(
+    return LayoutBuilder(
+      builder: (_, constraints) => Align(
+        alignment: Alignment.centerLeft,
+        child: Scrollbar(
           controller: scrollController,
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
+          child: SingleChildScrollView(
+            controller: scrollController,
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                Column(
                   children: [
                     Expanded(
+                        flex: 5,
                         child: RotatedBox(
-                      quarterTurns: 3,
-                      child: PlatformSlider(
-                        activeColor: Theme.of(context).colorScheme.primary,
-                        onChanged: (double value) =>
-                            context.read<MixerViewModel>().setVolume(value),
-                        value: context.watch<MixerViewModel>().volume,
-                      ),
-                    )),
-                    SizedBox(
-                      child: Center(
-                        child: PlatformIconButton(
-                            icon: Icon(
-                          volumeIcon(),
-                          size: 35,
-                          color: Theme.of(context).colorScheme.primary,
+                          quarterTurns: 3,
+                          child: PlatformSlider(
+                            activeColor: Theme.of(context).colorScheme.primary,
+                            onChanged: (double value) =>
+                                context.read<MixerViewModel>().setVolume(value),
+                            value: context.watch<MixerViewModel>().volume,
+                          ),
                         )),
+                    Expanded(
+                      child: AxisSizedBox(
+                        reference: ReferenceAxis.vertical,
+                        child: ScaledPadding(
+                          child: Icon(
+                            volumeIcon(),
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              ...(context
-                  .watch<MixerViewModel>()
-                  .subdivisions
-                  .keys
-                  .map((key) => Channel(
-                      key: key,
-                      onRemove: (Key key) async => await context
-                          .read<MixerViewModel>()
-                          .removeSubdivision(key)))
-                  .toList()),
-              VerticalDivider(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              if (context.watch<MixerViewModel>().subdivisions.length <
-                  subdivisionOptions.length)
-                PlatformIconButton(
-                    onPressed: () async {
-                      if (_canAddSubdivison()) {
-                        await context.read<MixerViewModel>().addSubdivision();
-                      } else {
-                        await _showPremiumDialog();
-                      }
-                    },
-                    icon: Icon(
-                      PlatformIcons(context).add,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 35,
-                    ))
-            ],
+                ...(context
+                    .watch<MixerViewModel>()
+                    .subdivisions
+                    .keys
+                    .map((key) => Channel(
+                        key: key,
+                        onRemove: (Key key) async => await context
+                            .read<MixerViewModel>()
+                            .removeSubdivision(key)))
+                    .toList()),
+                VerticalDivider(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                if (context.watch<MixerViewModel>().subdivisions.length <
+                    subdivisionOptions.length)
+                  GestureDetector(
+                      onTap: () async {
+                        if (_canAddSubdivison()) {
+                          await context.read<MixerViewModel>().addSubdivision();
+                        } else {
+                          await showPurchaseDialog(
+                              context,
+                              "Simultaneous subdivisions are available with the premium version. Would you like to continue to the purchase?",
+                              context.read<MixerViewModel>().purchasePremium);
+                        }
+                      },
+                      child: SizedBox(
+                        width: constraints.maxHeight / 6,
+                        child: AxisSizedBox(
+                          reference: ReferenceAxis.vertical,
+                          child: ScaledPadding(
+                            child: Icon(
+                              PlatformIcons(context).add,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ))
+              ],
+            ),
           ),
         ),
       ),
