@@ -60,7 +60,7 @@ class _SettingsState extends State<Settings> {
                   PurchaseResult purchaseResult =
                       await context.read<SettingsViewModel>().purchasePremium();
                   if (context.mounted) {
-                    await showPurchaseDialog(context, purchaseResult);
+                    await showPurchaseResultDialog(context, purchaseResult);
                   }
                 }),
             SettingsTile(
@@ -69,7 +69,7 @@ class _SettingsState extends State<Settings> {
                   PurchaseResult purchaseResult =
                       await context.read<SettingsViewModel>().restorePremium();
                   if (context.mounted) {
-                    await showPurchaseDialog(context, purchaseResult);
+                    await showPurchaseResultDialog(context, purchaseResult);
                   }
                 })
           ]),

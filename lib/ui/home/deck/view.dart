@@ -5,6 +5,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:tempus/ui/core/axis_sizer.dart';
+import 'package:tempus/ui/core/scaled_padding.dart';
+import 'package:tempus/ui/home/deck/bpm_button/view.dart';
 import 'package:tempus/ui/home/deck/bpm_dial/view.dart';
 import 'package:tempus/ui/home/deck/settings/view.dart';
 import 'package:tempus/ui/home/deck/view_model.dart';
@@ -58,124 +61,154 @@ class DeckState extends State<Deck> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-      return Flex(
-        direction: Axis.vertical,
-        children: [
-          Expanded(
-            flex: 1,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+        builder: (_, constraints) => Flex(
+              direction: Axis.vertical,
               children: [
-                PlatformIconButton(
-                  icon: Icon(
-                    PlatformIcons(context).remove,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 35,
-                  ),
-                  onPressed: () async => await context
-                      .read<DeckViewModel>()
-                      .setBpm(context.read<DeckViewModel>().bpm - 1),
-                ),
-                GestureDetector(
-                  onTap: () async => await showBpmDialog(
-                      context,
-                      context.read<DeckViewModel>().setBpm,
-                      context.read<DeckViewModel>().bpm),
-                  child: Container(
-                      padding: EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                              color: Theme.of(context).colorScheme.primary),
-                          borderRadius: BorderRadius.circular(8.0)),
-                      width: 100,
-                      height: 60,
-                      child: FittedBox(
-                          child: Text(
-                        tapTimes.length == 1
-                            ? "TAP"
-                            : context.watch<DeckViewModel>().bpm.toString(),
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary),
-                        textAlign: TextAlign.center,
-                      ))),
-                ),
-                PlatformIconButton(
-                    icon: Icon(PlatformIcons(context).add,
-                        color: Theme.of(context).colorScheme.primary, size: 35),
-                    onPressed: () async => await context
-                        .read<DeckViewModel>()
-                        .setBpm(context.read<DeckViewModel>().bpm + 1)),
-              ],
-            ),
-          ),
-          Expanded(
-              flex: 3,
-              child: Stack(
-                children: [
-                  Center(
-                    child: SizedBox(
-                        width: constraints.maxHeight / 3 * 2,
-                        height: constraints.maxWidth / 3 * 2,
-                        child: BpmDial(
-                            callbackThreshold: 20,
-                            callback: (int change) async => await context
-                                .read<DeckViewModel>()
-                                .setBpm(context.read<DeckViewModel>().bpm +
-                                    change))),
-                  ),
-                  Center(
-                      child: PlatformIconButton(
-                    icon: Icon(
-                        size: 80,
-                        context.watch<DeckViewModel>().playback
-                            ? PlatformIcons(context).pause
-                            : PlatformIcons(context).playArrowSolid,
-                        color: Theme.of(context).colorScheme.primary),
-                    onPressed: () async =>
-                        await context.read<DeckViewModel>().togglePlayback(),
-                  )),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                Expanded(
+                  flex: 2,
+                  child: Column(
                     children: [
-                      Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Expanded(child: SizedBox.expand()),
+                      Expanded(
+                        flex: 3,
+                        child: LayoutBuilder(
+                          builder: (_, barConstraints) => Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              PlatformIconButton(
-                                  icon: Icon(
-                                    PlatformIcons(context).settings,
-                                    size: 40,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        useSafeArea: true,
-                                        builder: (BuildContext context) =>
-                                            Settings());
-                                  }),
-                              PlatformIconButton(
-                                  icon: Icon(
-                                    Icons.touch_app,
-                                    size: 40,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  onPressed: tapTempo)
-                            ]),
+                              BpmButton(
+                                  callback: () async => await context
+                                      .read<DeckViewModel>()
+                                      .setBpm(
+                                          context.read<DeckViewModel>().bpm -
+                                              1),
+                                  iconData: PlatformIcons(context).remove),
+                              GestureDetector(
+                                onTap: () async => await showBpmDialog(
+                                    context,
+                                    context.read<DeckViewModel>().setBpm,
+                                    context.read<DeckViewModel>().bpm),
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0)),
+                                    child: SizedBox(
+                                      height: barConstraints.maxHeight,
+                                      width: barConstraints.maxHeight * 2,
+                                      child: FittedBox(
+                                          child: Text(
+                                        tapTimes.length == 1
+                                            ? "TAP"
+                                            : context
+                                                .watch<DeckViewModel>()
+                                                .bpm
+                                                .toString(),
+                                        style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            fontFamily: "SFMono"),
+                                        textAlign: TextAlign.center,
+                                      )),
+                                    )),
+                              ),
+                              BpmButton(
+                                  callback: () async => await context
+                                      .read<DeckViewModel>()
+                                      .setBpm(
+                                          context.read<DeckViewModel>().bpm +
+                                              1),
+                                  iconData: PlatformIcons(context).add)
+                            ],
+                          ),
+                        ),
                       ),
+                      Expanded(child: SizedBox.expand())
                     ],
-                  )
-                ],
-              )),
-        ],
-      );
-    });
+                  ),
+                ),
+                Expanded(
+                    flex: 5,
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: SizedBox(
+                              width: constraints.maxHeight,
+                              height: constraints.maxWidth,
+                              child: BpmDial(
+                                  callbackThreshold: 20,
+                                  callback: (int change) async => await context
+                                      .read<DeckViewModel>()
+                                      .setBpm(
+                                          context.read<DeckViewModel>().bpm +
+                                              change))),
+                        ),
+                        Center(
+                            child: GestureDetector(
+                          onTap: () async => await context
+                              .read<DeckViewModel>()
+                              .togglePlayback(),
+                          child: ScaledPadding(
+                            scale: 0.4,
+                            child: Icon(
+                                context.watch<DeckViewModel>().playback
+                                    ? PlatformIcons(context).pause
+                                    : PlatformIcons(context).playArrowSolid,
+                                color: Theme.of(context).colorScheme.primary),
+                          ),
+                        )),
+                      ],
+                    )),
+                Expanded(
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 24.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              showModalBottomSheet(
+                                  constraints: constraints.copyWith(
+                                      maxHeight: double.infinity),
+                                  context: context,
+                                  isScrollControlled: true,
+                                  useSafeArea: true,
+                                  builder: (BuildContext context) =>
+                                      Settings());
+                            },
+                            child: AxisSizedBox(
+                              reference: Axis.vertical,
+                              child: FittedBox(
+                                child: Icon(
+                                  PlatformIcons(context).settings,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 24.0),
+                          child: GestureDetector(
+                            onTap: tapTempo,
+                            child: AxisSizedBox(
+                              reference: Axis.vertical,
+                              child: FittedBox(
+                                child: Icon(
+                                  Icons.touch_app,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      ]),
+                )
+              ],
+            ));
   }
 }
 
