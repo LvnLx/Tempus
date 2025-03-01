@@ -51,8 +51,7 @@ class Home extends StatelessWidget {
                         home: Container(
                             color: Theme.of(context).colorScheme.surface,
                             child: SafeArea(
-                                child: Flex(
-                              direction: Axis.vertical,
+                                child: Column(
                               children: [
                                 Expanded(child: Mixer()),
                                 Divider(

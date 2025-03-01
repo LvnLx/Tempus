@@ -33,6 +33,7 @@ class PreferenceService {
       return bpm ?? Preference.bpm.defaultValue;
     } catch (exception) {
       print("Exception while getting BPM: $exception");
+      await setBpm(Preference.bpm.defaultValue);
       return Preference.bpm.defaultValue;
     }
   }
@@ -44,6 +45,7 @@ class PreferenceService {
       return isPremium ?? Preference.isPremium.defaultValue;
     } catch (exception) {
       print("Exception while getting premium status: $exception");
+      await setIsPremium(Preference.isPremium.defaultValue);
       return Preference.isPremium.defaultValue;
     }
   }
@@ -61,6 +63,7 @@ class PreferenceService {
       }
     } catch (exception) {
       print("Exception while getting sample pair: $exception");
+      await setSamplePair(Preference.samplePair.defaultValue);
       return Preference.samplePair.defaultValue;
     }
   }
@@ -80,6 +83,7 @@ class PreferenceService {
       }
     } catch (exception) {
       print("Exception while getting subdivisions: $exception");
+      await setSubdivisions(Preference.subdivisions.defaultValue);
       return Preference.subdivisions.defaultValue;
     }
   }
@@ -97,6 +101,7 @@ class PreferenceService {
       }
     } catch (exception) {
       print("Exception while getting theme mode: $exception");
+      await setThemeMode(Preference.themeMode.defaultValue);
       return Preference.themeMode.defaultValue;
     }
   }
@@ -108,6 +113,7 @@ class PreferenceService {
       return volume ?? Preference.volume.defaultValue;
     } catch (exception) {
       print("Exception while getting volume: $exception");
+      await setVolume(Preference.volume.defaultValue);
       return Preference.volume.defaultValue;
     }
   }
