@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
+import 'package:tempus/ui/core/outlined.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/home/deck/bpm_button/view.dart';
 import 'package:tempus/ui/home/deck/bpm_dial/view.dart';
@@ -87,33 +88,27 @@ class DeckState extends State<Deck> {
                                     context,
                                     context.read<DeckViewModel>().setBpm,
                                     context.read<DeckViewModel>().bpm),
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0)),
-                                    child: SizedBox(
-                                      height: barConstraints.maxHeight,
-                                      width: barConstraints.maxHeight * 2,
-                                      child: FittedBox(
-                                          child: Text(
-                                        tapTimes.length == 1
-                                            ? "TAP"
-                                            : context
-                                                .watch<DeckViewModel>()
-                                                .bpm
-                                                .toString(),
-                                        style: TextStyle(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                            fontFamily: "SFMono"),
-                                        textAlign: TextAlign.center,
-                                      )),
+                                child: Outlined(
+                                  child: SizedBox(
+                                    height: barConstraints.maxHeight,
+                                    width: barConstraints.maxHeight * 2,
+                                    child: FittedBox(
+                                        child: Text(
+                                      tapTimes.length == 1
+                                          ? "TAP"
+                                          : context
+                                              .watch<DeckViewModel>()
+                                              .bpm
+                                              .toString(),
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          fontFamily: "SFMono"),
+                                      textAlign: TextAlign.center,
                                     )),
+                                  ),
+                                ),
                               ),
                               BpmButton(
                                   callback: () async => await context
