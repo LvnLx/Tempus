@@ -13,6 +13,7 @@ enum Action {
   addSubdivision,
   removeSubdivision,
   setBpm,
+  setDownbeatVolume,
   setSample,
   setSampleNames,
   setState,
@@ -30,6 +31,7 @@ class AudioService {
   final MethodChannel methodChannel = MethodChannel('audio');
 
   late ValueNotifier<int> _bpmValueNotifier;
+  late ValueNotifier<double> _downbeatValueNotifier;
   late ValueNotifier<SamplePair> _samplePairValueNotifier;
   late final ValueNotifier<Map<Key, SubdivisionData>>
       _subdivisionsValueNotifier;
@@ -39,6 +41,8 @@ class AudioService {
 
   Future<void> init() async {
     _bpmValueNotifier = ValueNotifier(await _preferenceService.getBpm());
+    _downbeatValueNotifier =
+        ValueNotifier(await _preferenceService.getDownbeatVolume());
     _samplePairValueNotifier =
         ValueNotifier(await _preferenceService.getSamplePair());
     _subdivisionsValueNotifier =
@@ -55,6 +59,7 @@ class AudioService {
 
     await setState(
         await _preferenceService.getBpm(),
+        await _preferenceService.getDownbeatVolume(),
         await _preferenceService.getSamplePair(),
         await _preferenceService.getSubdivisions(),
         await _preferenceService.getVolume());
@@ -62,6 +67,8 @@ class AudioService {
 
   int get bpm => _bpmValueNotifier.value;
   ValueNotifier<int> get bpmValueNotifier => _bpmValueNotifier;
+  double get downbeatVolume => _downbeatValueNotifier.value;
+  ValueNotifier<double> get downbeatValueNotifier => _downbeatValueNotifier;
   SamplePair get samplePair => _samplePairValueNotifier.value;
   ValueNotifier<SamplePair> get samplePairValueNotifier =>
       _samplePairValueNotifier;
@@ -121,15 +128,24 @@ class AudioService {
     _preferenceService.setBpm(validatedBpm);
   }
 
-  Future<void> setState(int bpm, SamplePair samplePair,
+  Future<void> setDownbeatVolume(double volume) async {
+    _downbeatValueNotifier.value = volume;
+
+    await _setDownbeatVolume(volume);
+    _preferenceService.setDownbeatVolume(volume);
+  }
+
+  Future<void> setState(int bpm, double downbeatVolume, SamplePair samplePair,
       Map<Key, SubdivisionData> subdivisions, double volume) async {
     _bpmValueNotifier.value = bpm;
+    _downbeatValueNotifier.value = downbeatVolume;
     _samplePairValueNotifier.value = samplePair;
     _subdivisionsValueNotifier.value = subdivisions;
     _volumeValueNotifier.value = volume;
 
     final result = await methodChannel.invokeMethod(Action.setState.name, [
       bpm.toString(),
+      downbeatVolume.toString(),
       samplePair.getDownbeatSamplePath(),
       samplePair.getSubdivisionSamplePath(),
       subdivisions.toJsonString(),
@@ -193,6 +209,12 @@ class AudioService {
     await HapticFeedback.lightImpact();
     final result =
         await methodChannel.invokeMethod(Action.setBpm.name, [bpm.toString()]);
+    print(result);
+  }
+
+  Future<void> _setDownbeatVolume(double volume) async {
+    final result = await methodChannel.invokeMethod(
+        Action.setDownbeatVolume.name, [pow(volume, 2).toString()]);
     print(result);
   }
 

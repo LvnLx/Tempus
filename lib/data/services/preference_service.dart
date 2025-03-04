@@ -9,6 +9,7 @@ import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Preference {
   bpm(120),
+  downbeatVolume(1.0),
   isPremium(false),
   samplePair(SamplePair("sine", false)),
   subdivisions(<Key, SubdivisionData>{}),
@@ -26,6 +27,17 @@ class PreferenceService {
       SharedPreferencesAsync();
 
   PreferenceService(this._assetService);
+
+  Future<double> getDownbeatVolume() async {
+    try {
+      double? volume = await _sharedPreferencesAsync
+          .getDouble(Preference.downbeatVolume.name);
+      return volume ?? Preference.downbeatVolume.defaultValue;
+    } catch (exception) {
+      print("Exception while getting downbeat volume: $exception");
+      return Preference.downbeatVolume.defaultValue;
+    }
+  }
 
   Future<int> getBpm() async {
     try {
@@ -120,6 +132,10 @@ class PreferenceService {
 
   Future<void> setBpm(int bpm) async =>
       await _sharedPreferencesAsync.setInt(Preference.bpm.name, bpm);
+
+  Future<void> setDownbeatVolume(double volume) async =>
+      await _sharedPreferencesAsync.setDouble(
+          Preference.downbeatVolume.name, volume);
 
   Future<void> setIsPremium(bool value) async =>
       await _sharedPreferencesAsync.setBool(Preference.isPremium.name, value);

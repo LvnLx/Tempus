@@ -29,14 +29,19 @@ class SettingsViewModel extends ChangeNotifier {
     _themeService.setThemeMode(Preference.themeMode.defaultValue);
     await _audioService.setState(
         Preference.bpm.defaultValue,
+        Preference.downbeatVolume.defaultValue,
         Preference.samplePair.defaultValue,
         Preference.subdivisions.defaultValue,
         Preference.volume.defaultValue);
   }
 
   Future<void> resetMetronome() async {
-    await _audioService.setState(Preference.bpm.defaultValue, samplePair,
-        Preference.subdivisions.defaultValue, Preference.volume.defaultValue);
+    await _audioService.setState(
+        Preference.bpm.defaultValue,
+        Preference.downbeatVolume.defaultValue,
+        samplePair,
+        Preference.subdivisions.defaultValue,
+        Preference.volume.defaultValue);
   }
 
   Future<PurchaseResult> restorePremium() async =>
