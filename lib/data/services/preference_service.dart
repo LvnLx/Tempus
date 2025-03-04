@@ -9,6 +9,7 @@ import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Preference {
   bpm(120),
+  beatVolume(1.0),
   downbeatVolume(1.0),
   isPremium(false),
   samplePair(SamplePair("sine", false)),
@@ -28,17 +29,6 @@ class PreferenceService {
 
   PreferenceService(this._assetService);
 
-  Future<double> getDownbeatVolume() async {
-    try {
-      double? volume = await _sharedPreferencesAsync
-          .getDouble(Preference.downbeatVolume.name);
-      return volume ?? Preference.downbeatVolume.defaultValue;
-    } catch (exception) {
-      print("Exception while getting downbeat volume: $exception");
-      return Preference.downbeatVolume.defaultValue;
-    }
-  }
-
   Future<int> getBpm() async {
     try {
       int? bpm = await _sharedPreferencesAsync.getInt(Preference.bpm.name);
@@ -47,6 +37,28 @@ class PreferenceService {
       print("Exception while getting BPM: $exception");
       await setBpm(Preference.bpm.defaultValue);
       return Preference.bpm.defaultValue;
+    }
+  }
+
+  Future<double> getBeatVolume() async {
+    try {
+      double? volume =
+          await _sharedPreferencesAsync.getDouble(Preference.beatVolume.name);
+      return volume ?? Preference.beatVolume.defaultValue;
+    } catch (exception) {
+      print("Exception while getting beat volume: $exception");
+      return Preference.beatVolume.defaultValue;
+    }
+  }
+
+  Future<double> getDownbeatVolume() async {
+    try {
+      double? volume = await _sharedPreferencesAsync
+          .getDouble(Preference.downbeatVolume.name);
+      return volume ?? Preference.downbeatVolume.defaultValue;
+    } catch (exception) {
+      print("Exception while getting downbeat volume: $exception");
+      return Preference.downbeatVolume.defaultValue;
     }
   }
 
@@ -132,6 +144,10 @@ class PreferenceService {
 
   Future<void> setBpm(int bpm) async =>
       await _sharedPreferencesAsync.setInt(Preference.bpm.name, bpm);
+
+  Future<void> setBeatVolume(double volume) async =>
+      await _sharedPreferencesAsync.setDouble(
+          Preference.beatVolume.name, volume);
 
   Future<void> setDownbeatVolume(double volume) async =>
       await _sharedPreferencesAsync.setDouble(

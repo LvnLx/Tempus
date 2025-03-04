@@ -32,10 +32,11 @@ class MixerState extends State<Mixer> {
               children: [
                 Padding(padding: EdgeInsets.only(left: 8.0)),
                 FixedChannel(
-                    initialVolume:
-                        context.read<MixerViewModel>().downbeatVolume,
                     sliderCallback:
                         context.read<MixerViewModel>().setDownbeatVolume,
+                    volumeValueNotifier: context
+                        .read<MixerViewModel>()
+                        .downbeatVolumeValueNotifier,
                     child: ScaledPadding(
                         scale: 0.8,
                         child: FittedBox(
@@ -43,8 +44,10 @@ class MixerState extends State<Mixer> {
                                 style: TextStyle(fontFamily: "SFMono"))))),
                 VerticalDivider(color: Theme.of(context).colorScheme.onSurface),
                 FixedChannel(
-                    initialVolume: context.read<MixerViewModel>().volume,
-                    sliderCallback: context.read<MixerViewModel>().setVolume,
+                    sliderCallback:
+                        context.read<MixerViewModel>().setBeatVolume,
+                    volumeValueNotifier:
+                        context.read<MixerViewModel>().beatVolumeValueNotifier,
                     child: FittedBox(
                         child: Text("\u{1D15F}",
                             style: TextStyle(
