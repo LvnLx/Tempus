@@ -41,7 +41,10 @@ class MixerState extends State<Mixer> {
                         scale: 0.8,
                         child: FittedBox(
                             child: Text("ACC",
-                                style: TextStyle(fontFamily: "SFMono"))))),
+                                style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    fontFamily: "SFMono"))))),
                 VerticalDivider(color: Theme.of(context).colorScheme.onSurface),
                 FixedChannel(
                     sliderCallback:
@@ -51,6 +54,7 @@ class MixerState extends State<Mixer> {
                     child: FittedBox(
                         child: Text("\u{1D15F}",
                             style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
                                 fontFamily: "NotoMusic",
                                 fontWeight: FontWeight.bold)))),
                 ...(context

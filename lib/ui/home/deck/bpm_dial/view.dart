@@ -62,6 +62,16 @@ class BpmDialState extends State<BpmDial> {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
+                Center(
+                  child: Container(
+                    width: constraints.maxWidth / 5 * 3,
+                    height: constraints.maxHeight / 5 * 3,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
+                  ),
+                )
               ],
             ),
           ),

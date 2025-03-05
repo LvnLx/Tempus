@@ -20,7 +20,7 @@ class TimeSignature extends StatelessWidget {
             child: GestureDetector(
                 onTap: () async => await showIntegerSettingDialog(
                     context,
-                    "Time signature numerator",
+                    "Numerator",
                     2,
                     numeratorCallback,
                     numeratorValueNotifier.value),
@@ -28,6 +28,7 @@ class TimeSignature extends StatelessWidget {
                     child: FittedBox(
                         child: Text(numeratorValueNotifier.value.toString(),
                             style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
                                 fontFamily: "SFMono",
                                 fontWeight: FontWeight.bold)))))),
         Divider(height: 0),
@@ -35,7 +36,7 @@ class TimeSignature extends StatelessWidget {
             child: GestureDetector(
                 onTap: () async => await showIntegerSettingDialog(
                     context,
-                    "Time signature denominator",
+                    "Denominator",
                     2,
                     denominatorCallback,
                     denominatorValueNotifier.value),
@@ -43,6 +44,7 @@ class TimeSignature extends StatelessWidget {
                     child: FittedBox(
                         child: Text(denominatorValueNotifier.value.toString(),
                             style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
                                 fontFamily: "SFMono",
                                 fontWeight: FontWeight.bold))))))
       ]);
