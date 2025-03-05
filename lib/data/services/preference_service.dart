@@ -11,8 +11,10 @@ enum Preference {
   appVolume(1.0),
   bpm(120),
   beatVolume(1.0),
+  denominator(4),
   downbeatVolume(1.0),
   isPremium(false),
+  numerator(4),
   samplePair(SamplePair("sine", false)),
   subdivisions(<Key, SubdivisionData>{}),
   themeMode(ThemeMode.system);
@@ -62,6 +64,18 @@ class PreferenceService {
     }
   }
 
+  Future<int> getDenominator() async {
+    try {
+      int? denominator =
+          await _sharedPreferencesAsync.getInt(Preference.denominator.name);
+      return denominator ?? Preference.denominator.defaultValue;
+    } catch (exception) {
+      print("Exception while getting denominator: $exception");
+      await setDenominator(Preference.denominator.defaultValue);
+      return Preference.denominator.defaultValue;
+    }
+  }
+
   Future<double> getDownbeatVolume() async {
     try {
       double? volume = await _sharedPreferencesAsync
@@ -82,6 +96,18 @@ class PreferenceService {
       print("Exception while getting premium status: $exception");
       await setIsPremium(Preference.isPremium.defaultValue);
       return Preference.isPremium.defaultValue;
+    }
+  }
+
+  Future<int> getNumerator() async {
+    try {
+      int? numerator =
+          await _sharedPreferencesAsync.getInt(Preference.numerator.name);
+      return numerator ?? Preference.numerator.defaultValue;
+    } catch (exception) {
+      print("Exception while getting numerator: $exception");
+      await setNumerator(Preference.numerator.defaultValue);
+      return Preference.numerator.defaultValue;
     }
   }
 
@@ -152,12 +178,18 @@ class PreferenceService {
       await _sharedPreferencesAsync.setDouble(
           Preference.beatVolume.name, volume);
 
+  Future<void> setDenominator(int value) async =>
+      await _sharedPreferencesAsync.setInt(Preference.denominator.name, value);
+
   Future<void> setDownbeatVolume(double volume) async =>
       await _sharedPreferencesAsync.setDouble(
           Preference.downbeatVolume.name, volume);
 
   Future<void> setIsPremium(bool value) async =>
       await _sharedPreferencesAsync.setBool(Preference.isPremium.name, value);
+
+  Future<void> setNumerator(int value) async =>
+      await _sharedPreferencesAsync.setInt(Preference.numerator.name, value);
 
   Future<void> setSamplePair(SamplePair samplePair) async =>
       await _sharedPreferencesAsync.setString(

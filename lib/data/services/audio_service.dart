@@ -14,7 +14,9 @@ enum Action {
   removeSubdivision,
   setBpm,
   setBeatVolume,
+  setDenominator,
   setDownbeatVolume,
+  setNumerator,
   setSample,
   setSampleNames,
   setState,
@@ -33,7 +35,9 @@ class AudioService {
   late ValueNotifier<double> _appVolumeValueNotifier;
   late ValueNotifier<int> _bpmValueNotifier;
   late ValueNotifier<double> _beatVolumeValueNotifier;
+  late ValueNotifier<int> _denominatorValueNotifier;
   late ValueNotifier<double> _downbeatVolumeValueNotifier;
+  late ValueNotifier<int> _numeratorValueNotifier;
   late ValueNotifier<SamplePair> _samplePairValueNotifier;
   late final ValueNotifier<Map<Key, SubdivisionData>>
       _subdivisionsValueNotifier;
@@ -46,8 +50,12 @@ class AudioService {
     _bpmValueNotifier = ValueNotifier(await _preferenceService.getBpm());
     _beatVolumeValueNotifier =
         ValueNotifier(await _preferenceService.getBeatVolume());
+    _denominatorValueNotifier =
+        ValueNotifier(await _preferenceService.getDenominator());
     _downbeatVolumeValueNotifier =
         ValueNotifier(await _preferenceService.getDownbeatVolume());
+    _numeratorValueNotifier =
+        ValueNotifier(await _preferenceService.getNumerator());
     _samplePairValueNotifier =
         ValueNotifier(await _preferenceService.getSamplePair());
     _subdivisionsValueNotifier =
@@ -65,7 +73,9 @@ class AudioService {
         await _preferenceService.getAppVolume(),
         await _preferenceService.getBpm(),
         await _preferenceService.getBeatVolume(),
+        await _preferenceService.getDenominator(),
         await _preferenceService.getDownbeatVolume(),
+        await _preferenceService.getNumerator(),
         await _preferenceService.getSamplePair(),
         await _preferenceService.getSubdivisions());
   }
@@ -76,9 +86,13 @@ class AudioService {
   ValueNotifier<int> get bpmValueNotifier => _bpmValueNotifier;
   double get beatVolume => _beatVolumeValueNotifier.value;
   ValueNotifier<double> get beatVolumeValueNotifier => _beatVolumeValueNotifier;
+  int get denominator => _denominatorValueNotifier.value;
+  ValueNotifier<int> get denominatorValueNotifier => _denominatorValueNotifier;
   double get downbeatVolume => _downbeatVolumeValueNotifier.value;
   ValueNotifier<double> get downbeatVolumeValueNotifier =>
       _downbeatVolumeValueNotifier;
+  int get numerator => _numeratorValueNotifier.value;
+  ValueNotifier<int> get numeratorValueNotifier => _numeratorValueNotifier;
   SamplePair get samplePair => _samplePairValueNotifier.value;
   ValueNotifier<SamplePair> get samplePairValueNotifier =>
       _samplePairValueNotifier;
@@ -141,11 +155,25 @@ class AudioService {
     _preferenceService.setBeatVolume(volume);
   }
 
+  Future<void> setDenominator(int value) async {
+    _denominatorValueNotifier.value = value;
+
+    await _setDenominator(value);
+    _preferenceService.setDenominator(value);
+  }
+
   Future<void> setDownbeatVolume(double volume) async {
     _downbeatVolumeValueNotifier.value = volume;
 
     await _setDownbeatVolume(volume);
     _preferenceService.setDownbeatVolume(volume);
+  }
+
+  Future<void> setNumerator(int value) async {
+    _numeratorValueNotifier.value = value;
+
+    await _setNumerator(value);
+    _preferenceService.setNumerator(value);
   }
 
   Future<void> setSamplePair(SamplePair samplePair) async {
@@ -161,20 +189,36 @@ class AudioService {
       double appVolume,
       int bpm,
       double beatVolume,
+      int denominator,
       double downbeatVolume,
+      int numerator,
       SamplePair samplePair,
       Map<Key, SubdivisionData> subdivisions) async {
+    _appVolumeValueNotifier.value = appVolume;
     _bpmValueNotifier.value = bpm;
     _beatVolumeValueNotifier.value = beatVolume;
+    _denominatorValueNotifier.value = denominator;
     _downbeatVolumeValueNotifier.value = downbeatVolume;
+    _numeratorValueNotifier.value = numerator;
     _samplePairValueNotifier.value = samplePair;
     _subdivisionsValueNotifier.value = subdivisions;
+
+    _preferenceService.setAppVolume(appVolume);
+    _preferenceService.setBpm(bpm);
+    _preferenceService.setBeatVolume(beatVolume);
+    _preferenceService.setDenominator(denominator);
+    _preferenceService.setDownbeatVolume(downbeatVolume);
+    _preferenceService.setNumerator(numerator);
+    _preferenceService.setSamplePair(samplePair);
+    _preferenceService.setSubdivisions(subdivisions);
 
     final result = await methodChannel.invokeMethod(Action.setState.name, [
       appVolume.toString(),
       bpm.toString(),
       beatVolume.toString(),
+      denominator.toString(),
       downbeatVolume.toString(),
+      numerator.toString(),
       samplePair.getDownbeatSamplePath(),
       samplePair.getSubdivisionSamplePath(),
       subdivisions.toJsonString(),
@@ -245,9 +289,21 @@ class AudioService {
     print(result);
   }
 
+  Future<void> _setDenominator(int value) async {
+    final result = await methodChannel
+        .invokeMethod(Action.setDenominator.name, [value.toString()]);
+    print(result);
+  }
+
   Future<void> _setDownbeatVolume(double volume) async {
     final result = await methodChannel
         .invokeMethod(Action.setDownbeatVolume.name, [volume.toString()]);
+    print(result);
+  }
+
+  Future<void> _setNumerator(int value) async {
+    final result = await methodChannel
+        .invokeMethod(Action.setNumerator.name, [value.toString()]);
     print(result);
   }
 

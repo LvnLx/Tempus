@@ -40,10 +40,18 @@ import AVFoundation
         let volume: Float = Float(arguments[0])!
         // TODO set beat volume
         result("Set beat volume")
+      case "setDenominator":
+        let bpm: UInt16 = UInt16(arguments[0])!
+        // TODO set denominator
+        result("Set denominator")
       case "setDownbeatVolume":
         let volume: Float = Float(arguments[0])!
         // TODO set downbeat volume
         result("Set downbeat volume")
+      case "setNumerator":
+        let bpm: UInt16 = UInt16(arguments[0])!
+        // TODO set numerator
+        result("Set numerator")
       case "setSample":
         let isDownbeat: Bool = Bool(arguments[0])!
         let sampleName: String = arguments[1]
@@ -58,10 +66,12 @@ import AVFoundation
         let appVolume: Float = Float(arguments[0])!
         let bpm: UInt16 = UInt16(arguments[1])!
         let beatVolume: Float = Float(arguments[2])!
-        let downbeatVolume: Float = Float(arguments[3])!
-        let downbeatSampleName: String = arguments[4]
-        let subdivisionSampleName: String = arguments[5]
-        let subdivisionsAsJsonString: String = arguments[6]
+        let denominator: UInt16 = UInt16(arguments[3])!
+        let downbeatVolume: Float = Float(arguments[4])!
+        let numerator: UInt16 = UInt16(arguments[5])!
+        let downbeatSampleName: String = arguments[6]
+        let subdivisionSampleName: String = arguments[7]
+        let subdivisionsAsJsonString: String = arguments[8]
         self.metronome.setState(appVolume, bpm, downbeatSampleName, subdivisionSampleName, subdivisionsAsJsonString)
         result("Set state")
       case "setSubdivisionOption":

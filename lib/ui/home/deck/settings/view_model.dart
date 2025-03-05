@@ -33,7 +33,9 @@ class SettingsViewModel extends ChangeNotifier {
         Preference.appVolume.defaultValue,
         Preference.bpm.defaultValue,
         Preference.beatVolume.defaultValue,
+        Preference.denominator.defaultValue,
         Preference.downbeatVolume.defaultValue,
+        Preference.numerator.defaultValue,
         Preference.samplePair.defaultValue,
         Preference.subdivisions.defaultValue);
   }
@@ -43,7 +45,9 @@ class SettingsViewModel extends ChangeNotifier {
         _audioService.appVolume,
         Preference.bpm.defaultValue,
         Preference.beatVolume.defaultValue,
+        Preference.denominator.defaultValue,
         Preference.downbeatVolume.defaultValue,
+        Preference.numerator.defaultValue,
         samplePair,
         Preference.subdivisions.defaultValue);
   }
