@@ -28,13 +28,17 @@ import AVFoundation
         let key: String = arguments[0]
         self.metronome.removeSubdivision(key)
         result("Removed subdivision")
+      case "setAppVolume":
+        let volume: Float = Float(arguments[0])!
+        self.metronome.setAppVolume(volume)
+        result("Set app volume")
       case "setBpm":
         let bpm: UInt16 = UInt16(arguments[0])!
         self.metronome.setBpm(bpm)
         result("Set BPM")
       case "setBeatVolume":
         let volume: Float = Float(arguments[0])!
-        // TODO set downbeat volume
+        // TODO set beat volume
         result("Set beat volume")
       case "setDownbeatVolume":
         let volume: Float = Float(arguments[0])!
@@ -51,14 +55,14 @@ import AVFoundation
         }
         result("Set sample names")
       case "setState":
-        let bpm: UInt16 = UInt16(arguments[0])!
-        let beatVolume: Float = Float(arguments[1])!
-        let downbeatVolume: Float = Float(arguments[2])!
-        let downbeatSampleName: String = arguments[3]
-        let subdivisionSampleName: String = arguments[4]
-        let subdivisionsAsJsonString: String = arguments[5]
-        let volume: Float = Float(arguments[6])!
-        self.metronome.setState(bpm, downbeatSampleName, subdivisionSampleName, subdivisionsAsJsonString, volume)
+        let appVolume: Float = Float(arguments[0])!
+        let bpm: UInt16 = UInt16(arguments[1])!
+        let beatVolume: Float = Float(arguments[2])!
+        let downbeatVolume: Float = Float(arguments[3])!
+        let downbeatSampleName: String = arguments[4]
+        let subdivisionSampleName: String = arguments[5]
+        let subdivisionsAsJsonString: String = arguments[6]
+        self.metronome.setState(appVolume, bpm, downbeatSampleName, subdivisionSampleName, subdivisionsAsJsonString)
         result("Set state")
       case "setSubdivisionOption":
         let key: String = arguments[0]
@@ -70,10 +74,6 @@ import AVFoundation
         let volume: Float = Float(arguments[1])!
         self.metronome.setSubdivisionVolume(key, volume)
         result("Set subdivision volume")
-      case "setVolume":
-        let volume: Float = Float(arguments[0])!
-        self.metronome.setVolume(volume)
-        result("Set volume")
       case "startPlayback":
         self.metronome.startPlayback()
         result("Started playback")

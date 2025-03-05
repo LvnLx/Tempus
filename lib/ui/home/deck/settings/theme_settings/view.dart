@@ -19,7 +19,7 @@ class ThemeSettings extends StatelessWidget {
             ),
             onPressed: () => Navigator.pop(context),
           ),
-          title: Text("Theme",
+          title: Text("Select a theme",
               style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
               )),

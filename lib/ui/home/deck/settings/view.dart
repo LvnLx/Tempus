@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:tempus/constants.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/core/dialogs.dart';
+import 'package:tempus/ui/home/deck/settings/app_volume_settings/view.dart';
 import 'package:tempus/ui/home/deck/settings/sample_settings/view.dart';
 import 'package:tempus/ui/home/deck/settings/theme_settings/view.dart';
 import 'package:tempus/ui/home/deck/settings/view_model.dart';
@@ -76,6 +77,14 @@ class _SettingsState extends State<Settings> {
           SettingsSection(
             title: Text("Audio"),
             tiles: [
+              SettingsTile.navigation(
+                  title: Text("App volume"),
+                  value: Text(
+                      "${(context.watch<SettingsViewModel>().appVolume * 100).round()}%"),
+                  onPressed: (context) => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AppVolumeSettings()))),
               SettingsTile.navigation(
                 title: Text("Sample"),
                 value: Text(capitalizeFirst(

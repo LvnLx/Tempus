@@ -12,7 +12,6 @@ class MixerViewModel extends ChangeNotifier {
     _audioService.beatVolumeValueNotifier.addListener(notifyListeners);
     _audioService.downbeatVolumeValueNotifier.addListener(notifyListeners);
     _audioService.subdivisionsValueNotifier.addListener(notifyListeners);
-    _audioService.volumeValueNotifier.addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
   }
 
@@ -22,7 +21,6 @@ class MixerViewModel extends ChangeNotifier {
       _audioService.downbeatVolumeValueNotifier;
   bool get isPremium => _purchaseService.isPremium;
   Map<Key, SubdivisionData> get subdivisions => _audioService.subdivisions;
-  double get volume => _audioService.volume;
 
   Future<void> addSubdivision() async => await _audioService.addSubdivision();
 
@@ -34,9 +32,6 @@ class MixerViewModel extends ChangeNotifier {
 
   Future<void> setDownbeatVolume(double volume) async =>
       await _audioService.setDownbeatVolume(volume);
-
-  Future<void> setVolume(double volume) async =>
-      await _audioService.setVolume(volume);
 
   Future<PurchaseResult> purchasePremium() async =>
       await _purchaseService.purchasePremium();

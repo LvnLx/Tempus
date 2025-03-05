@@ -8,7 +8,7 @@ class Metronome {
   private var subdivisions: [String: Subdivision] = [:]
   private var subdivisionSample: UnsafePointer<Sample>?
   private let validFrameCount: UnsafeMutablePointer<Int> = UnsafeMutablePointer<Int>.allocate(capacity: 1)
-  private var volume: Float?
+  private var appVolume: Float?
 
   init() {
     dispatchQueue.initialize(to: DispatchQueue(label: "com.lvnlx.tempus"))
@@ -112,6 +112,11 @@ class Metronome {
     updateClips()
   }
   
+  func setAppVolume(_ volume: Float) {
+    self.appVolume = volume
+    updateClips()
+  }
+  
   func setBpm(_ bpm: UInt16) {
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
@@ -134,7 +139,7 @@ class Metronome {
     updateClips()
   }
   
-  func setState(_ bpm: UInt16, _ downbeatSampleName: String, _ subdivisionSampleName: String, _ subdivisionsAsJsonString: String, _ volume: Float) {
+  func setState(_ appVolume: Float, _ bpm: UInt16, _ downbeatSampleName: String, _ subdivisionSampleName: String, _ subdivisionsAsJsonString: String) {
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
     validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
@@ -149,7 +154,7 @@ class Metronome {
       subdivisions[key] = Subdivision(fields["option"] as! Int, Float(fields["volume"] as! Double))
     }
     
-    self.volume = volume
+    self.appVolume = appVolume
     
     updateClips()
   }
@@ -161,11 +166,6 @@ class Metronome {
   
   func setSubdivisionVolume(_ key: String, _ volume: Float) {
     subdivisions[key]!.volume = volume
-    updateClips()
-  }
-  
-  func setVolume(_ volume: Float) {
-    self.volume = volume
     updateClips()
   }
   
@@ -204,11 +204,11 @@ class Metronome {
       }
     
     let downbeatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-    downbeatClip.initialize(to: Clip(sample: downbeatSample!, startFrame: 0, volume: volume!))
+    downbeatClip.initialize(to: Clip(sample: downbeatSample!, startFrame: 0, volume: appVolume!))
     
     let subdivisionClips: [UnsafeMutablePointer<Clip>] = subdivisionClipData.map { (startFrame, volume) in
       let subdivisionClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-      subdivisionClip.initialize(to: Clip(sample: subdivisionSample!, startFrame: startFrame, volume: volume))
+      subdivisionClip.initialize(to: Clip(sample: subdivisionSample!, startFrame: startFrame, volume: volume * appVolume!))
       return subdivisionClip
     }
     

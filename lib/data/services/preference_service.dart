@@ -8,14 +8,14 @@ import 'package:tempus/domain/models/sample_pair.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Preference {
+  appVolume(1.0),
   bpm(120),
   beatVolume(1.0),
   downbeatVolume(1.0),
   isPremium(false),
   samplePair(SamplePair("sine", false)),
   subdivisions(<Key, SubdivisionData>{}),
-  themeMode(ThemeMode.system),
-  volume(1.0);
+  themeMode(ThemeMode.system);
 
   final dynamic defaultValue;
   const Preference(this.defaultValue);
@@ -28,6 +28,17 @@ class PreferenceService {
       SharedPreferencesAsync();
 
   PreferenceService(this._assetService);
+
+  Future<double> getAppVolume() async {
+    try {
+      double? volume =
+          await _sharedPreferencesAsync.getDouble(Preference.appVolume.name);
+      return volume ?? Preference.appVolume.defaultValue;
+    } catch (exception) {
+      print("Exception while getting app volume: $exception");
+      return Preference.appVolume.defaultValue;
+    }
+  }
 
   Future<int> getBpm() async {
     try {
@@ -130,17 +141,9 @@ class PreferenceService {
     }
   }
 
-  Future<double> getVolume() async {
-    try {
-      double? volume =
-          await _sharedPreferencesAsync.getDouble(Preference.volume.name);
-      return volume ?? Preference.volume.defaultValue;
-    } catch (exception) {
-      print("Exception while getting volume: $exception");
-      await setVolume(Preference.volume.defaultValue);
-      return Preference.volume.defaultValue;
-    }
-  }
+  Future<void> setAppVolume(double volume) async =>
+      await _sharedPreferencesAsync.setDouble(
+          Preference.appVolume.name, volume);
 
   Future<void> setBpm(int bpm) async =>
       await _sharedPreferencesAsync.setInt(Preference.bpm.name, bpm);
@@ -167,7 +170,4 @@ class PreferenceService {
   Future<void> setThemeMode(ThemeMode themeMode) async =>
       await _sharedPreferencesAsync.setString(
           Preference.themeMode.name, themeMode.name);
-
-  Future<void> setVolume(double volume) async =>
-      await _sharedPreferencesAsync.setDouble(Preference.volume.name, volume);
 }

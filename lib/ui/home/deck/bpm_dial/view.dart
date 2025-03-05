@@ -22,7 +22,7 @@ class BpmDialState extends State<BpmDial> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+      builder: (_, constraints) {
         Point origin =
             Point(constraints.maxWidth / 2, constraints.maxHeight / 2);
         return GestureDetector(
@@ -59,38 +59,7 @@ class BpmDialState extends State<BpmDial> {
                   height: constraints.maxHeight,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    width: constraints.maxWidth / 32 * 31,
-                    height: constraints.maxHeight / 32 * 31,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    width: constraints.maxWidth / 3 * 2,
-                    height: constraints.maxHeight / 3 * 2,
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        shape: BoxShape.circle),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    width: constraints.maxWidth / 24 * 15,
-                    height: constraints.maxHeight / 24 * 15,
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        shape: BoxShape.circle),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ],

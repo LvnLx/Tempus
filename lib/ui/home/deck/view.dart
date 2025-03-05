@@ -2,15 +2,16 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/outlined.dart';
-import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/home/deck/bpm_button/view.dart';
 import 'package:tempus/ui/home/deck/bpm_dial/view.dart';
 import 'package:tempus/ui/home/deck/settings/view.dart';
+import 'package:tempus/ui/home/deck/time_signature/view.dart';
 import 'package:tempus/ui/home/deck/view_model.dart';
 
 class Deck extends StatefulWidget {
@@ -76,47 +77,40 @@ class DeckState extends State<Deck> {
                           builder: (_, barConstraints) => Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              BpmButton(
-                                  callback: () async => await context
-                                      .read<DeckViewModel>()
-                                      .setBpm(
-                                          context.read<DeckViewModel>().bpm -
-                                              1),
-                                  iconData: PlatformIcons(context).remove),
                               GestureDetector(
-                                onTap: () async => await showBpmDialog(
-                                    context,
-                                    context.read<DeckViewModel>().setBpm,
-                                    context.read<DeckViewModel>().bpm),
-                                child: Outlined(
-                                  child: SizedBox(
-                                    height: barConstraints.maxHeight,
-                                    width: barConstraints.maxHeight * 2,
-                                    child: FittedBox(
-                                        child: Text(
-                                      tapTimes.length == 1
-                                          ? "TAP"
-                                          : context
-                                              .watch<DeckViewModel>()
-                                              .bpm
-                                              .toString(),
-                                      style: TextStyle(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          fontFamily: "SFMono"),
-                                      textAlign: TextAlign.center,
-                                    )),
-                                  ),
-                                ),
-                              ),
-                              BpmButton(
-                                  callback: () async => await context
-                                      .read<DeckViewModel>()
-                                      .setBpm(
-                                          context.read<DeckViewModel>().bpm +
-                                              1),
-                                  iconData: PlatformIcons(context).add)
+                                  child: Outlined(
+                                      child: SizedBox(
+                                          height: barConstraints.maxHeight,
+                                          width: barConstraints.maxHeight,
+                                          child: TimeSignature()))),
+                              VerticalDivider(
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface),
+                              GestureDetector(
+                                  onTap: () async => await showBpmDialog(
+                                      context,
+                                      context.read<DeckViewModel>().setBpm,
+                                      context.read<DeckViewModel>().bpm),
+                                  child: Outlined(
+                                      child: SizedBox(
+                                          height: barConstraints.maxHeight,
+                                          width: barConstraints.maxHeight * 2,
+                                          child: FittedBox(
+                                              child: Text(
+                                                  tapTimes.length == 1
+                                                      ? "TAP"
+                                                      : context
+                                                          .watch<
+                                                              DeckViewModel>()
+                                                          .bpm
+                                                          .toString(),
+                                                  style: TextStyle(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .primary,
+                                                      fontFamily: "SFMono"),
+                                                  textAlign:
+                                                      TextAlign.center))))),
                             ],
                           ),
                         ),
@@ -127,36 +121,78 @@ class DeckState extends State<Deck> {
                 ),
                 Expanded(
                     flex: 5,
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: SizedBox(
-                              width: constraints.maxHeight,
-                              height: constraints.maxWidth,
-                              child: BpmDial(
-                                  callbackThreshold: 20,
-                                  callback: (int change) async => await context
-                                      .read<DeckViewModel>()
-                                      .setBpm(
-                                          context.read<DeckViewModel>().bpm +
-                                              change))),
-                        ),
-                        Center(
-                            child: GestureDetector(
-                          onTap: () async => await context
-                              .read<DeckViewModel>()
-                              .togglePlayback(),
-                          child: ScaledPadding(
-                            scale: 0.4,
-                            child: Icon(
-                                context.watch<DeckViewModel>().playback
-                                    ? PlatformIcons(context).pause
-                                    : PlatformIcons(context).playArrowSolid,
-                                color: Theme.of(context).colorScheme.primary),
-                          ),
-                        )),
-                      ],
-                    )),
+                    child: LayoutBuilder(
+                        builder: (_, dialConstraints) => Stack(children: [
+                              Center(
+                                  child: SizedBox(
+                                      height: min(dialConstraints.maxHeight,
+                                          dialConstraints.maxWidth),
+                                      width: min(dialConstraints.maxHeight,
+                                          dialConstraints.maxWidth),
+                                      child: BpmDial(
+                                          callbackThreshold: 20,
+                                          callback: (int change) async =>
+                                              await context
+                                                  .read<DeckViewModel>()
+                                                  .setBpm(context
+                                                          .read<DeckViewModel>()
+                                                          .bpm +
+                                                      change)))),
+                              Center(
+                                  child: SizedBox(
+                                height: min(dialConstraints.maxHeight,
+                                    dialConstraints.maxWidth),
+                                width: min(dialConstraints.maxHeight,
+                                    dialConstraints.maxWidth),
+                                child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: BpmButton(
+                                            callback: () async => await context
+                                                .read<DeckViewModel>()
+                                                .setBpm(context
+                                                        .read<DeckViewModel>()
+                                                        .bpm -
+                                                    1),
+                                            iconData:
+                                                PlatformIcons(context).remove),
+                                      ),
+                                      Expanded(
+                                        flex: 3,
+                                        child: GestureDetector(
+                                            onTap: () async => await context
+                                                .read<DeckViewModel>()
+                                                .togglePlayback(),
+                                            child: SizedBox.expand(
+                                              child: FittedBox(
+                                                child: Icon(
+                                                    context
+                                                            .watch<DeckViewModel>()
+                                                            .playback
+                                                        ? CupertinoIcons.pause
+                                                        : CupertinoIcons.play_fill,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .surface),
+                                              ),
+                                            )),
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: BpmButton(
+                                            callback: () async => await context
+                                                .read<DeckViewModel>()
+                                                .setBpm(context
+                                                        .read<DeckViewModel>()
+                                                        .bpm +
+                                                    1),
+                                            iconData:
+                                                PlatformIcons(context).add),
+                                      )
+                                    ]),
+                              ))
+                            ]))),
                 Expanded(
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -5,6 +5,7 @@ import 'package:tempus/data/services/audio_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
+import 'package:tempus/ui/home/deck/settings/app_volume_settings/view_model.dart';
 import 'package:tempus/ui/home/deck/settings/sample_settings/view_model.dart';
 import 'package:tempus/ui/home/deck/settings/theme_settings/view_model.dart';
 import 'package:tempus/ui/home/deck/settings/view_model.dart';
@@ -39,6 +40,9 @@ class Main extends StatelessWidget {
           Provider(
               create: (context) =>
                   ThemeService(context.read<PreferenceService>())),
+          ChangeNotifierProvider(
+              create: (context) =>
+                  AppVolumeSettingsViewModel(context.read<AudioService>())),
           ChangeNotifierProvider(
               create: (context) =>
                   ChannelViewModel(context.read<AudioService>())),

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +9,7 @@ import 'package:tempus/domain/models/sample_pair.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Action {
+  setAppVolume,
   addSubdivision,
   removeSubdivision,
   setBpm,
@@ -20,7 +20,6 @@ enum Action {
   setState,
   setSubdivisionOption,
   setSubdivisionVolume,
-  setVolume,
   startPlayback,
   stopPlayback,
 }
@@ -31,17 +30,19 @@ class AudioService {
 
   final MethodChannel methodChannel = MethodChannel('audio');
 
+  late ValueNotifier<double> _appVolumeValueNotifier;
   late ValueNotifier<int> _bpmValueNotifier;
   late ValueNotifier<double> _beatVolumeValueNotifier;
   late ValueNotifier<double> _downbeatVolumeValueNotifier;
   late ValueNotifier<SamplePair> _samplePairValueNotifier;
   late final ValueNotifier<Map<Key, SubdivisionData>>
       _subdivisionsValueNotifier;
-  late ValueNotifier<double> _volumeValueNotifier;
 
   AudioService(this._assetService, this._preferenceService);
 
   Future<void> init() async {
+    _appVolumeValueNotifier =
+        ValueNotifier(await _preferenceService.getAppVolume());
     _bpmValueNotifier = ValueNotifier(await _preferenceService.getBpm());
     _beatVolumeValueNotifier =
         ValueNotifier(await _preferenceService.getBeatVolume());
@@ -51,7 +52,6 @@ class AudioService {
         ValueNotifier(await _preferenceService.getSamplePair());
     _subdivisionsValueNotifier =
         ValueNotifier(await _preferenceService.getSubdivisions());
-    _volumeValueNotifier = ValueNotifier(await _preferenceService.getVolume());
 
     await _setSampleNames(_assetService.samplePairs.fold<Set<String>>(
         {},
@@ -62,14 +62,16 @@ class AudioService {
             }));
 
     await setState(
+        await _preferenceService.getAppVolume(),
         await _preferenceService.getBpm(),
         await _preferenceService.getBeatVolume(),
         await _preferenceService.getDownbeatVolume(),
         await _preferenceService.getSamplePair(),
-        await _preferenceService.getSubdivisions(),
-        await _preferenceService.getVolume());
+        await _preferenceService.getSubdivisions());
   }
 
+  double get appVolume => _appVolumeValueNotifier.value;
+  ValueNotifier get appVolumeValueNotifier => _appVolumeValueNotifier;
   int get bpm => _bpmValueNotifier.value;
   ValueNotifier<int> get bpmValueNotifier => _bpmValueNotifier;
   double get beatVolume => _beatVolumeValueNotifier.value;
@@ -84,8 +86,6 @@ class AudioService {
       _subdivisionsValueNotifier.value;
   ValueNotifier<Map<Key, SubdivisionData>> get subdivisionsValueNotifier =>
       _subdivisionsValueNotifier;
-  double get volume => _volumeValueNotifier.value;
-  ValueNotifier<double> get volumeValueNotifier => _volumeValueNotifier;
 
   Future<void> addSubdivision() async {
     UniqueKey key = UniqueKey();
@@ -106,13 +106,11 @@ class AudioService {
     _preferenceService.setSubdivisions(subdivisions);
   }
 
-  Future<void> setSamplePair(SamplePair samplePair) async {
-    _samplePairValueNotifier.value = samplePair;
+  Future<void> setAppVolume(double volume) async {
+    _appVolumeValueNotifier.value = volume;
 
-    await _setSample(true, samplePair.getDownbeatSamplePath());
-    await _setSample(false, samplePair.getSubdivisionSamplePath());
-
-    _preferenceService.setSamplePair(samplePair);
+    await _setAppVolume(volume);
+    _preferenceService.setAppVolume(volume);
   }
 
   Future<void> setBpm(int bpm, [bool skipUnchanged = true]) async {
@@ -150,28 +148,36 @@ class AudioService {
     _preferenceService.setDownbeatVolume(volume);
   }
 
+  Future<void> setSamplePair(SamplePair samplePair) async {
+    _samplePairValueNotifier.value = samplePair;
+
+    await _setSample(true, samplePair.getDownbeatSamplePath());
+    await _setSample(false, samplePair.getSubdivisionSamplePath());
+
+    _preferenceService.setSamplePair(samplePair);
+  }
+
   Future<void> setState(
+      double appVolume,
       int bpm,
       double beatVolume,
       double downbeatVolume,
       SamplePair samplePair,
-      Map<Key, SubdivisionData> subdivisions,
-      double volume) async {
+      Map<Key, SubdivisionData> subdivisions) async {
     _bpmValueNotifier.value = bpm;
     _beatVolumeValueNotifier.value = beatVolume;
     _downbeatVolumeValueNotifier.value = downbeatVolume;
     _samplePairValueNotifier.value = samplePair;
     _subdivisionsValueNotifier.value = subdivisions;
-    _volumeValueNotifier.value = volume;
 
     final result = await methodChannel.invokeMethod(Action.setState.name, [
+      appVolume.toString(),
       bpm.toString(),
       beatVolume.toString(),
       downbeatVolume.toString(),
       samplePair.getDownbeatSamplePath(),
       samplePair.getSubdivisionSamplePath(),
       subdivisions.toJsonString(),
-      pow(volume, 2).toString()
     ]);
     print(result);
   }
@@ -196,13 +202,6 @@ class AudioService {
     _preferenceService.setSubdivisions(subdivisions);
   }
 
-  Future<void> setVolume(double volume) async {
-    _volumeValueNotifier.value = volume;
-
-    await _setVolume(volume);
-    _preferenceService.setVolume(volume);
-  }
-
   Future<void> startPlayback() async {
     final result = await methodChannel.invokeMethod(Action.startPlayback.name);
     print(result);
@@ -216,7 +215,7 @@ class AudioService {
   Future<void> _addSubdivision(Key key, int option, double volume) async {
     await HapticFeedback.mediumImpact();
     final result = await methodChannel.invokeMethod(Action.addSubdivision.name,
-        [key.toString(), option.toString(), pow(volume, 2).toString()]);
+        [key.toString(), option.toString(), volume.toString()]);
     print(result);
   }
 
@@ -224,6 +223,12 @@ class AudioService {
     await HapticFeedback.mediumImpact();
     final result = await methodChannel
         .invokeMethod(Action.removeSubdivision.name, [key.toString()]);
+    print(result);
+  }
+
+  Future<void> _setAppVolume(double volume) async {
+    final result = await methodChannel
+        .invokeMethod(Action.setAppVolume.name, [volume.toString()]);
     print(result);
   }
 
@@ -236,13 +241,13 @@ class AudioService {
 
   Future<void> _setBeatVolume(double volume) async {
     final result = await methodChannel
-        .invokeMethod(Action.setBeatVolume.name, [pow(volume, 2).toString()]);
+        .invokeMethod(Action.setBeatVolume.name, [volume.toString()]);
     print(result);
   }
 
   Future<void> _setDownbeatVolume(double volume) async {
-    final result = await methodChannel.invokeMethod(
-        Action.setDownbeatVolume.name, [pow(volume, 2).toString()]);
+    final result = await methodChannel
+        .invokeMethod(Action.setDownbeatVolume.name, [volume.toString()]);
     print(result);
   }
 
@@ -267,14 +272,7 @@ class AudioService {
 
   Future<void> _setSubdivisionVolume(Key key, double volume) async {
     final result = await methodChannel.invokeMethod(
-        Action.setSubdivisionVolume.name,
-        [key.toString(), pow(volume, 2).toString()]);
-    print(result);
-  }
-
-  Future<void> _setVolume(double volume) async {
-    final result = await methodChannel
-        .invokeMethod(Action.setVolume.name, [pow(volume, 2).toString()]);
+        Action.setSubdivisionVolume.name, [key.toString(), volume.toString()]);
     print(result);
   }
 }
