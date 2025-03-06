@@ -180,15 +180,15 @@ class Metronome {
   }
   
   func stopPlayback() {
+    guard AudioOutputUnitStop(audioUnit!) == noErr else {
+      print("Error stopping audio output unit")
+      return
+    }
+    
     nextFrame.pointee = 0
     for clip in clips {
       clip.pointee.isPlaying = false
       clip.pointee.nextFrame = 0
-    }
-    
-    guard AudioOutputUnitStop(audioUnit!) == noErr else {
-      print("Error stopping audio output unit")
-      return
     }
   }
   
