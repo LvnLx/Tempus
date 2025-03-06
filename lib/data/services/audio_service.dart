@@ -26,11 +26,15 @@ enum Action {
   stopPlayback,
 }
 
+enum Event { beatStarted }
+
 class AudioService {
   final AssetService _assetService;
   final PreferenceService _preferenceService;
 
-  final MethodChannel methodChannel = MethodChannel('audio');
+  final MethodChannel _methodChannel = MethodChannel('audio');
+  final StreamController<Event> _eventController =
+      StreamController<Event>.broadcast();
 
   late ValueNotifier<double> _appVolumeValueNotifier;
   late ValueNotifier<int> _bpmValueNotifier;
@@ -42,7 +46,19 @@ class AudioService {
   late final ValueNotifier<Map<Key, SubdivisionData>>
       _subdivisionsValueNotifier;
 
-  AudioService(this._assetService, this._preferenceService);
+  AudioService(this._assetService, this._preferenceService) {
+    _methodChannel.setMethodCallHandler((call) async {
+      if (Event.values
+          .map((reaction) => reaction.name)
+          .contains(call.method)) {
+        _eventController.add(Event.values
+            .firstWhere((reaction) => reaction.name == call.method));
+      } else {
+        throw MissingPluginException(
+            "Unknown method call method received: ${call.method}");
+      }
+    });
+  }
 
   Future<void> init() async {
     _appVolumeValueNotifier =
@@ -79,6 +95,8 @@ class AudioService {
         await _preferenceService.getSamplePair(),
         await _preferenceService.getSubdivisions());
   }
+
+  Stream<Event> get eventStream => _eventController.stream;
 
   double get appVolume => _appVolumeValueNotifier.value;
   ValueNotifier get appVolumeValueNotifier => _appVolumeValueNotifier;
@@ -212,7 +230,7 @@ class AudioService {
     _preferenceService.setSamplePair(samplePair);
     _preferenceService.setSubdivisions(subdivisions);
 
-    final result = await methodChannel.invokeMethod(Action.setState.name, [
+    final result = await _methodChannel.invokeMethod(Action.setState.name, [
       appVolume.toString(),
       bpm.toString(),
       beatVolume.toString(),
@@ -247,31 +265,31 @@ class AudioService {
   }
 
   Future<void> startPlayback() async {
-    final result = await methodChannel.invokeMethod(Action.startPlayback.name);
+    final result = await _methodChannel.invokeMethod(Action.startPlayback.name);
     print(result);
   }
 
   Future<void> stopPlayback() async {
-    final result = await methodChannel.invokeMethod(Action.stopPlayback.name);
+    final result = await _methodChannel.invokeMethod(Action.stopPlayback.name);
     print(result);
   }
 
   Future<void> _addSubdivision(Key key, int option, double volume) async {
     await HapticFeedback.mediumImpact();
-    final result = await methodChannel.invokeMethod(Action.addSubdivision.name,
+    final result = await _methodChannel.invokeMethod(Action.addSubdivision.name,
         [key.toString(), option.toString(), volume.toString()]);
     print(result);
   }
 
   Future<void> _removeSubdivision(Key key) async {
     await HapticFeedback.mediumImpact();
-    final result = await methodChannel
+    final result = await _methodChannel
         .invokeMethod(Action.removeSubdivision.name, [key.toString()]);
     print(result);
   }
 
   Future<void> _setAppVolume(double volume) async {
-    final result = await methodChannel
+    final result = await _methodChannel
         .invokeMethod(Action.setAppVolume.name, [volume.toString()]);
     print(result);
   }
@@ -279,55 +297,55 @@ class AudioService {
   Future<void> _setBpm(int bpm) async {
     await HapticFeedback.lightImpact();
     final result =
-        await methodChannel.invokeMethod(Action.setBpm.name, [bpm.toString()]);
+        await _methodChannel.invokeMethod(Action.setBpm.name, [bpm.toString()]);
     print(result);
   }
 
   Future<void> _setBeatVolume(double volume) async {
-    final result = await methodChannel
+    final result = await _methodChannel
         .invokeMethod(Action.setBeatVolume.name, [volume.toString()]);
     print(result);
   }
 
   Future<void> _setDenominator(int value) async {
-    final result = await methodChannel
+    final result = await _methodChannel
         .invokeMethod(Action.setDenominator.name, [value.toString()]);
     print(result);
   }
 
   Future<void> _setDownbeatVolume(double volume) async {
-    final result = await methodChannel
+    final result = await _methodChannel
         .invokeMethod(Action.setDownbeatVolume.name, [volume.toString()]);
     print(result);
   }
 
   Future<void> _setNumerator(int value) async {
-    final result = await methodChannel
+    final result = await _methodChannel
         .invokeMethod(Action.setNumerator.name, [value.toString()]);
     print(result);
   }
 
   Future<void> _setSample(bool isDownbeat, String sampleName) async {
-    final result = await methodChannel.invokeMethod(
+    final result = await _methodChannel.invokeMethod(
         Action.setSample.name, [isDownbeat.toString(), sampleName]);
     print(result);
   }
 
   Future<void> _setSampleNames(Set<String> sampleNames) async {
-    final result = await methodChannel.invokeMethod(
+    final result = await _methodChannel.invokeMethod(
         Action.setSampleNames.name, sampleNames.toList());
     print(result);
   }
 
   Future<void> _setSubdivisionOption(Key key, int option) async {
     await HapticFeedback.lightImpact();
-    final result = await methodChannel.invokeMethod(
+    final result = await _methodChannel.invokeMethod(
         Action.setSubdivisionOption.name, [key.toString(), option.toString()]);
     print(result);
   }
 
   Future<void> _setSubdivisionVolume(Key key, double volume) async {
-    final result = await methodChannel.invokeMethod(
+    final result = await _methodChannel.invokeMethod(
         Action.setSubdivisionVolume.name, [key.toString(), volume.toString()]);
     print(result);
   }

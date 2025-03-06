@@ -11,7 +11,7 @@ import AVFoundation
     let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
     
     methodChannel = FlutterMethodChannel(name: "audio", binaryMessenger: controller.binaryMessenger)
-    metronome = Metronome()
+    metronome = Metronome(self.beatStarted)
     
     methodChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
@@ -103,5 +103,9 @@ import AVFoundation
     
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+  
+  func beatStarted() {
+    methodChannel.invokeMethod("beatStarted", arguments: nil)
   }
 }

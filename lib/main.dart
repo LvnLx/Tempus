@@ -10,6 +10,7 @@ import 'package:tempus/ui/home/deck/settings/sample_settings/view_model.dart';
 import 'package:tempus/ui/home/deck/settings/theme_settings/view_model.dart';
 import 'package:tempus/ui/home/deck/settings/view_model.dart';
 import 'package:tempus/ui/home/deck/view_model.dart';
+import 'package:tempus/ui/home/deck/visualizer/view_model.dart';
 import 'package:tempus/ui/home/mixer/channel/view_model.dart';
 import 'package:tempus/ui/home/mixer/view_model.dart';
 import 'package:tempus/ui/home/view.dart';
@@ -65,7 +66,10 @@ class Main extends StatelessWidget {
                   context.read<ThemeService>())),
           ChangeNotifierProvider(
               create: (context) =>
-                  ThemeSettingsViewModel(context.read<ThemeService>()))
+                  ThemeSettingsViewModel(context.read<ThemeService>())),
+          ChangeNotifierProvider(
+              create: (context) =>
+                  VisualizerViewModel(context.read<AudioService>()))
         ],
         builder: (context, child) => Home(),
       ),

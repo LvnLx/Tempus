@@ -7,10 +7,12 @@ class Metronome {
   private let nextFrame: UnsafeMutablePointer<Int> = UnsafeMutablePointer.allocate(capacity: 1)
   private var subdivisions: [String: Subdivision] = [:]
   private var subdivisionSample: UnsafePointer<Sample>?
+  private let beatStarted: () -> Void
   private let validFrameCount: UnsafeMutablePointer<Int> = UnsafeMutablePointer<Int>.allocate(capacity: 1)
   private var appVolume: Float?
 
-  init() {
+  init(_ beatStarted: @escaping () -> Void) {
+    self.beatStarted = beatStarted
     dispatchQueue.initialize(to: DispatchQueue(label: "com.lvnlx.tempus"))
     
     var audioComponentDescription: AudioComponentDescription = AudioComponentDescription(
@@ -56,6 +58,7 @@ class Metronome {
           for clip in clips {
             if (clip.pointee.isActive && !clip.pointee.isPlaying && clip.pointee.startFrame == inRefCon.nextFrame.pointee) {
               clip.pointee.isPlaying = true
+              clip.pointee.onStart()
             }
           
             if (clip.pointee.isPlaying) {
@@ -204,7 +207,7 @@ class Metronome {
       }
     
     let downbeatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-    downbeatClip.initialize(to: Clip(sample: downbeatSample!, startFrame: 0, volume: appVolume!))
+    downbeatClip.initialize(to: Clip(onStart: self.beatStarted, sample: downbeatSample!, startFrame: 0, volume: appVolume!))
     
     let subdivisionClips: [UnsafeMutablePointer<Clip>] = subdivisionClipData.map { (startFrame, volume) in
       let subdivisionClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)

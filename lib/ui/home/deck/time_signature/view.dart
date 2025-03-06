@@ -24,13 +24,13 @@ class TimeSignature extends StatelessWidget {
                     2,
                     numeratorCallback,
                     numeratorValueNotifier.value),
+                behavior: HitTestBehavior.opaque,
                 child: SizedBox.expand(
                     child: FittedBox(
                         child: Text(numeratorValueNotifier.value.toString(),
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
-                                fontFamily: "SFMono",
-                                fontWeight: FontWeight.bold)))))),
+                                fontFamily: "SFMono")))))),
         Divider(height: 0),
         Expanded(
             child: GestureDetector(
@@ -40,12 +40,12 @@ class TimeSignature extends StatelessWidget {
                     2,
                     denominatorCallback,
                     denominatorValueNotifier.value),
+                behavior: HitTestBehavior.opaque,
                 child: SizedBox.expand(
                     child: FittedBox(
                         child: Text(denominatorValueNotifier.value.toString(),
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
-                                fontFamily: "SFMono",
-                                fontWeight: FontWeight.bold))))))
+                                fontFamily: "SFMono"))))))
       ]);
 }

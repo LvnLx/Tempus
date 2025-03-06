@@ -14,6 +14,7 @@ import 'package:tempus/ui/home/deck/bpm_dial/view.dart';
 import 'package:tempus/ui/home/deck/settings/view.dart';
 import 'package:tempus/ui/home/deck/time_signature/view.dart';
 import 'package:tempus/ui/home/deck/view_model.dart';
+import 'package:tempus/ui/home/deck/visualizer/view.dart';
 
 class Deck extends StatefulWidget {
   const Deck({super.key});
@@ -66,70 +67,80 @@ class DeckState extends State<Deck> {
     return LayoutBuilder(
         builder: (_, constraints) => Flex(direction: Axis.vertical, children: [
               Expanded(
-                flex: 2,
-                child: Column(
-                  children: [
-                    Expanded(child: SizedBox.expand()),
-                    Expanded(
-                      flex: 3,
-                      child: LayoutBuilder(
-                        builder: (_, barConstraints) => Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Outlined(
-                                child: SizedBox(
-                                    height: barConstraints.maxHeight,
-                                    width: barConstraints.maxHeight,
-                                    child: TimeSignature(
-                                        denominatorCallback: context
-                                            .read<DeckViewModel>()
-                                            .setDenominator,
-                                        denominatorValueNotifier: context
-                                            .watch<DeckViewModel>()
-                                            .denominatorValueNotifier,
-                                        numeratorCallback: context
-                                            .read<DeckViewModel>()
-                                            .setNumerator,
-                                        numeratorValueNotifier: context
-                                            .watch<DeckViewModel>()
-                                            .numeratorValueNotifier))),
-                            VerticalDivider(
-                                color: Theme.of(context).colorScheme.onSurface),
-                            GestureDetector(
-                                onTap: () async =>
-                                    await showIntegerSettingDialog(
-                                        context,
-                                        "Beats per minute",
-                                        3,
-                                        context.read<DeckViewModel>().setBpm,
-                                        context.read<DeckViewModel>().bpm),
-                                child: Outlined(
-                                    child: SizedBox(
-                                        height: barConstraints.maxHeight,
-                                        width: barConstraints.maxHeight * 2,
-                                        child: FittedBox(
-                                            child: Text(
-                                                tapTimes.length == 1
-                                                    ? "TAP"
-                                                    : context
-                                                        .watch<DeckViewModel>()
-                                                        .bpm
-                                                        .toString(),
-                                                style: TextStyle(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary,
-                                                    fontFamily: "SFMono"),
-                                                textAlign:
-                                                    TextAlign.center))))),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(child: SizedBox.expand())
-                  ],
-                ),
-              ),
+                  flex: 2,
+                  child: LayoutBuilder(
+                      builder: (_, barConstraints) => Column(children: [
+                            Expanded(child: SizedBox()),
+                            Expanded(
+                                flex: 5,
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Visualizer(constraints: barConstraints),
+                                      SizedBox(
+                                        height: barConstraints.maxHeight / 2,
+                                        child: VerticalDivider(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface),
+                                      ),
+                                      GestureDetector(
+                                          onTap: () async => await showIntegerSettingDialog(
+                                              context,
+                                              "Beats per minute",
+                                              3,
+                                              context
+                                                  .read<DeckViewModel>()
+                                                  .setBpm,
+                                              context
+                                                  .read<DeckViewModel>()
+                                                  .bpm),
+                                          child: Outlined(
+                                              child: SizedBox(
+                                                  height: barConstraints.maxHeight /
+                                                      2,
+                                                  width:
+                                                      barConstraints.maxHeight,
+                                                  child: FittedBox(
+                                                      child: Text(
+                                                          tapTimes.length == 1
+                                                              ? "TAP"
+                                                              : context
+                                                                  .watch<
+                                                                      DeckViewModel>()
+                                                                  .bpm
+                                                                  .toString(),
+                                                          style: TextStyle(
+                                                              color: Theme.of(context)
+                                                                  .colorScheme
+                                                                  .primary,
+                                                              fontFamily: "SFMono"),
+                                                          textAlign: TextAlign.center))))),
+                                      VerticalDivider(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface),
+                                      Outlined(
+                                          child: SizedBox(
+                                              height: barConstraints.maxHeight,
+                                              width:
+                                                  barConstraints.maxHeight / 2,
+                                              child: TimeSignature(
+                                                  denominatorCallback: context
+                                                      .read<DeckViewModel>()
+                                                      .setDenominator,
+                                                  denominatorValueNotifier: context
+                                                      .watch<DeckViewModel>()
+                                                      .denominatorValueNotifier,
+                                                  numeratorCallback: context
+                                                      .read<DeckViewModel>()
+                                                      .setNumerator,
+                                                  numeratorValueNotifier: context
+                                                      .watch<DeckViewModel>()
+                                                      .numeratorValueNotifier)))
+                                    ])),
+                            Expanded(child: SizedBox()),
+                          ]))),
               Expanded(
                   flex: 5,
                   child: LayoutBuilder(
@@ -181,7 +192,8 @@ class DeckState extends State<Deck> {
                                                                 DeckViewModel>()
                                                             .playback
                                                         ? CupertinoIcons.pause
-                                                        : Icons.play_arrow_rounded,
+                                                        : Icons
+                                                            .play_arrow_rounded,
                                                     color: Theme.of(context)
                                                         .colorScheme
                                                         .primary),
