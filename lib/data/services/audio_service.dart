@@ -49,9 +49,9 @@ class AudioService {
 
   AudioService(this._assetService, this._preferenceService) {
     _methodChannel.setMethodCallHandler((call) async {
-      if (Event.values.map((reaction) => reaction.name).contains(call.method)) {
+      if (Event.values.map((event) => event.name).contains(call.method)) {
         _eventController.add(Event.values
-            .firstWhere((reaction) => reaction.name == call.method));
+            .firstWhere((event) => event.name == call.method));
       } else {
         throw MissingPluginException(
             "Unknown method call method received: ${call.method}");
