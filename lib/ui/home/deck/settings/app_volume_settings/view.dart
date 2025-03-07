@@ -26,7 +26,7 @@ class AppVolumeSettings extends StatelessWidget {
               SettingsTile(
                 title: LayoutBuilder(
                   builder: (_, constraints) => SizedBox(
-                    width: constraints.maxWidth,
+                    width: constraints.maxWidth * 0.95,
                     child: PlatformSlider(
                         activeColor: Theme.of(context).colorScheme.primary,
                         value: context
@@ -38,7 +38,7 @@ class AppVolumeSettings extends StatelessWidget {
                   ),
                 ),
                 description: Text(
-                    "This affects all audio from the app, but is separate from your device's settings. This setting can be useful when multiple apps are playing audio at the same time"),
+                    "Affects all audio from the app, but is separate from your device's settings. This setting can be useful when multiple apps are playing audio at the same time"),
                 trailing: DefaultTextStyle(
                     style: TextStyle(
                         fontSize: 17,
