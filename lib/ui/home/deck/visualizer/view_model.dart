@@ -12,7 +12,7 @@ class VisualizerViewModel extends ChangeNotifier {
         _isVisible = true;
         notifyListeners();
 
-        Future.delayed(Duration(milliseconds: 34), () {
+        Future.delayed(Duration(milliseconds: 100), () {
           _isVisible = false;
           notifyListeners();
         });
