@@ -42,10 +42,10 @@ import AVFoundation
         result("Set beat sample")
       case "setBeatVolume":
         let volume: Float = Float(arguments[0])!
-        // TODO set beat volume
+        self.metronome.setBeatVolume(volume)
         result("Set beat volume")
       case "setDenominator":
-        let bpm: UInt16 = UInt16(arguments[0])!
+        let denominator: UInt16 = UInt16(arguments[0])!
         // TODO set denominator
         result("Set denominator")
       case "setDownbeatVolume":
@@ -57,7 +57,7 @@ import AVFoundation
         self.metronome.setInnerBeatSample(path)
         result("Set inner beat sample")
       case "setNumerator":
-        let bpm: UInt16 = UInt16(arguments[0])!
+        let numerator: UInt16 = UInt16(arguments[0])!
         // TODO set numerator
         result("Set numerator")
       case "setSamplePaths":

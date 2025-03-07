@@ -120,7 +120,12 @@ class Metronome {
   }
   
   func setAppVolume(_ volume: Float) {
-    self.appVolume = volume
+    appVolume = volume
+    updateClips()
+  }
+  
+  func setBeatVolume(_ volume: Float) {
+    beatVolume = volume
     updateClips()
   }
   
@@ -215,7 +220,7 @@ class Metronome {
       }
     
     let downbeatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-    downbeatClip.initialize(to: Clip(onStart: self.beatStarted, sample: beatSample!, startFrame: 0, volume: appVolume!))
+    downbeatClip.initialize(to: Clip(onStart: self.beatStarted, sample: beatSample!, startFrame: 0, volume: beatVolume! * appVolume!))
     
     let subdivisionClips: [UnsafeMutablePointer<Clip>] = subdivisionClipData.map { (startFrame, volume) in
       let subdivisionClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
