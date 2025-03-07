@@ -35,35 +35,35 @@ class SampleSettings extends StatelessWidget {
               title: Text("Free"),
               tiles: context
                   .watch<SampleSettingsViewModel>()
-                  .samplePairs
-                  .where((samplePair) => !samplePair.isPremium)
-                  .map((samplePair) =>
-                      getSamplePairSettingsTiles(context, samplePair, true))
+                  .sampleSets
+                  .where((sampleSet) => !sampleSet.isPremium)
+                  .map((sampleSet) =>
+                      getSampleSetSettingsTiles(context, sampleSet, true))
                   .toList(),
             ),
             SettingsSection(
                 title: Text("Premium"),
                 tiles: context
                     .watch<SampleSettingsViewModel>()
-                    .samplePairs
-                    .where((samplePair) => samplePair.isPremium)
-                    .map((samplePair) =>
-                        getSamplePairSettingsTiles(context, samplePair, false))
+                    .sampleSets
+                    .where((sampleSet) => sampleSet.isPremium)
+                    .map((sampleSet) =>
+                        getSampleSetSettingsTiles(context, sampleSet, false))
                     .toList())
           ]),
     );
   }
 
-  SettingsTile getSamplePairSettingsTiles(
-      BuildContext context, SamplePair samplePair, bool isFree) {
+  SettingsTile getSampleSetSettingsTiles(
+      BuildContext context, SampleSet sampleSet, bool isFree) {
     return SettingsTile(
         enabled: isFree || context.watch<SampleSettingsViewModel>().isPremium,
-        title: Text(capitalizeFirst(samplePair.name)),
+        title: Text(capitalizeFirst(sampleSet.name)),
         trailing: () {
-          SamplePair activeSamplePair =
-              context.watch<SampleSettingsViewModel>().samplePair;
-          if (activeSamplePair.name == samplePair.name &&
-              activeSamplePair.isPremium == samplePair.isPremium) {
+          SampleSet activeSampleSet =
+              context.watch<SampleSettingsViewModel>().sampleSet;
+          if (activeSampleSet.name == sampleSet.name &&
+              activeSampleSet.isPremium == sampleSet.isPremium) {
             return Icon(PlatformIcons(context).checkMark);
           } else {
             return null;
@@ -71,6 +71,6 @@ class SampleSettings extends StatelessWidget {
         }(),
         onPressed: (context) async => await context
             .read<SampleSettingsViewModel>()
-            .setSamplePair(samplePair));
+            .setSampleSets(sampleSet));
   }
 }

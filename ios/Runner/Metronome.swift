@@ -1,15 +1,19 @@
 import AVFoundation
 
 class Metronome {
+  private var appVolume: Float?
   private var audioUnit: AudioUnit?
-  private var downbeatSample: UnsafePointer<Sample>?
+  private var beatVolume: Float?
+  private var denominator: UInt16?
+  private var beatSample: UnsafePointer<Sample>?
+  private var downbeatVolume: Float?
   private var dispatchQueue: UnsafeMutablePointer<DispatchQueue> = UnsafeMutablePointer<DispatchQueue>.allocate(capacity: 1)
   private let nextFrame: UnsafeMutablePointer<Int> = UnsafeMutablePointer.allocate(capacity: 1)
+  private var numerator: UInt16?
   private var subdivisions: [String: Subdivision] = [:]
-  private var subdivisionSample: UnsafePointer<Sample>?
+  private var innerBeatSample: UnsafePointer<Sample>?
   private let beatStarted: () -> Void
   private let validFrameCount: UnsafeMutablePointer<Int> = UnsafeMutablePointer<Int>.allocate(capacity: 1)
-  private var appVolume: Float?
 
   init(_ beatStarted: @escaping () -> Void) {
     self.beatStarted = beatStarted
@@ -132,23 +136,23 @@ class Metronome {
     updateClips()
   }
   
-  func setSample(_ isDownbeat: Bool, _ sampleName: String) {
-    switch isDownbeat {
-    case true:
-      downbeatSample = samples[sampleName]!
-    case false:
-      subdivisionSample = samples[sampleName]!
-    }
+  func setBeatSample(_ path: String) {
+    beatSample = samples[path]!
     updateClips()
   }
   
-  func setState(_ appVolume: Float, _ bpm: UInt16, _ downbeatSampleName: String, _ subdivisionSampleName: String, _ subdivisionsAsJsonString: String) {
+  func setInnerBeatSample(_ path: String) {
+    innerBeatSample = samples[path]!
+    updateClips()
+  }
+  
+  func setState(_ appVolume: Float, _ bpm: UInt16, _ beatVolume: Float, _ denominator: UInt16, _ downbeatVolume: Float, _ numerator: UInt16, _ beatSamplePath: String, _ innerBeatSamplePath: String, _ subdivisionsAsJsonString: String) {
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
     validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
     
-    downbeatSample = samples[downbeatSampleName]!
-    subdivisionSample = samples[subdivisionSampleName]!
+    beatSample = samples[beatSamplePath]!
+    innerBeatSample = samples[innerBeatSamplePath]!
     
     subdivisions.removeAll()
     let subdivisionsAsData: Data? = subdivisionsAsJsonString.data(using: .utf8)
@@ -158,6 +162,10 @@ class Metronome {
     }
     
     self.appVolume = appVolume
+    self.beatVolume = beatVolume
+    self.denominator = denominator
+    self.downbeatVolume = downbeatVolume
+    self.numerator = numerator
     
     updateClips()
   }
@@ -207,11 +215,11 @@ class Metronome {
       }
     
     let downbeatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-    downbeatClip.initialize(to: Clip(onStart: self.beatStarted, sample: downbeatSample!, startFrame: 0, volume: appVolume!))
+    downbeatClip.initialize(to: Clip(onStart: self.beatStarted, sample: beatSample!, startFrame: 0, volume: appVolume!))
     
     let subdivisionClips: [UnsafeMutablePointer<Clip>] = subdivisionClipData.map { (startFrame, volume) in
       let subdivisionClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-      subdivisionClip.initialize(to: Clip(sample: subdivisionSample!, startFrame: startFrame, volume: volume * appVolume!))
+      subdivisionClip.initialize(to: Clip(sample: innerBeatSample!, startFrame: startFrame, volume: volume * appVolume!))
       return subdivisionClip
     }
     

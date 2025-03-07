@@ -1,19 +1,19 @@
 import 'dart:convert';
 
-class SamplePair {
+class SampleSet {
   final String name;
   final bool isPremium;
 
-  const SamplePair(this.name, this.isPremium);
+  const SampleSet(this.name, this.isPremium);
 
-  static SamplePair fromJsonString(String jsonString) {
-    Map<String, dynamic> samplePairAsJson = jsonDecode(jsonString);
-    return SamplePair(samplePairAsJson["name"], samplePairAsJson["isPremium"]);
+  static SampleSet fromJsonString(String jsonString) {
+    Map<String, dynamic> sampleSetAsJson = jsonDecode(jsonString);
+    return SampleSet(sampleSetAsJson["name"], sampleSetAsJson["isPremium"]);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is SamplePair &&
+    return other is SampleSet &&
         other.name == name &&
         other.isPremium == isPremium;
   }
@@ -21,11 +21,11 @@ class SamplePair {
   @override
   int get hashCode => Object.hash(name, isPremium);
 
-  String getDownbeatSamplePath() =>
-      "audio/${isPremium ? "premium" : "free"}/$name/downbeat.wav";
+  String getBeatSamplePath() =>
+      "assets/audio/${isPremium ? "premium" : "free"}/$name/beat.wav";
 
-  String getSubdivisionSamplePath() =>
-      "audio/${isPremium ? "premium" : "free"}/$name/subdivision.wav";
+  String getInnerBeatSamplePath() =>
+      "assets/audio/${isPremium ? "premium" : "free"}/$name/inner_beat.wav";
 
   String toJsonString() => jsonEncode({"name": name, "isPremium": isPremium});
 }

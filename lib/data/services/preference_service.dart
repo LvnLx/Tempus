@@ -15,7 +15,7 @@ enum Preference {
   downbeatVolume(1.0),
   isPremium(false),
   numerator(4),
-  samplePair(SamplePair("sine", false)),
+  sampleSet(SampleSet("sine", false)),
   subdivisions(<Key, SubdivisionData>{}),
   themeMode(ThemeMode.system);
 
@@ -111,21 +111,21 @@ class PreferenceService {
     }
   }
 
-  Future<SamplePair> getSamplePair() async {
+  Future<SampleSet> getSampleSet() async {
     try {
-      String? samplePairAsJsonString =
-          await _sharedPreferencesAsync.getString(Preference.samplePair.name);
+      String? sampleSetAsJsonString =
+          await _sharedPreferencesAsync.getString(Preference.sampleSet.name);
 
-      if (samplePairAsJsonString != null) {
-        return _assetService.samplePairs.firstWhere((samplePair) =>
-            samplePair == SamplePair.fromJsonString(samplePairAsJsonString));
+      if (sampleSetAsJsonString != null) {
+        return _assetService.sampleSets.firstWhere((sampleSet) =>
+            sampleSet == SampleSet.fromJsonString(sampleSetAsJsonString));
       } else {
-        return Preference.samplePair.defaultValue;
+        return Preference.sampleSet.defaultValue;
       }
     } catch (exception) {
       print("Exception while getting sample pair: $exception");
-      await setSamplePair(Preference.samplePair.defaultValue);
-      return Preference.samplePair.defaultValue;
+      await setSampleSet(Preference.sampleSet.defaultValue);
+      return Preference.sampleSet.defaultValue;
     }
   }
 
@@ -191,9 +191,9 @@ class PreferenceService {
   Future<void> setNumerator(int value) async =>
       await _sharedPreferencesAsync.setInt(Preference.numerator.name, value);
 
-  Future<void> setSamplePair(SamplePair samplePair) async =>
+  Future<void> setSampleSet(SampleSet sampleSet) async =>
       await _sharedPreferencesAsync.setString(
-          Preference.samplePair.name, samplePair.toJsonString());
+          Preference.sampleSet.name, sampleSet.toJsonString());
 
   Future<void> setSubdivisions(Map<Key, SubdivisionData> subdivisions) async =>
       await _sharedPreferencesAsync.setString(

@@ -14,13 +14,13 @@ class SettingsViewModel extends ChangeNotifier {
   SettingsViewModel(
       this._audioService, this._purchaseService, this._themeService) {
     _audioService.appVolumeValueNotifier.addListener(notifyListeners);
-    _audioService.samplePairValueNotifier.addListener(notifyListeners);
+    _audioService.sampleSetValueNotifier.addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
     _themeService.themeModeValueNotifier.addListener(notifyListeners);
   }
 
   double get appVolume => _audioService.appVolume;
-  SamplePair get samplePair => _audioService.samplePair;
+  SampleSet get sampleSet => _audioService.sampleSet;
   bool get isPremium => _purchaseService.isPremium;
   ThemeMode get themeMode => _themeService.themeMode;
 
@@ -36,7 +36,7 @@ class SettingsViewModel extends ChangeNotifier {
         Preference.denominator.defaultValue,
         Preference.downbeatVolume.defaultValue,
         Preference.numerator.defaultValue,
-        Preference.samplePair.defaultValue,
+        Preference.sampleSet.defaultValue,
         Preference.subdivisions.defaultValue);
   }
 
@@ -48,7 +48,7 @@ class SettingsViewModel extends ChangeNotifier {
         Preference.denominator.defaultValue,
         Preference.downbeatVolume.defaultValue,
         Preference.numerator.defaultValue,
-        samplePair,
+        sampleSet,
         Preference.subdivisions.defaultValue);
   }
 

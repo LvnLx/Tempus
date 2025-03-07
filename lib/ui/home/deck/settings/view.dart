@@ -88,7 +88,7 @@ class _SettingsState extends State<Settings> {
               SettingsTile.navigation(
                 title: Text("Sample"),
                 value: Text(capitalizeFirst(
-                    context.watch<SettingsViewModel>().samplePair.name)),
+                    context.watch<SettingsViewModel>().sampleSet.name)),
                 onPressed: (context) => Navigator.push(context,
                     MaterialPageRoute(builder: (context) => SampleSettings())),
               )
