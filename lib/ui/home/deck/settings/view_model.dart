@@ -13,12 +13,14 @@ class SettingsViewModel extends ChangeNotifier {
 
   SettingsViewModel(
       this._audioService, this._purchaseService, this._themeService) {
-    _audioService.samplePairValueNotifier.addListener(notifyListeners);
+    _audioService.appVolumeValueNotifier.addListener(notifyListeners);
+    _audioService.sampleSetValueNotifier.addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
     _themeService.themeModeValueNotifier.addListener(notifyListeners);
   }
 
-  SamplePair get samplePair => _audioService.samplePair;
+  double get appVolume => _audioService.appVolume;
+  SampleSet get sampleSet => _audioService.sampleSet;
   bool get isPremium => _purchaseService.isPremium;
   ThemeMode get themeMode => _themeService.themeMode;
 
@@ -28,15 +30,28 @@ class SettingsViewModel extends ChangeNotifier {
   Future<void> resetApp() async {
     _themeService.setThemeMode(Preference.themeMode.defaultValue);
     await _audioService.setState(
+        Preference.appVolume.defaultValue,
         Preference.bpm.defaultValue,
-        Preference.samplePair.defaultValue,
-        Preference.subdivisions.defaultValue,
-        Preference.volume.defaultValue);
+        Preference.beatVolume.defaultValue,
+        Preference.beatVolume.defaultValue,
+        Preference.denominator.defaultValue,
+        Preference.downbeatVolume.defaultValue,
+        Preference.numerator.defaultValue,
+        Preference.sampleSet.defaultValue,
+        Preference.subdivisions.defaultValue);
   }
 
   Future<void> resetMetronome() async {
-    await _audioService.setState(Preference.bpm.defaultValue, samplePair,
-        Preference.subdivisions.defaultValue, Preference.volume.defaultValue);
+    await _audioService.setState(
+        _audioService.appVolume,
+        Preference.bpm.defaultValue,
+        Preference.beatUnit.defaultValue,
+        Preference.beatVolume.defaultValue,
+        Preference.denominator.defaultValue,
+        Preference.downbeatVolume.defaultValue,
+        Preference.numerator.defaultValue,
+        sampleSet,
+        Preference.subdivisions.defaultValue);
   }
 
   Future<PurchaseResult> restorePremium() async =>

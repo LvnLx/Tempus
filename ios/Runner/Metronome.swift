@@ -1,16 +1,22 @@
 import AVFoundation
 
 class Metronome {
+  private var appVolume: Float?
   private var audioUnit: AudioUnit?
-  private var downbeatSample: UnsafePointer<Sample>?
+  private var beatVolume: Float?
+  private var denominator: UInt16?
+  private var beatSample: UnsafePointer<Sample>?
+  private var downbeatVolume: Float?
   private var dispatchQueue: UnsafeMutablePointer<DispatchQueue> = UnsafeMutablePointer<DispatchQueue>.allocate(capacity: 1)
   private let nextFrame: UnsafeMutablePointer<Int> = UnsafeMutablePointer.allocate(capacity: 1)
+  private var numerator: UInt16?
   private var subdivisions: [String: Subdivision] = [:]
-  private var subdivisionSample: UnsafePointer<Sample>?
+  private var innerBeatSample: UnsafePointer<Sample>?
+  private let beatStarted: () -> Void
   private let validFrameCount: UnsafeMutablePointer<Int> = UnsafeMutablePointer<Int>.allocate(capacity: 1)
-  private var volume: Float?
 
-  init() {
+  init(_ beatStarted: @escaping () -> Void) {
+    self.beatStarted = beatStarted
     dispatchQueue.initialize(to: DispatchQueue(label: "com.lvnlx.tempus"))
     
     var audioComponentDescription: AudioComponentDescription = AudioComponentDescription(
@@ -56,6 +62,7 @@ class Metronome {
           for clip in clips {
             if (clip.pointee.isActive && !clip.pointee.isPlaying && clip.pointee.startFrame == inRefCon.nextFrame.pointee) {
               clip.pointee.isPlaying = true
+              clip.pointee.onStart()
             }
           
             if (clip.pointee.isPlaying) {
@@ -112,6 +119,16 @@ class Metronome {
     updateClips()
   }
   
+  func setAppVolume(_ volume: Float) {
+    appVolume = volume
+    updateClips()
+  }
+  
+  func setBeatVolume(_ volume: Float) {
+    beatVolume = volume
+    updateClips()
+  }
+  
   func setBpm(_ bpm: UInt16) {
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
@@ -124,23 +141,23 @@ class Metronome {
     updateClips()
   }
   
-  func setSample(_ isDownbeat: Bool, _ sampleName: String) {
-    switch isDownbeat {
-    case true:
-      downbeatSample = samples[sampleName]!
-    case false:
-      subdivisionSample = samples[sampleName]!
-    }
+  func setBeatSample(_ path: String) {
+    beatSample = samples[path]!
     updateClips()
   }
   
-  func setState(_ bpm: UInt16, _ downbeatSampleName: String, _ subdivisionSampleName: String, _ subdivisionsAsJsonString: String, _ volume: Float) {
+  func setInnerBeatSample(_ path: String) {
+    innerBeatSample = samples[path]!
+    updateClips()
+  }
+  
+  func setState(_ appVolume: Float, _ bpm: UInt16, _ beatUnitAsJsonString: String, _ beatVolume: Float, _ denominator: UInt16, _ downbeatVolume: Float, _ numerator: UInt16, _ beatSamplePath: String, _ innerBeatSamplePath: String, _ subdivisionsAsJsonString: String) {
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
     validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
     
-    downbeatSample = samples[downbeatSampleName]!
-    subdivisionSample = samples[subdivisionSampleName]!
+    beatSample = samples[beatSamplePath]!
+    innerBeatSample = samples[innerBeatSamplePath]!
     
     subdivisions.removeAll()
     let subdivisionsAsData: Data? = subdivisionsAsJsonString.data(using: .utf8)
@@ -149,7 +166,11 @@ class Metronome {
       subdivisions[key] = Subdivision(fields["option"] as! Int, Float(fields["volume"] as! Double))
     }
     
-    self.volume = volume
+    self.appVolume = appVolume
+    self.beatVolume = beatVolume
+    self.denominator = denominator
+    self.downbeatVolume = downbeatVolume
+    self.numerator = numerator
     
     updateClips()
   }
@@ -164,11 +185,6 @@ class Metronome {
     updateClips()
   }
   
-  func setVolume(_ volume: Float) {
-    self.volume = volume
-    updateClips()
-  }
-  
   func startPlayback() {
     guard AudioOutputUnitStart(audioUnit!) == noErr else {
       print("Error starting audio output unit")
@@ -177,15 +193,15 @@ class Metronome {
   }
   
   func stopPlayback() {
+    guard AudioOutputUnitStop(audioUnit!) == noErr else {
+      print("Error stopping audio output unit")
+      return
+    }
+    
     nextFrame.pointee = 0
     for clip in clips {
       clip.pointee.isPlaying = false
       clip.pointee.nextFrame = 0
-    }
-    
-    guard AudioOutputUnitStop(audioUnit!) == noErr else {
-      print("Error stopping audio output unit")
-      return
     }
   }
   
@@ -204,11 +220,11 @@ class Metronome {
       }
     
     let downbeatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-    downbeatClip.initialize(to: Clip(sample: downbeatSample!, startFrame: 0, volume: volume!))
+    downbeatClip.initialize(to: Clip(onStart: self.beatStarted, sample: beatSample!, startFrame: 0, volume: beatVolume! * appVolume!))
     
     let subdivisionClips: [UnsafeMutablePointer<Clip>] = subdivisionClipData.map { (startFrame, volume) in
       let subdivisionClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-      subdivisionClip.initialize(to: Clip(sample: subdivisionSample!, startFrame: startFrame, volume: volume))
+      subdivisionClip.initialize(to: Clip(sample: innerBeatSample!, startFrame: startFrame, volume: volume * appVolume!))
       return subdivisionClip
     }
     

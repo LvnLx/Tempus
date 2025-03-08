@@ -1,76 +1,130 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
+import 'package:tempus/domain/models/beat_unit.dart';
 import 'package:tempus/domain/models/sample_pair.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Action {
+  setAppVolume,
   addSubdivision,
   removeSubdivision,
   setBpm,
-  setSample,
-  setSampleNames,
+  setBeatSample,
+  setBeatUnit,
+  setBeatVolume,
+  setDenominator,
+  setDownbeatVolume,
+  setInnerBeatSample,
+  setNumerator,
+  setSamplePaths,
   setState,
   setSubdivisionOption,
   setSubdivisionVolume,
-  setVolume,
   startPlayback,
   stopPlayback,
 }
+
+enum Event { beatStarted }
 
 class AudioService {
   final AssetService _assetService;
   final PreferenceService _preferenceService;
 
-  final MethodChannel methodChannel = MethodChannel('audio');
+  final MethodChannel _methodChannel = MethodChannel('audio');
+  final StreamController<Event> _eventController =
+      StreamController<Event>.broadcast();
 
+  late ValueNotifier<double> _appVolumeValueNotifier;
   late ValueNotifier<int> _bpmValueNotifier;
-  late ValueNotifier<SamplePair> _samplePairValueNotifier;
+  late ValueNotifier<BeatUnit> _beatUnitValueNotifier;
+  late ValueNotifier<double> _beatVolumeValueNotifier;
+  late ValueNotifier<int> _denominatorValueNotifier;
+  late ValueNotifier<double> _downbeatVolumeValueNotifier;
+  late ValueNotifier<int> _numeratorValueNotifier;
+  late ValueNotifier<SampleSet> _sampleSetValueNotifier;
   late final ValueNotifier<Map<Key, SubdivisionData>>
       _subdivisionsValueNotifier;
-  late ValueNotifier<double> _volumeValueNotifier;
 
-  AudioService(this._assetService, this._preferenceService);
+  AudioService(this._assetService, this._preferenceService) {
+    _methodChannel.setMethodCallHandler((call) async {
+      if (Event.values.map((event) => event.name).contains(call.method)) {
+        _eventController
+            .add(Event.values.firstWhere((event) => event.name == call.method));
+      } else {
+        throw MissingPluginException(
+            "Unknown method call method received: ${call.method}");
+      }
+    });
+  }
 
   Future<void> init() async {
+    _appVolumeValueNotifier =
+        ValueNotifier(await _preferenceService.getAppVolume());
     _bpmValueNotifier = ValueNotifier(await _preferenceService.getBpm());
-    _samplePairValueNotifier =
-        ValueNotifier(await _preferenceService.getSamplePair());
+    _beatUnitValueNotifier =
+        ValueNotifier(await _preferenceService.getBeatUnit());
+    _beatVolumeValueNotifier =
+        ValueNotifier(await _preferenceService.getBeatVolume());
+    _denominatorValueNotifier =
+        ValueNotifier(await _preferenceService.getDenominator());
+    _downbeatVolumeValueNotifier =
+        ValueNotifier(await _preferenceService.getDownbeatVolume());
+    _numeratorValueNotifier =
+        ValueNotifier(await _preferenceService.getNumerator());
+    _sampleSetValueNotifier =
+        ValueNotifier(await _preferenceService.getSampleSet());
     _subdivisionsValueNotifier =
         ValueNotifier(await _preferenceService.getSubdivisions());
-    _volumeValueNotifier = ValueNotifier(await _preferenceService.getVolume());
 
-    await _setSampleNames(_assetService.samplePairs.fold<Set<String>>(
+    await _setSamplePaths(_assetService.sampleSets.fold<Set<String>>(
         {},
-        (accumulator, samplePair) => {
+        (accumulator, sampleSet) => {
               ...accumulator,
-              samplePair.getDownbeatSamplePath(),
-              samplePair.getSubdivisionSamplePath()
+              sampleSet.getBeatSamplePath(),
+              sampleSet.getInnerBeatSamplePath()
             }));
 
     await setState(
+        await _preferenceService.getAppVolume(),
         await _preferenceService.getBpm(),
-        await _preferenceService.getSamplePair(),
-        await _preferenceService.getSubdivisions(),
-        await _preferenceService.getVolume());
+        await _preferenceService.getBeatUnit(),
+        await _preferenceService.getBeatVolume(),
+        await _preferenceService.getDenominator(),
+        await _preferenceService.getDownbeatVolume(),
+        await _preferenceService.getNumerator(),
+        await _preferenceService.getSampleSet(),
+        await _preferenceService.getSubdivisions());
   }
 
+  Stream<Event> get eventStream => _eventController.stream;
+
+  double get appVolume => _appVolumeValueNotifier.value;
+  ValueNotifier get appVolumeValueNotifier => _appVolumeValueNotifier;
   int get bpm => _bpmValueNotifier.value;
   ValueNotifier<int> get bpmValueNotifier => _bpmValueNotifier;
-  SamplePair get samplePair => _samplePairValueNotifier.value;
-  ValueNotifier<SamplePair> get samplePairValueNotifier =>
-      _samplePairValueNotifier;
+  BeatUnit get beatUnit => _beatUnitValueNotifier.value;
+  ValueNotifier<BeatUnit> get beatUnitValueNotifier => _beatUnitValueNotifier;
+  double get beatVolume => _beatVolumeValueNotifier.value;
+  ValueNotifier<double> get beatVolumeValueNotifier => _beatVolumeValueNotifier;
+  int get denominator => _denominatorValueNotifier.value;
+  ValueNotifier<int> get denominatorValueNotifier => _denominatorValueNotifier;
+  double get downbeatVolume => _downbeatVolumeValueNotifier.value;
+  ValueNotifier<double> get downbeatVolumeValueNotifier =>
+      _downbeatVolumeValueNotifier;
+  int get numerator => _numeratorValueNotifier.value;
+  ValueNotifier<int> get numeratorValueNotifier => _numeratorValueNotifier;
+  SampleSet get sampleSet => _sampleSetValueNotifier.value;
+  ValueNotifier<SampleSet> get sampleSetValueNotifier =>
+      _sampleSetValueNotifier;
   Map<Key, SubdivisionData> get subdivisions =>
       _subdivisionsValueNotifier.value;
   ValueNotifier<Map<Key, SubdivisionData>> get subdivisionsValueNotifier =>
       _subdivisionsValueNotifier;
-  double get volume => _volumeValueNotifier.value;
-  ValueNotifier<double> get volumeValueNotifier => _volumeValueNotifier;
 
   Future<void> addSubdivision() async {
     UniqueKey key = UniqueKey();
@@ -91,13 +145,11 @@ class AudioService {
     _preferenceService.setSubdivisions(subdivisions);
   }
 
-  Future<void> setSamplePair(SamplePair samplePair) async {
-    _samplePairValueNotifier.value = samplePair;
+  Future<void> setAppVolume(double volume) async {
+    _appVolumeValueNotifier.value = volume;
 
-    await _setSample(true, samplePair.getDownbeatSamplePath());
-    await _setSample(false, samplePair.getSubdivisionSamplePath());
-
-    _preferenceService.setSamplePair(samplePair);
+    await _setAppVolume(volume);
+    _preferenceService.setAppVolume(volume);
   }
 
   Future<void> setBpm(int bpm, [bool skipUnchanged = true]) async {
@@ -121,19 +173,91 @@ class AudioService {
     _preferenceService.setBpm(validatedBpm);
   }
 
-  Future<void> setState(int bpm, SamplePair samplePair,
-      Map<Key, SubdivisionData> subdivisions, double volume) async {
-    _bpmValueNotifier.value = bpm;
-    _samplePairValueNotifier.value = samplePair;
-    _subdivisionsValueNotifier.value = subdivisions;
-    _volumeValueNotifier.value = volume;
+  Future<void> setBeatUnit(BeatUnit beatUnit) async {
+    _beatUnitValueNotifier.value = beatUnit;
 
-    final result = await methodChannel.invokeMethod(Action.setState.name, [
+    await _setBeatUnit(beatUnit);
+    _preferenceService.setBeatUnit(beatUnit);
+  }
+
+  Future<void> setBeatVolume(double volume) async {
+    _beatVolumeValueNotifier.value = volume;
+
+    await _setBeatVolume(volume);
+    _preferenceService.setBeatVolume(volume);
+  }
+
+  Future<void> setDenominator(int value) async {
+    _denominatorValueNotifier.value = value;
+
+    await _setDenominator(value);
+    _preferenceService.setDenominator(value);
+  }
+
+  Future<void> setDownbeatVolume(double volume) async {
+    _downbeatVolumeValueNotifier.value = volume;
+
+    await _setDownbeatVolume(volume);
+    _preferenceService.setDownbeatVolume(volume);
+  }
+
+  Future<void> setNumerator(int value) async {
+    _numeratorValueNotifier.value = value;
+
+    await _setNumerator(value);
+    _preferenceService.setNumerator(value);
+  }
+
+  Future<void> setSampleSet(SampleSet sampleSet) async {
+    _sampleSetValueNotifier.value = sampleSet;
+
+    await _setBeatSample(sampleSet.getBeatSamplePath());
+    await _setInnerBeatSample(sampleSet.getInnerBeatSamplePath());
+
+    _preferenceService.setSampleSet(sampleSet);
+  }
+
+  Future<void> setState(
+      double appVolume,
+      int bpm,
+      BeatUnit beatUnit,
+      double beatVolume,
+      int denominator,
+      double downbeatVolume,
+      int numerator,
+      SampleSet sampleSet,
+      Map<Key, SubdivisionData> subdivisions) async {
+    _appVolumeValueNotifier.value = appVolume;
+    _bpmValueNotifier.value = bpm;
+    _beatUnitValueNotifier.value = beatUnit;
+    _beatVolumeValueNotifier.value = beatVolume;
+    _denominatorValueNotifier.value = denominator;
+    _downbeatVolumeValueNotifier.value = downbeatVolume;
+    _numeratorValueNotifier.value = numerator;
+    _sampleSetValueNotifier.value = sampleSet;
+    _subdivisionsValueNotifier.value = subdivisions;
+
+    _preferenceService.setAppVolume(appVolume);
+    _preferenceService.setBpm(bpm);
+    _preferenceService.setBeatUnit(beatUnit);
+    _preferenceService.setBeatVolume(beatVolume);
+    _preferenceService.setDenominator(denominator);
+    _preferenceService.setDownbeatVolume(downbeatVolume);
+    _preferenceService.setNumerator(numerator);
+    _preferenceService.setSampleSet(sampleSet);
+    _preferenceService.setSubdivisions(subdivisions);
+
+    final result = await _methodChannel.invokeMethod(Action.setState.name, [
+      appVolume.toString(),
       bpm.toString(),
-      samplePair.getDownbeatSamplePath(),
-      samplePair.getSubdivisionSamplePath(),
+      beatUnit.toJsonString(),
+      beatVolume.toString(),
+      denominator.toString(),
+      downbeatVolume.toString(),
+      numerator.toString(),
+      sampleSet.getBeatSamplePath(),
+      sampleSet.getInnerBeatSamplePath(),
       subdivisions.toJsonString(),
-      pow(volume, 2).toString()
     ]);
     print(result);
   }
@@ -158,73 +282,101 @@ class AudioService {
     _preferenceService.setSubdivisions(subdivisions);
   }
 
-  Future<void> setVolume(double volume) async {
-    _volumeValueNotifier.value = volume;
-
-    await _setVolume(volume);
-    _preferenceService.setVolume(volume);
-  }
-
   Future<void> startPlayback() async {
-    final result = await methodChannel.invokeMethod(Action.startPlayback.name);
+    final result = await _methodChannel.invokeMethod(Action.startPlayback.name);
     print(result);
   }
 
   Future<void> stopPlayback() async {
-    final result = await methodChannel.invokeMethod(Action.stopPlayback.name);
+    final result = await _methodChannel.invokeMethod(Action.stopPlayback.name);
     print(result);
   }
 
   Future<void> _addSubdivision(Key key, int option, double volume) async {
     await HapticFeedback.mediumImpact();
-    final result = await methodChannel.invokeMethod(Action.addSubdivision.name,
-        [key.toString(), option.toString(), pow(volume, 2).toString()]);
+    final result = await _methodChannel.invokeMethod(Action.addSubdivision.name,
+        [key.toString(), option.toString(), volume.toString()]);
     print(result);
   }
 
   Future<void> _removeSubdivision(Key key) async {
     await HapticFeedback.mediumImpact();
-    final result = await methodChannel
+    final result = await _methodChannel
         .invokeMethod(Action.removeSubdivision.name, [key.toString()]);
+    print(result);
+  }
+
+  Future<void> _setAppVolume(double volume) async {
+    final result = await _methodChannel
+        .invokeMethod(Action.setAppVolume.name, [volume.toString()]);
     print(result);
   }
 
   Future<void> _setBpm(int bpm) async {
     await HapticFeedback.lightImpact();
     final result =
-        await methodChannel.invokeMethod(Action.setBpm.name, [bpm.toString()]);
+        await _methodChannel.invokeMethod(Action.setBpm.name, [bpm.toString()]);
     print(result);
   }
 
-  Future<void> _setSample(bool isDownbeat, String sampleName) async {
-    final result = await methodChannel.invokeMethod(
-        Action.setSample.name, [isDownbeat.toString(), sampleName]);
+  Future<void> _setBeatSample(String path) async {
+    final result =
+        await _methodChannel.invokeMethod(Action.setBeatSample.name, [path]);
     print(result);
   }
 
-  Future<void> _setSampleNames(Set<String> sampleNames) async {
-    final result = await methodChannel.invokeMethod(
-        Action.setSampleNames.name, sampleNames.toList());
+  Future<void> _setBeatUnit(BeatUnit beatUnit) async {
+    final result = await _methodChannel
+        .invokeMethod(Action.setBeatUnit.name, [beatUnit.toJsonString()]);
+    print(result);
+  }
+
+  Future<void> _setBeatVolume(double volume) async {
+    final result = await _methodChannel
+        .invokeMethod(Action.setBeatVolume.name, [volume.toString()]);
+    print(result);
+  }
+
+  Future<void> _setDenominator(int value) async {
+    final result = await _methodChannel
+        .invokeMethod(Action.setDenominator.name, [value.toString()]);
+    print(result);
+  }
+
+  Future<void> _setDownbeatVolume(double volume) async {
+    final result = await _methodChannel
+        .invokeMethod(Action.setDownbeatVolume.name, [volume.toString()]);
+    print(result);
+  }
+
+  Future<void> _setInnerBeatSample(String path) async {
+    final result = await _methodChannel
+        .invokeMethod(Action.setInnerBeatSample.name, [path]);
+    print(result);
+  }
+
+  Future<void> _setNumerator(int value) async {
+    final result = await _methodChannel
+        .invokeMethod(Action.setNumerator.name, [value.toString()]);
+    print(result);
+  }
+
+  Future<void> _setSamplePaths(Set<String> samplePaths) async {
+    final result = await _methodChannel.invokeMethod(
+        Action.setSamplePaths.name, samplePaths.toList());
     print(result);
   }
 
   Future<void> _setSubdivisionOption(Key key, int option) async {
     await HapticFeedback.lightImpact();
-    final result = await methodChannel.invokeMethod(
+    final result = await _methodChannel.invokeMethod(
         Action.setSubdivisionOption.name, [key.toString(), option.toString()]);
     print(result);
   }
 
   Future<void> _setSubdivisionVolume(Key key, double volume) async {
-    final result = await methodChannel.invokeMethod(
-        Action.setSubdivisionVolume.name,
-        [key.toString(), pow(volume, 2).toString()]);
-    print(result);
-  }
-
-  Future<void> _setVolume(double volume) async {
-    final result = await methodChannel
-        .invokeMethod(Action.setVolume.name, [pow(volume, 2).toString()]);
+    final result = await _methodChannel.invokeMethod(
+        Action.setSubdivisionVolume.name, [key.toString(), volume.toString()]);
     print(result);
   }
 }

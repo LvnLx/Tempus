@@ -11,15 +11,15 @@ class SampleSettingsViewModel extends ChangeNotifier {
 
   SampleSettingsViewModel(
       this._assetService, this._audioService, this._purchaseService) {
-    _audioService.samplePairValueNotifier.addListener(notifyListeners);
+    _audioService.sampleSetValueNotifier.addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
   }
 
-  SamplePair get samplePair => _audioService.samplePair;
-  List<SamplePair> get samplePairs => _assetService.samplePairs;
+  SampleSet get sampleSet => _audioService.sampleSet;
+  List<SampleSet> get sampleSets => _assetService.sampleSets;
   bool get isPremium => _purchaseService.isPremium;
 
-  Future<void> setSamplePair(SamplePair samplePair) async {
-    await _audioService.setSamplePair(samplePair);
+  Future<void> setSampleSets(SampleSet sampleSet) async {
+    await _audioService.setSampleSet(sampleSet);
   }
 }

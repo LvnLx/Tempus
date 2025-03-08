@@ -2,9 +2,8 @@ import AudioToolbox
 
 var samples: [String:UnsafePointer<Sample>] = [:]
 
-func loadAudioFile(_ fileName: String, _ key: String) {
-  let path: String = Bundle.main.path(forResource: key, ofType: nil)!
-  let url: URL = URL(string: path)!
+func loadAudioFile(_ path: String, _ key: String) {
+  let url: URL = URL(string: Bundle.main.path(forResource: key, ofType: nil)!)!
   
   var audioFile: AudioFileID? = nil
   var status: OSStatus = AudioFileOpenURL(url as CFURL, .readPermission, kAudioFileWAVEType, &audioFile)
@@ -37,6 +36,6 @@ func loadAudioFile(_ fileName: String, _ key: String) {
   sample.pointee.data.update(from: buffer, count: buffer.count)
   sample.pointee.length = buffer.count
 
-  samples[fileName] = UnsafePointer(sample)
+  samples[path] = UnsafePointer(sample)
 }
 

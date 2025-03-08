@@ -5,10 +5,13 @@ import 'package:tempus/data/services/audio_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
+import 'package:tempus/ui/home/deck/settings/app_volume_settings/view_model.dart';
 import 'package:tempus/ui/home/deck/settings/sample_settings/view_model.dart';
 import 'package:tempus/ui/home/deck/settings/theme_settings/view_model.dart';
 import 'package:tempus/ui/home/deck/settings/view_model.dart';
 import 'package:tempus/ui/home/deck/view_model.dart';
+import 'package:tempus/ui/home/deck/visualizer/view_model.dart';
+import 'package:tempus/ui/home/mixer/beat_unit_button/view_model.dart';
 import 'package:tempus/ui/home/mixer/channel/view_model.dart';
 import 'package:tempus/ui/home/mixer/view_model.dart';
 import 'package:tempus/ui/home/view.dart';
@@ -41,6 +44,12 @@ class Main extends StatelessWidget {
                   ThemeService(context.read<PreferenceService>())),
           ChangeNotifierProvider(
               create: (context) =>
+                  AppVolumeSettingsViewModel(context.read<AudioService>())),
+          ChangeNotifierProvider(
+              create: (context) =>
+                  BeatUnitButtonViewModel(context.read<AudioService>())),
+          ChangeNotifierProvider(
+              create: (context) =>
                   ChannelViewModel(context.read<AudioService>())),
           ChangeNotifierProvider(
               create: (context) => DeckViewModel(context.read<AudioService>())),
@@ -61,7 +70,10 @@ class Main extends StatelessWidget {
                   context.read<ThemeService>())),
           ChangeNotifierProvider(
               create: (context) =>
-                  ThemeSettingsViewModel(context.read<ThemeService>()))
+                  ThemeSettingsViewModel(context.read<ThemeService>())),
+          ChangeNotifierProvider(
+              create: (context) =>
+                  VisualizerViewModel(context.read<AudioService>()))
         ],
         builder: (context, child) => Home(),
       ),

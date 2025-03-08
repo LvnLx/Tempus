@@ -3,29 +3,29 @@ import 'package:flutter/services.dart';
 import 'package:tempus/domain/models/sample_pair.dart';
 
 class AssetService {
-  late final ValueNotifier<List<SamplePair>> _samplePairsValueNotifier;
+  late final ValueNotifier<List<SampleSet>> _sampleSetsValueNotifier;
 
   Future<void> init() async {
     AssetManifest assetManifest =
         await AssetManifest.loadFromAssetBundle(rootBundle);
-    _samplePairsValueNotifier = ValueNotifier([
-      ..._getSamplePairs(assetManifest, false),
-      ..._getSamplePairs(assetManifest, true)
+    _sampleSetsValueNotifier = ValueNotifier([
+      ..._getSampleSets(assetManifest, false),
+      ..._getSampleSets(assetManifest, true)
     ]);
   }
 
-  List<SamplePair> get samplePairs => _samplePairsValueNotifier.value;
-  ValueNotifier<List<SamplePair>> get samplePairsValueNotifier =>
-      _samplePairsValueNotifier;
+  List<SampleSet> get sampleSets => _sampleSetsValueNotifier.value;
+  ValueNotifier<List<SampleSet>> get sampleSetsValueNotifier =>
+      _sampleSetsValueNotifier;
 
-  List<SamplePair> _getSamplePairs(
+  List<SampleSet> _getSampleSets(
           AssetManifest assetManifest, bool isPremiumPath) =>
       assetManifest
           .listAssets()
           .where((string) =>
-              string.startsWith("audio/${isPremiumPath ? "premium" : "free"}/"))
+              string.startsWith("assets/audio/${isPremiumPath ? "premium" : "free"}/"))
           .fold<Set<String>>(
-              {}, (accumulator, path) => {...accumulator, path.split("/")[2]})
-          .map((samplePairName) => SamplePair(samplePairName, isPremiumPath))
+              {}, (accumulator, path) => {...accumulator, path.split("/")[3]})
+          .map((sampleSetName) => SampleSet(sampleSetName, isPremiumPath))
           .toList();
 }
