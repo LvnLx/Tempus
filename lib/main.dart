@@ -11,6 +11,7 @@ import 'package:tempus/ui/home/deck/settings/theme_settings/view_model.dart';
 import 'package:tempus/ui/home/deck/settings/view_model.dart';
 import 'package:tempus/ui/home/deck/view_model.dart';
 import 'package:tempus/ui/home/deck/visualizer/view_model.dart';
+import 'package:tempus/ui/home/mixer/beat_unit_button/view_model.dart';
 import 'package:tempus/ui/home/mixer/channel/view_model.dart';
 import 'package:tempus/ui/home/mixer/view_model.dart';
 import 'package:tempus/ui/home/view.dart';
@@ -44,6 +45,9 @@ class Main extends StatelessWidget {
           ChangeNotifierProvider(
               create: (context) =>
                   AppVolumeSettingsViewModel(context.read<AudioService>())),
+          ChangeNotifierProvider(
+              create: (context) =>
+                  BeatUnitButtonViewModel(context.read<AudioService>())),
           ChangeNotifierProvider(
               create: (context) =>
                   ChannelViewModel(context.read<AudioService>())),

@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
+import 'package:tempus/domain/models/beat_unit.dart';
 import 'package:tempus/domain/models/sample_pair.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Preference {
   appVolume(1.0),
   bpm(120),
+  beatUnit(BeatUnit.quarter),
   beatVolume(1.0),
   denominator(4),
   downbeatVolume(1.0),
@@ -38,6 +40,7 @@ class PreferenceService {
       return volume ?? Preference.appVolume.defaultValue;
     } catch (exception) {
       print("Exception while getting app volume: $exception");
+      await setAppVolume(Preference.appVolume.defaultValue);
       return Preference.appVolume.defaultValue;
     }
   }
@@ -53,6 +56,24 @@ class PreferenceService {
     }
   }
 
+  Future<BeatUnit> getBeatUnit() async {
+    try {
+      String? beatUnitAsJsonString =
+          await _sharedPreferencesAsync.getString(Preference.beatUnit.name);
+
+      if (beatUnitAsJsonString != null) {
+        Map<String, dynamic> beatUnitAsJson = jsonDecode(beatUnitAsJsonString);
+        return BeatUnit.fromJson(beatUnitAsJson);
+      } else {
+        return Preference.beatUnit.defaultValue;
+      }
+    } catch (exception) {
+      print("Exception while getting beat unit: $exception");
+      await setBpm(Preference.beatUnit.defaultValue);
+      return Preference.beatUnit.defaultValue;
+    }
+  }
+
   Future<double> getBeatVolume() async {
     try {
       double? volume =
@@ -60,6 +81,7 @@ class PreferenceService {
       return volume ?? Preference.beatVolume.defaultValue;
     } catch (exception) {
       print("Exception while getting beat volume: $exception");
+      await setBeatVolume(Preference.beatVolume.defaultValue);
       return Preference.beatVolume.defaultValue;
     }
   }
@@ -83,6 +105,7 @@ class PreferenceService {
       return volume ?? Preference.downbeatVolume.defaultValue;
     } catch (exception) {
       print("Exception while getting downbeat volume: $exception");
+      await setDownbeatVolume(Preference.downbeatVolume.defaultValue);
       return Preference.downbeatVolume.defaultValue;
     }
   }
@@ -173,6 +196,10 @@ class PreferenceService {
 
   Future<void> setBpm(int bpm) async =>
       await _sharedPreferencesAsync.setInt(Preference.bpm.name, bpm);
+
+  Future<void> setBeatUnit(BeatUnit beatUnit) async =>
+      await _sharedPreferencesAsync.setString(
+          Preference.beatUnit.name, beatUnit.toJsonString());
 
   Future<void> setBeatVolume(double volume) async =>
       await _sharedPreferencesAsync.setDouble(

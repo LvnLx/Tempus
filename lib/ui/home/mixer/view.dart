@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
+import 'package:tempus/ui/home/mixer/beat_unit_button/view.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 import 'package:tempus/ui/home/mixer/fixed_channel/view.dart';
 import 'package:tempus/ui/home/mixer/view_model.dart';
@@ -51,12 +52,7 @@ class MixerState extends State<Mixer> {
                         context.read<MixerViewModel>().setBeatVolume,
                     volumeValueNotifier:
                         context.read<MixerViewModel>().beatVolumeValueNotifier,
-                    child: FittedBox(
-                        child: Text("\u{1D15F}",
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontFamily: "NotoMusic",
-                                fontWeight: FontWeight.bold)))),
+                    child: BeatUnitButton()),
                 ...(context
                     .watch<MixerViewModel>()
                     .subdivisions

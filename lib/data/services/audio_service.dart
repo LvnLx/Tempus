@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
+import 'package:tempus/domain/models/beat_unit.dart';
 import 'package:tempus/domain/models/sample_pair.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 
@@ -14,6 +15,7 @@ enum Action {
   removeSubdivision,
   setBpm,
   setBeatSample,
+  setBeatUnit,
   setBeatVolume,
   setDenominator,
   setDownbeatVolume,
@@ -39,6 +41,7 @@ class AudioService {
 
   late ValueNotifier<double> _appVolumeValueNotifier;
   late ValueNotifier<int> _bpmValueNotifier;
+  late ValueNotifier<BeatUnit> _beatUnitValueNotifier;
   late ValueNotifier<double> _beatVolumeValueNotifier;
   late ValueNotifier<int> _denominatorValueNotifier;
   late ValueNotifier<double> _downbeatVolumeValueNotifier;
@@ -50,8 +53,8 @@ class AudioService {
   AudioService(this._assetService, this._preferenceService) {
     _methodChannel.setMethodCallHandler((call) async {
       if (Event.values.map((event) => event.name).contains(call.method)) {
-        _eventController.add(Event.values
-            .firstWhere((event) => event.name == call.method));
+        _eventController
+            .add(Event.values.firstWhere((event) => event.name == call.method));
       } else {
         throw MissingPluginException(
             "Unknown method call method received: ${call.method}");
@@ -63,6 +66,8 @@ class AudioService {
     _appVolumeValueNotifier =
         ValueNotifier(await _preferenceService.getAppVolume());
     _bpmValueNotifier = ValueNotifier(await _preferenceService.getBpm());
+    _beatUnitValueNotifier =
+        ValueNotifier(await _preferenceService.getBeatUnit());
     _beatVolumeValueNotifier =
         ValueNotifier(await _preferenceService.getBeatVolume());
     _denominatorValueNotifier =
@@ -87,6 +92,7 @@ class AudioService {
     await setState(
         await _preferenceService.getAppVolume(),
         await _preferenceService.getBpm(),
+        await _preferenceService.getBeatUnit(),
         await _preferenceService.getBeatVolume(),
         await _preferenceService.getDenominator(),
         await _preferenceService.getDownbeatVolume(),
@@ -101,6 +107,8 @@ class AudioService {
   ValueNotifier get appVolumeValueNotifier => _appVolumeValueNotifier;
   int get bpm => _bpmValueNotifier.value;
   ValueNotifier<int> get bpmValueNotifier => _bpmValueNotifier;
+  BeatUnit get beatUnit => _beatUnitValueNotifier.value;
+  ValueNotifier<BeatUnit> get beatUnitValueNotifier => _beatUnitValueNotifier;
   double get beatVolume => _beatVolumeValueNotifier.value;
   ValueNotifier<double> get beatVolumeValueNotifier => _beatVolumeValueNotifier;
   int get denominator => _denominatorValueNotifier.value;
@@ -165,6 +173,13 @@ class AudioService {
     _preferenceService.setBpm(validatedBpm);
   }
 
+  Future<void> setBeatUnit(BeatUnit beatUnit) async {
+    _beatUnitValueNotifier.value = beatUnit;
+
+    await _setBeatUnit(beatUnit);
+    _preferenceService.setBeatUnit(beatUnit);
+  }
+
   Future<void> setBeatVolume(double volume) async {
     _beatVolumeValueNotifier.value = volume;
 
@@ -205,6 +220,7 @@ class AudioService {
   Future<void> setState(
       double appVolume,
       int bpm,
+      BeatUnit beatUnit,
       double beatVolume,
       int denominator,
       double downbeatVolume,
@@ -213,6 +229,7 @@ class AudioService {
       Map<Key, SubdivisionData> subdivisions) async {
     _appVolumeValueNotifier.value = appVolume;
     _bpmValueNotifier.value = bpm;
+    _beatUnitValueNotifier.value = beatUnit;
     _beatVolumeValueNotifier.value = beatVolume;
     _denominatorValueNotifier.value = denominator;
     _downbeatVolumeValueNotifier.value = downbeatVolume;
@@ -222,6 +239,7 @@ class AudioService {
 
     _preferenceService.setAppVolume(appVolume);
     _preferenceService.setBpm(bpm);
+    _preferenceService.setBeatUnit(beatUnit);
     _preferenceService.setBeatVolume(beatVolume);
     _preferenceService.setDenominator(denominator);
     _preferenceService.setDownbeatVolume(downbeatVolume);
@@ -232,6 +250,7 @@ class AudioService {
     final result = await _methodChannel.invokeMethod(Action.setState.name, [
       appVolume.toString(),
       bpm.toString(),
+      beatUnit.toJsonString(),
       beatVolume.toString(),
       denominator.toString(),
       downbeatVolume.toString(),
@@ -303,6 +322,12 @@ class AudioService {
   Future<void> _setBeatSample(String path) async {
     final result =
         await _methodChannel.invokeMethod(Action.setBeatSample.name, [path]);
+    print(result);
+  }
+
+  Future<void> _setBeatUnit(BeatUnit beatUnit) async {
+    final result = await _methodChannel
+        .invokeMethod(Action.setBeatUnit.name, [beatUnit.toJsonString()]);
     print(result);
   }
 

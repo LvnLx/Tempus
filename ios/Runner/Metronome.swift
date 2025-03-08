@@ -151,7 +151,7 @@ class Metronome {
     updateClips()
   }
   
-  func setState(_ appVolume: Float, _ bpm: UInt16, _ beatVolume: Float, _ denominator: UInt16, _ downbeatVolume: Float, _ numerator: UInt16, _ beatSamplePath: String, _ innerBeatSamplePath: String, _ subdivisionsAsJsonString: String) {
+  func setState(_ appVolume: Float, _ bpm: UInt16, _ beatUnitAsJsonString: String, _ beatVolume: Float, _ denominator: UInt16, _ downbeatVolume: Float, _ numerator: UInt16, _ beatSamplePath: String, _ innerBeatSamplePath: String, _ subdivisionsAsJsonString: String) {
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
     validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))

@@ -33,6 +33,7 @@ class SettingsViewModel extends ChangeNotifier {
         Preference.appVolume.defaultValue,
         Preference.bpm.defaultValue,
         Preference.beatVolume.defaultValue,
+        Preference.beatVolume.defaultValue,
         Preference.denominator.defaultValue,
         Preference.downbeatVolume.defaultValue,
         Preference.numerator.defaultValue,
@@ -44,6 +45,7 @@ class SettingsViewModel extends ChangeNotifier {
     await _audioService.setState(
         _audioService.appVolume,
         Preference.bpm.defaultValue,
+        Preference.beatUnit.defaultValue,
         Preference.beatVolume.defaultValue,
         Preference.denominator.defaultValue,
         Preference.downbeatVolume.defaultValue,

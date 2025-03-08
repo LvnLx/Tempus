@@ -40,6 +40,10 @@ import AVFoundation
         let path: String = arguments[0]
         self.metronome.setBeatSample(path)
         result("Set beat sample")
+      case "setBeatUnit":
+        let path: String = arguments[0]
+        // TODO set beat unit
+        result("Set beat unit")
       case "setBeatVolume":
         let volume: Float = Float(arguments[0])!
         self.metronome.setBeatVolume(volume)
@@ -68,14 +72,15 @@ import AVFoundation
       case "setState":
         let appVolume: Float = Float(arguments[0])!
         let bpm: UInt16 = UInt16(arguments[1])!
-        let beatVolume: Float = Float(arguments[2])!
-        let denominator: UInt16 = UInt16(arguments[3])!
-        let downbeatVolume: Float = Float(arguments[4])!
-        let numerator: UInt16 = UInt16(arguments[5])!
-        let beatSamplePath: String = arguments[6]
-        let innerBeatSamplePath: String = arguments[7]
-        let subdivisionsAsJsonString: String = arguments[8]
-        self.metronome.setState(appVolume, bpm, beatVolume, denominator, downbeatVolume, numerator, beatSamplePath, innerBeatSamplePath, subdivisionsAsJsonString)
+        let beatUnitAsJsonString: String = arguments[2]
+        let beatVolume: Float = Float(arguments[3])!
+        let denominator: UInt16 = UInt16(arguments[4])!
+        let downbeatVolume: Float = Float(arguments[5])!
+        let numerator: UInt16 = UInt16(arguments[6])!
+        let beatSamplePath: String = arguments[7]
+        let innerBeatSamplePath: String = arguments[8]
+        let subdivisionsAsJsonString: String = arguments[9]
+        self.metronome.setState(appVolume, bpm, beatUnitAsJsonString, beatVolume, denominator, downbeatVolume, numerator, beatSamplePath, innerBeatSamplePath, subdivisionsAsJsonString)
         result("Set state")
       case "setSubdivisionOption":
         let key: String = arguments[0]
