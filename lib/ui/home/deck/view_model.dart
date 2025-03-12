@@ -1,15 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/data/services/purchase_service.dart';
 
 class DeckViewModel extends ChangeNotifier {
   final AudioService _audioService;
+  final PurchaseService _purchaseService;
 
   bool _playback = false;
 
-  DeckViewModel(this._audioService) {
+  DeckViewModel(this._audioService, this._purchaseService) {
     _audioService.bpmValueNotifier.addListener(notifyListeners);
     _audioService.denominatorValueNotifier.addListener(notifyListeners);
     _audioService.numeratorValueNotifier.addListener(notifyListeners);
+    _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
   }
 
   Future<void> init() async {
@@ -17,10 +20,9 @@ class DeckViewModel extends ChangeNotifier {
   }
 
   int get bpm => _audioService.bpm;
-  ValueNotifier<int> get denominatorValueNotifier =>
-      _audioService.denominatorValueNotifier;
-  ValueNotifier<int> get numeratorValueNotifier =>
-      _audioService.numeratorValueNotifier;
+  int get denominator => _audioService.denominator;
+  bool get isPremium => _purchaseService.isPremium;
+  int get numerator => _audioService.numerator;
   bool get playback => _playback;
 
   Future<void> setBpm(int bpm, [bool skipUnchanged = true]) async =>

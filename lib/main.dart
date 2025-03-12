@@ -52,7 +52,8 @@ class Main extends StatelessWidget {
               create: (context) =>
                   ChannelViewModel(context.read<AudioService>())),
           ChangeNotifierProvider(
-              create: (context) => DeckViewModel(context.read<AudioService>())),
+              create: (context) => DeckViewModel(context.read<AudioService>(),
+                  context.read<PurchaseService>())),
           ChangeNotifierProvider(
               create: (context) => HomeViewModel(context.read<ThemeService>())),
           ChangeNotifierProvider(

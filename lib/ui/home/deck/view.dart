@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:tempus/constants.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/outlined.dart';
@@ -121,23 +122,47 @@ class DeckState extends State<Deck> {
                                               .colorScheme
                                               .onSurface),
                                       Outlined(
-                                          child: SizedBox(
-                                              height: barConstraints.maxHeight,
-                                              width:
-                                                  barConstraints.maxHeight / 2,
-                                              child: TimeSignature(
-                                                  denominatorCallback: context
-                                                      .read<DeckViewModel>()
-                                                      .setDenominator,
-                                                  denominatorValueNotifier: context
-                                                      .watch<DeckViewModel>()
-                                                      .denominatorValueNotifier,
-                                                  numeratorCallback: context
-                                                      .read<DeckViewModel>()
-                                                      .setNumerator,
-                                                  numeratorValueNotifier: context
-                                                      .watch<DeckViewModel>()
-                                                      .numeratorValueNotifier)))
+                                          child: GestureDetector(
+                                        onTap: () => TimeSignature.showDialog(
+                                            context,
+                                            (numerator) async => await context
+                                                .read<DeckViewModel>()
+                                                .setNumerator(numerator),
+                                            (denominator) async => await context
+                                                .read<DeckViewModel>()
+                                                .setDenominator(denominator),
+                                            context
+                                                .read<DeckViewModel>()
+                                                .numerator,
+                                            context
+                                                .read<DeckViewModel>()
+                                                .denominator,
+                                            context
+                                                    .read<DeckViewModel>()
+                                                    .isPremium
+                                                ? Constants
+                                                    .premiumTimeSignatureOptions
+                                                : Constants
+                                                    .freeNumeratorOptions,
+                                            context
+                                                    .read<DeckViewModel>()
+                                                    .isPremium
+                                                ? Constants
+                                                    .premiumTimeSignatureOptions
+                                                : Constants
+                                                    .freeDenominatorOptions),
+                                        behavior: HitTestBehavior.opaque,
+                                        child: SizedBox(
+                                            height: barConstraints.maxHeight,
+                                            width: barConstraints.maxHeight / 2,
+                                            child: TimeSignature(
+                                                numerator: context
+                                                    .watch<DeckViewModel>()
+                                                    .numerator,
+                                                denominator: context
+                                                    .watch<DeckViewModel>()
+                                                    .denominator)),
+                                      ))
                                     ])),
                             Expanded(child: SizedBox()),
                           ]))),

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart' hide Selector;
+import 'package:tempus/constants.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
+import 'package:tempus/ui/core/selector.dart';
 import 'package:tempus/ui/home/mixer/channel/view_model.dart';
-import 'package:tempus/ui/home/mixer/channel/selector/view.dart';
-
-final List<int> subdivisionOptions = List.generate(8, (index) => (index + 2));
 
 class Channel extends StatefulWidget {
   final void Function(Key key) onRemove;
@@ -65,18 +64,18 @@ class ChannelState extends State<Channel> {
               Expanded(
                 flex: 2,
                 child: LayoutBuilder(
-                  builder: (_, constraints) => Selector(
-                      key: widget.key!,
-                      height: constraints.maxHeight,
-                      initialItem: context
-                              .read<ChannelViewModel>()
-                              .subdivisions[key]!
-                              .option -
-                          2,
-                      callback: context
-                          .read<ChannelViewModel>()
-                          .setSubdivisionOption),
-                ),
+                    builder: (_, constraints) => Selector(
+                        callback: (index) async => context
+                            .read<ChannelViewModel>()
+                            .setSubdivisionOption(
+                                key, Constants.subdivisionOptions[index]),
+                        itemExtent: constraints.maxHeight / 3,
+                        initialItemIndex: Constants.subdivisionOptions.indexOf(
+                            context
+                                .read<ChannelViewModel>()
+                                .subdivisions[key]!
+                                .option),
+                        options: Constants.subdivisionOptions)),
               ),
               Expanded(
                 child: GestureDetector(

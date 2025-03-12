@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tempus/constants.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
@@ -130,7 +131,7 @@ class AudioService {
     UniqueKey key = UniqueKey();
     _subdivisionsValueNotifier.value = {
       ...subdivisions,
-      key: SubdivisionData(option: subdivisionOptions[0], volume: 0.0)
+      key: SubdivisionData(option: Constants.subdivisionOptions[0], volume: 0.0)
     };
 
     await _addSubdivision(
