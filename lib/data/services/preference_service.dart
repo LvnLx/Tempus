@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
 import 'package:tempus/domain/models/beat_unit.dart';
-import 'package:tempus/domain/models/sample_pair.dart';
+import 'package:tempus/domain/models/sample_set.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Preference {

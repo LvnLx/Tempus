@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/domain/models/sample_pair.dart';
+import 'package:tempus/domain/models/sample_set.dart';
 import 'package:tempus/ui/home/deck/settings/sample_settings/view_model.dart';
 import 'package:tempus/ui/home/deck/settings/view.dart';
 import 'package:tempus/util.dart';

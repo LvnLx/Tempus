@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:tempus/domain/models/sample_pair.dart';
+import 'package:tempus/domain/models/sample_set.dart';
 
 class AssetService {
   late final ValueNotifier<List<SampleSet>> _sampleSetsValueNotifier;

@@ -4,7 +4,7 @@ import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
-import 'package:tempus/domain/models/sample_pair.dart';
+import 'package:tempus/domain/models/sample_set.dart';
 
 class SettingsViewModel extends ChangeNotifier {
   final AudioService _audioService;

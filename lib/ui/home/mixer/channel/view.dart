@@ -75,7 +75,16 @@ class ChannelState extends State<Channel> {
                                 .read<ChannelViewModel>()
                                 .subdivisions[key]!
                                 .option),
-                        options: Constants.subdivisionOptions)),
+                        options: Constants.subdivisionOptions
+                            .map((subdivisionOption) => FittedBox(
+                                  child: Text(subdivisionOption.toString(),
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          fontFamily: "SFMono")),
+                                ))
+                            .toList())),
               ),
               Expanded(
                 child: GestureDetector(

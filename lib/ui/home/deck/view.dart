@@ -13,7 +13,7 @@ import 'package:tempus/ui/core/outlined.dart';
 import 'package:tempus/ui/home/deck/bpm_button/view.dart';
 import 'package:tempus/ui/home/deck/bpm_dial/view.dart';
 import 'package:tempus/ui/home/deck/settings/view.dart';
-import 'package:tempus/ui/home/deck/time_signature/view.dart';
+import 'package:tempus/ui/home/deck/time_signature_button/view.dart';
 import 'package:tempus/ui/home/deck/view_model.dart';
 import 'package:tempus/ui/home/deck/visualizer/view.dart';
 
@@ -123,48 +123,46 @@ class DeckState extends State<Deck> {
                                               .onSurface),
                                       Outlined(
                                           child: GestureDetector(
-                                        onTap: () => TimeSignature.showDialog(
-                                            context,
-                                            (numerator) async => await context
-                                                .read<DeckViewModel>()
-                                                .setNumerator(numerator),
-                                            (denominator) async => await context
-                                                .read<DeckViewModel>()
-                                                .setDenominator(denominator),
-                                            context
-                                                .read<DeckViewModel>()
-                                                .numerator,
-                                            context
-                                                .read<DeckViewModel>()
-                                                .denominator,
-                                            context
-                                                    .read<DeckViewModel>()
-                                                    .isPremium
-                                                ? Constants
-                                                    .premiumTimeSignatureOptions
-                                                : Constants
-                                                    .freeNumeratorOptions,
-                                            context
-                                                    .read<DeckViewModel>()
-                                                    .isPremium
-                                                ? Constants
-                                                    .premiumTimeSignatureOptions
-                                                : Constants
-                                                    .freeDenominatorOptions),
-                                        behavior: HitTestBehavior.opaque,
-                                        child: SizedBox(
-                                            height: barConstraints.maxHeight,
-                                            width: barConstraints.maxHeight / 2,
-                                            child: TimeSignature(
-                                                numerator: context
-                                                    .watch<DeckViewModel>()
-                                                    .numerator,
-                                                denominator: context
-                                                    .watch<DeckViewModel>()
-                                                    .denominator)),
-                                      ))
+                                              onTap: () => TimeSignatureButton.showDialog(
+                                                  context,
+                                                  (numerator) async => await context
+                                                      .read<DeckViewModel>()
+                                                      .setNumerator(numerator),
+                                                  (denominator) async => await context
+                                                      .read<DeckViewModel>()
+                                                      .setDenominator(
+                                                          denominator),
+                                                  context
+                                                      .read<DeckViewModel>()
+                                                      .numerator,
+                                                  context
+                                                      .read<DeckViewModel>()
+                                                      .denominator,
+                                                  context.read<DeckViewModel>().isPremium
+                                                      ? Constants
+                                                          .premiumTimeSignatureOptions
+                                                      : Constants
+                                                          .freeNumeratorOptions,
+                                                  context
+                                                          .read<DeckViewModel>()
+                                                          .isPremium
+                                                      ? Constants
+                                                          .premiumTimeSignatureOptions
+                                                      : Constants
+                                                          .freeDenominatorOptions),
+                                              behavior: HitTestBehavior.opaque,
+                                              child: SizedBox(
+                                                  height:
+                                                      barConstraints.maxHeight,
+                                                  width: barConstraints.maxHeight /
+                                                      2,
+                                                  child: TimeSignatureButton(
+                                                      numerator: context
+                                                          .watch<DeckViewModel>()
+                                                          .numerator,
+                                                      denominator: context.watch<DeckViewModel>().denominator))))
                                     ])),
-                            Expanded(child: SizedBox()),
+                            Expanded(child: SizedBox())
                           ]))),
               Expanded(
                   flex: 5,
@@ -204,27 +202,26 @@ class DeckState extends State<Deck> {
                                                 PlatformIcons(context).remove),
                                       ),
                                       Expanded(
-                                        flex: 3,
-                                        child: GestureDetector(
-                                            onTap: () async => await context
-                                                .read<DeckViewModel>()
-                                                .togglePlayback(),
-                                            child: SizedBox.expand(
-                                              child: FittedBox(
-                                                child: Icon(
-                                                    context
-                                                            .watch<
-                                                                DeckViewModel>()
-                                                            .playback
-                                                        ? CupertinoIcons.pause
-                                                        : Icons
-                                                            .play_arrow_rounded,
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary),
-                                              ),
-                                            )),
-                                      ),
+                                          flex: 3,
+                                          child: GestureDetector(
+                                              onTap: () async => await context
+                                                  .read<DeckViewModel>()
+                                                  .togglePlayback(),
+                                              child: SizedBox.expand(
+                                                  child: FittedBox(
+                                                      child: Icon(
+                                                          context
+                                                                  .watch<
+                                                                      DeckViewModel>()
+                                                                  .playback
+                                                              ? CupertinoIcons
+                                                                  .pause
+                                                              : Icons
+                                                                  .play_arrow_rounded,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .primary))))),
                                       Expanded(
                                           child: BpmButton(
                                               callback: () async => await context

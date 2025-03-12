@@ -4,7 +4,7 @@ class Selector extends StatelessWidget {
   final Future<void> Function(int index)? callback;
   final int initialItemIndex;
   final double itemExtent;
-  final List<int> options;
+  final List<Widget> options;
   final Axis orientation;
   final bool useTheme;
 
@@ -36,12 +36,5 @@ class Selector extends StatelessWidget {
               options.length,
               (index) => RotatedBox(
                   quarterTurns: orientation == Axis.horizontal ? 1 : 0,
-                  child: FittedBox(
-                    child: Text(options[index].toString(),
-                        style: useTheme
-                            ? TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontFamily: "SFMono")
-                            : TextStyle(fontFamily: "SFMono")),
-                  )))));
+                  child: options[index]))));
 }

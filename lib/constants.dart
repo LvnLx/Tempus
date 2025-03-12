@@ -1,6 +1,4 @@
 class Constants {
-  static final int dialogMinWidth = 280;
-
   static final List<int> freeDenominatorOptions = [4, 8];
   static final List<int> freeNumeratorOptions = [1, 2, 3, 4, 5, 6, 9, 12];
   static final List<int> premiumTimeSignatureOptions =

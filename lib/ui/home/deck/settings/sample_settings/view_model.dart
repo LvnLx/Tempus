@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/data/services/audio_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
-import 'package:tempus/domain/models/sample_pair.dart';
+import 'package:tempus/domain/models/sample_set.dart';
 
 class SampleSettingsViewModel extends ChangeNotifier {
   final AssetService _assetService;
