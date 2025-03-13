@@ -16,26 +16,6 @@ class Channel extends StatefulWidget {
 }
 
 class ChannelState extends State<Channel> {
-  late Key key;
-  PageController scrollController = PageController(viewportFraction: 0.5);
-
-  @override
-  void initState() {
-    super.initState();
-
-    key = widget.key!;
-    scrollController.addListener(() {
-      if (scrollController.position.isScrollingNotifier.value == false) {
-        final int currentPage = scrollController.page!.round();
-        scrollController.animateToPage(
-          currentPage,
-          curve: Curves.easeOut,
-          duration: Duration(),
-        );
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -58,7 +38,7 @@ class ChannelState extends State<Channel> {
                             .setSubdivisionVolume(widget.key!, value),
                         value: context
                             .watch<ChannelViewModel>()
-                            .subdivisions[key]!
+                            .subdivisions[widget.key]!
                             .volume,
                       ))),
               Expanded(
@@ -68,12 +48,12 @@ class ChannelState extends State<Channel> {
                         callback: (index) async => context
                             .read<ChannelViewModel>()
                             .setSubdivisionOption(
-                                key, Constants.subdivisionOptions[index]),
+                                widget.key!, Constants.subdivisionOptions[index]),
                         itemExtent: constraints.maxHeight / 3,
                         initialItemIndex: Constants.subdivisionOptions.indexOf(
                             context
                                 .read<ChannelViewModel>()
-                                .subdivisions[key]!
+                                .subdivisions[widget.key]!
                                 .option),
                         options: Constants.subdivisionOptions
                             .map((subdivisionOption) => FittedBox(
