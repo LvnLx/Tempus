@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:tempus/data/services/audio_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
+import 'package:tempus/domain/models/beat_unit.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 
@@ -9,12 +10,14 @@ class MixerViewModel extends ChangeNotifier {
   final PurchaseService _purchaseService;
 
   MixerViewModel(this._audioService, this._purchaseService) {
+    _audioService.beatUnitValueNotifier.addListener(notifyListeners);
     _audioService.beatVolumeValueNotifier.addListener(notifyListeners);
     _audioService.downbeatVolumeValueNotifier.addListener(notifyListeners);
     _audioService.subdivisionsValueNotifier.addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
   }
 
+  BeatUnit get beatUnit => _audioService.beatUnit;
   ValueNotifier<double> get beatVolumeValueNotifier =>
       _audioService.beatVolumeValueNotifier;
   ValueNotifier<double> get downbeatVolumeValueNotifier =>

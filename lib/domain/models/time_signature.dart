@@ -24,8 +24,21 @@ class TimeSignature {
   TimeSignature copyWith({int? denominator, int? numerator}) => TimeSignature(
       numerator ?? this.numerator, denominator ?? this.denominator);
 
-  BeatUnit defaultBeatUnit() => throw UnimplementedError();
+  BeatUnit defaultBeatUnit() => BeatUnit.values.firstWhere(
+      (beatUnit) => isDottedBeatUnitAppropriate(beatUnit),
+      orElse: () => BeatUnit.values.firstWhere(
+          (beatUnit) => isDenominatorBeatUnitAppropriate(beatUnit)));
 
   String toJsonString() =>
       jsonEncode({"numerator": numerator, "denominator": denominator});
+
+  bool isDottedBeatUnitAppropriate(BeatUnit beatUnit) =>
+      beatUnit.denominator == denominator * 2 &&
+      beatUnit.numerator % 3 == 0 &&
+      numerator % 3 == 0 &&
+      numerator != 3 &&
+      denominator != 4;
+
+  bool isDenominatorBeatUnitAppropriate(BeatUnit beatUnit) =>
+      beatUnit.denominator == denominator && beatUnit.numerator == 1;
 }

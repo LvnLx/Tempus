@@ -53,7 +53,8 @@ class MixerState extends State<Mixer> {
                         context.read<MixerViewModel>().setBeatVolume,
                     volumeValueNotifier:
                         context.read<MixerViewModel>().beatVolumeValueNotifier,
-                    child: BeatUnitButton()),
+                    child: BeatUnitButton(
+                        beatUnit: context.watch<MixerViewModel>().beatUnit)),
                 ...(context
                     .watch<MixerViewModel>()
                     .subdivisions
