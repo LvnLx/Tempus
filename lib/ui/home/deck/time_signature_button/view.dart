@@ -39,7 +39,7 @@ class TimeSignatureButton extends StatelessWidget {
     int updatedNumerator = numerator;
     int updatedDenominator = denominator;
 
-    showPlatformDialog(
+    return await showPlatformDialog(
         context: context,
         builder: (_) => PlatformAlertDialog(
                 title: Text("Time Signature"),

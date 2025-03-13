@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart' hide Selector;
-import 'package:tempus/constants.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
-import 'package:tempus/ui/core/selector.dart';
 import 'package:tempus/ui/home/mixer/channel/view_model.dart';
+import 'package:tempus/ui/home/mixer/subdivision_option_button/view.dart';
 
 class Channel extends StatefulWidget {
   final void Function(Key key) onRemove;
@@ -28,7 +27,7 @@ class ChannelState extends State<Channel> {
             width: constraints.maxHeight / 6,
             child: Column(children: [
               Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: RotatedBox(
                       quarterTurns: 3,
                       child: PlatformSlider(
@@ -42,30 +41,15 @@ class ChannelState extends State<Channel> {
                             .volume,
                       ))),
               Expanded(
-                flex: 2,
-                child: LayoutBuilder(
-                    builder: (_, constraints) => Selector(
-                        callback: (index) async => context
-                            .read<ChannelViewModel>()
-                            .setSubdivisionOption(
-                                widget.key!, Constants.subdivisionOptions[index]),
-                        itemExtent: constraints.maxHeight / 3,
-                        initialItemIndex: Constants.subdivisionOptions.indexOf(
-                            context
-                                .read<ChannelViewModel>()
-                                .subdivisions[widget.key]!
-                                .option),
-                        options: Constants.subdivisionOptions
-                            .map((subdivisionOption) => FittedBox(
-                                  child: Text(subdivisionOption.toString(),
-                                      style: TextStyle(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          fontFamily: "SFMono")),
-                                ))
-                            .toList())),
-              ),
+                  child: SubdivisionOptionButton(
+                      callback: (updatedSubdivisionOption) => context
+                          .read<ChannelViewModel>()
+                          .setSubdivisionOption(
+                              widget.key!, updatedSubdivisionOption),
+                      subdivisionOption: context
+                          .watch<ChannelViewModel>()
+                          .subdivisions[widget.key]!
+                          .option)),
               Expanded(
                 child: GestureDetector(
                   onTap: () => widget.onRemove(widget.key!),
