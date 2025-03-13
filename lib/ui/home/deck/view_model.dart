@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:tempus/data/services/audio_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
+import 'package:tempus/domain/models/time_signature.dart';
 
 class DeckViewModel extends ChangeNotifier {
   final AudioService _audioService;
@@ -10,8 +11,7 @@ class DeckViewModel extends ChangeNotifier {
 
   DeckViewModel(this._audioService, this._purchaseService) {
     _audioService.bpmValueNotifier.addListener(notifyListeners);
-    _audioService.denominatorValueNotifier.addListener(notifyListeners);
-    _audioService.numeratorValueNotifier.addListener(notifyListeners);
+    _audioService.timeSignatureValueNotifier.addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
   }
 
@@ -20,19 +20,15 @@ class DeckViewModel extends ChangeNotifier {
   }
 
   int get bpm => _audioService.bpm;
-  int get denominator => _audioService.denominator;
+  TimeSignature get timeSignature => _audioService.timeSignature;
   bool get isPremium => _purchaseService.isPremium;
-  int get numerator => _audioService.numerator;
   bool get playback => _playback;
 
   Future<void> setBpm(int bpm, [bool skipUnchanged = true]) async =>
       await _audioService.setBpm(bpm, skipUnchanged);
 
-  Future<void> setDenominator(int value) async =>
-      await _audioService.setDenominator(value);
-
-  Future<void> setNumerator(int value) async =>
-      await _audioService.setNumerator(value);
+  Future<void> setTimeSignature(TimeSignature timeSignature) async =>
+      await _audioService.setTimeSignature(timeSignature);
 
   Future<void> togglePlayback() async {
     _playback

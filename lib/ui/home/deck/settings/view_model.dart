@@ -34,11 +34,10 @@ class SettingsViewModel extends ChangeNotifier {
         Preference.bpm.defaultValue,
         Preference.beatVolume.defaultValue,
         Preference.beatVolume.defaultValue,
-        Preference.denominator.defaultValue,
         Preference.downbeatVolume.defaultValue,
-        Preference.numerator.defaultValue,
         Preference.sampleSet.defaultValue,
-        Preference.subdivisions.defaultValue);
+        Preference.subdivisions.defaultValue,
+        Preference.timeSignature.defaultValue);
   }
 
   Future<void> resetMetronome() async {
@@ -47,11 +46,10 @@ class SettingsViewModel extends ChangeNotifier {
         Preference.bpm.defaultValue,
         Preference.beatUnit.defaultValue,
         Preference.beatVolume.defaultValue,
-        Preference.denominator.defaultValue,
         Preference.downbeatVolume.defaultValue,
-        Preference.numerator.defaultValue,
         sampleSet,
-        Preference.subdivisions.defaultValue);
+        Preference.subdivisions.defaultValue,
+        Preference.timeSignature.defaultValue);
   }
 
   Future<PurchaseResult> restorePremium() async =>

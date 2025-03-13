@@ -8,6 +8,7 @@ import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
 import 'package:tempus/domain/models/beat_unit.dart';
 import 'package:tempus/domain/models/sample_set.dart';
+import 'package:tempus/domain/models/time_signature.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Action {
@@ -44,10 +45,10 @@ class AudioService {
   late ValueNotifier<int> _bpmValueNotifier;
   late ValueNotifier<BeatUnit> _beatUnitValueNotifier;
   late ValueNotifier<double> _beatVolumeValueNotifier;
-  late ValueNotifier<int> _denominatorValueNotifier;
   late ValueNotifier<double> _downbeatVolumeValueNotifier;
-  late ValueNotifier<int> _numeratorValueNotifier;
   late ValueNotifier<SampleSet> _sampleSetValueNotifier;
+  late ValueNotifier<TimeSignature> _timeSignatureValueNotifier;
+
   late final ValueNotifier<Map<Key, SubdivisionData>>
       _subdivisionsValueNotifier;
 
@@ -71,16 +72,14 @@ class AudioService {
         ValueNotifier(await _preferenceService.getBeatUnit());
     _beatVolumeValueNotifier =
         ValueNotifier(await _preferenceService.getBeatVolume());
-    _denominatorValueNotifier =
-        ValueNotifier(await _preferenceService.getDenominator());
     _downbeatVolumeValueNotifier =
         ValueNotifier(await _preferenceService.getDownbeatVolume());
-    _numeratorValueNotifier =
-        ValueNotifier(await _preferenceService.getNumerator());
     _sampleSetValueNotifier =
         ValueNotifier(await _preferenceService.getSampleSet());
     _subdivisionsValueNotifier =
         ValueNotifier(await _preferenceService.getSubdivisions());
+    _timeSignatureValueNotifier =
+        ValueNotifier(await _preferenceService.getTimeSignature());
 
     await _setSamplePaths(_assetService.sampleSets.fold<Set<String>>(
         {},
@@ -90,16 +89,8 @@ class AudioService {
               sampleSet.getInnerBeatSamplePath()
             }));
 
-    await setState(
-        await _preferenceService.getAppVolume(),
-        await _preferenceService.getBpm(),
-        await _preferenceService.getBeatUnit(),
-        await _preferenceService.getBeatVolume(),
-        await _preferenceService.getDenominator(),
-        await _preferenceService.getDownbeatVolume(),
-        await _preferenceService.getNumerator(),
-        await _preferenceService.getSampleSet(),
-        await _preferenceService.getSubdivisions());
+    await setState(appVolume, bpm, beatUnit, beatVolume, downbeatVolume,
+        sampleSet, subdivisions, timeSignature);
   }
 
   Stream<Event> get eventStream => _eventController.stream;
@@ -112,13 +103,9 @@ class AudioService {
   ValueNotifier<BeatUnit> get beatUnitValueNotifier => _beatUnitValueNotifier;
   double get beatVolume => _beatVolumeValueNotifier.value;
   ValueNotifier<double> get beatVolumeValueNotifier => _beatVolumeValueNotifier;
-  int get denominator => _denominatorValueNotifier.value;
-  ValueNotifier<int> get denominatorValueNotifier => _denominatorValueNotifier;
   double get downbeatVolume => _downbeatVolumeValueNotifier.value;
   ValueNotifier<double> get downbeatVolumeValueNotifier =>
       _downbeatVolumeValueNotifier;
-  int get numerator => _numeratorValueNotifier.value;
-  ValueNotifier<int> get numeratorValueNotifier => _numeratorValueNotifier;
   SampleSet get sampleSet => _sampleSetValueNotifier.value;
   ValueNotifier<SampleSet> get sampleSetValueNotifier =>
       _sampleSetValueNotifier;
@@ -126,6 +113,9 @@ class AudioService {
       _subdivisionsValueNotifier.value;
   ValueNotifier<Map<Key, SubdivisionData>> get subdivisionsValueNotifier =>
       _subdivisionsValueNotifier;
+  TimeSignature get timeSignature => _timeSignatureValueNotifier.value;
+  ValueNotifier<TimeSignature> get timeSignatureValueNotifier =>
+      _timeSignatureValueNotifier;
 
   Future<void> addSubdivision() async {
     UniqueKey key = UniqueKey();
@@ -188,25 +178,11 @@ class AudioService {
     _preferenceService.setBeatVolume(volume);
   }
 
-  Future<void> setDenominator(int value) async {
-    _denominatorValueNotifier.value = value;
-
-    await _setDenominator(value);
-    _preferenceService.setDenominator(value);
-  }
-
   Future<void> setDownbeatVolume(double volume) async {
     _downbeatVolumeValueNotifier.value = volume;
 
     await _setDownbeatVolume(volume);
     _preferenceService.setDownbeatVolume(volume);
-  }
-
-  Future<void> setNumerator(int value) async {
-    _numeratorValueNotifier.value = value;
-
-    await _setNumerator(value);
-    _preferenceService.setNumerator(value);
   }
 
   Future<void> setSampleSet(SampleSet sampleSet) async {
@@ -223,39 +199,36 @@ class AudioService {
       int bpm,
       BeatUnit beatUnit,
       double beatVolume,
-      int denominator,
       double downbeatVolume,
-      int numerator,
       SampleSet sampleSet,
-      Map<Key, SubdivisionData> subdivisions) async {
+      Map<Key, SubdivisionData> subdivisions,
+      TimeSignature timeSignature) async {
     _appVolumeValueNotifier.value = appVolume;
     _bpmValueNotifier.value = bpm;
     _beatUnitValueNotifier.value = beatUnit;
     _beatVolumeValueNotifier.value = beatVolume;
-    _denominatorValueNotifier.value = denominator;
     _downbeatVolumeValueNotifier.value = downbeatVolume;
-    _numeratorValueNotifier.value = numerator;
     _sampleSetValueNotifier.value = sampleSet;
     _subdivisionsValueNotifier.value = subdivisions;
+    _timeSignatureValueNotifier.value = timeSignature;
 
     _preferenceService.setAppVolume(appVolume);
     _preferenceService.setBpm(bpm);
     _preferenceService.setBeatUnit(beatUnit);
     _preferenceService.setBeatVolume(beatVolume);
-    _preferenceService.setDenominator(denominator);
     _preferenceService.setDownbeatVolume(downbeatVolume);
-    _preferenceService.setNumerator(numerator);
     _preferenceService.setSampleSet(sampleSet);
     _preferenceService.setSubdivisions(subdivisions);
+    _preferenceService.setTimeSignature(timeSignature);
 
     final result = await _methodChannel.invokeMethod(Action.setState.name, [
       appVolume.toString(),
       bpm.toString(),
       beatUnit.toJsonString(),
       beatVolume.toString(),
-      denominator.toString(),
+      timeSignature.denominator.toString(),
       downbeatVolume.toString(),
-      numerator.toString(),
+      timeSignature.numerator.toString(),
       sampleSet.getBeatSamplePath(),
       sampleSet.getInnerBeatSamplePath(),
       subdivisions.toJsonString(),
@@ -281,6 +254,15 @@ class AudioService {
 
     await _setSubdivisionVolume(key, volume);
     _preferenceService.setSubdivisions(subdivisions);
+  }
+
+  Future<void> setTimeSignature(TimeSignature timeSignature) async {
+    _timeSignatureValueNotifier.value = timeSignature;
+
+    await _setNumerator(timeSignature.numerator);
+    await _setDenominator(timeSignature.denominator);
+
+    _preferenceService.setTimeSignature(timeSignature);
   }
 
   Future<void> startPlayback() async {

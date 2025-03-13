@@ -6,6 +6,7 @@ import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
 import 'package:tempus/domain/models/beat_unit.dart';
 import 'package:tempus/domain/models/sample_set.dart';
+import 'package:tempus/domain/models/time_signature.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Preference {
@@ -13,13 +14,12 @@ enum Preference {
   bpm(120),
   beatUnit(BeatUnit.quarter),
   beatVolume(1.0),
-  denominator(4),
   downbeatVolume(1.0),
   isPremium(false),
-  numerator(4),
   sampleSet(SampleSet("sine", false)),
   subdivisions(<Key, SubdivisionData>{}),
-  themeMode(ThemeMode.system);
+  themeMode(ThemeMode.system),
+  timeSignature(TimeSignature(4, 4));
 
   final dynamic defaultValue;
   const Preference(this.defaultValue);
@@ -86,18 +86,6 @@ class PreferenceService {
     }
   }
 
-  Future<int> getDenominator() async {
-    try {
-      int? denominator =
-          await _sharedPreferencesAsync.getInt(Preference.denominator.name);
-      return denominator ?? Preference.denominator.defaultValue;
-    } catch (exception) {
-      print("Exception while getting denominator: $exception");
-      await setDenominator(Preference.denominator.defaultValue);
-      return Preference.denominator.defaultValue;
-    }
-  }
-
   Future<double> getDownbeatVolume() async {
     try {
       double? volume = await _sharedPreferencesAsync
@@ -119,18 +107,6 @@ class PreferenceService {
       print("Exception while getting premium status: $exception");
       await setIsPremium(Preference.isPremium.defaultValue);
       return Preference.isPremium.defaultValue;
-    }
-  }
-
-  Future<int> getNumerator() async {
-    try {
-      int? numerator =
-          await _sharedPreferencesAsync.getInt(Preference.numerator.name);
-      return numerator ?? Preference.numerator.defaultValue;
-    } catch (exception) {
-      print("Exception while getting numerator: $exception");
-      await setNumerator(Preference.numerator.defaultValue);
-      return Preference.numerator.defaultValue;
     }
   }
 
@@ -190,6 +166,24 @@ class PreferenceService {
     }
   }
 
+  Future<TimeSignature> getTimeSignature() async {
+    try {
+      String? timeSignatureAsJsonString = await _sharedPreferencesAsync
+          .getString(Preference.timeSignature.name);
+      if (timeSignatureAsJsonString != null) {
+        Map<String, dynamic> timeSignatureAsJson =
+            jsonDecode(timeSignatureAsJsonString);
+        return TimeSignature.fromJson(timeSignatureAsJson);
+      } else {
+        return Preference.timeSignature.defaultValue;
+      }
+    } catch (exception) {
+      print("Exception while getting time signature: $exception");
+      await setTimeSignature(Preference.timeSignature.defaultValue);
+      return Preference.timeSignature.defaultValue;
+    }
+  }
+
   Future<void> setAppVolume(double volume) async =>
       await _sharedPreferencesAsync.setDouble(
           Preference.appVolume.name, volume);
@@ -205,18 +199,12 @@ class PreferenceService {
       await _sharedPreferencesAsync.setDouble(
           Preference.beatVolume.name, volume);
 
-  Future<void> setDenominator(int value) async =>
-      await _sharedPreferencesAsync.setInt(Preference.denominator.name, value);
-
   Future<void> setDownbeatVolume(double volume) async =>
       await _sharedPreferencesAsync.setDouble(
           Preference.downbeatVolume.name, volume);
 
   Future<void> setIsPremium(bool value) async =>
       await _sharedPreferencesAsync.setBool(Preference.isPremium.name, value);
-
-  Future<void> setNumerator(int value) async =>
-      await _sharedPreferencesAsync.setInt(Preference.numerator.name, value);
 
   Future<void> setSampleSet(SampleSet sampleSet) async =>
       await _sharedPreferencesAsync.setString(
@@ -229,4 +217,8 @@ class PreferenceService {
   Future<void> setThemeMode(ThemeMode themeMode) async =>
       await _sharedPreferencesAsync.setString(
           Preference.themeMode.name, themeMode.name);
+
+  Future<void> setTimeSignature(TimeSignature timeSignature) async =>
+      await _sharedPreferencesAsync.setString(
+          Preference.timeSignature.name, timeSignature.toJsonString());
 }

@@ -121,46 +121,29 @@ class DeckState extends State<Deck> {
                                           color: Theme.of(context)
                                               .colorScheme
                                               .onSurface),
-                                      Outlined(
-                                          child: GestureDetector(
-                                              onTap: () => TimeSignatureButton.showDialog(
-                                                  context,
-                                                  (numerator) async => await context
-                                                      .read<DeckViewModel>()
-                                                      .setNumerator(numerator),
-                                                  (denominator) async => await context
-                                                      .read<DeckViewModel>()
-                                                      .setDenominator(
-                                                          denominator),
-                                                  context
-                                                      .read<DeckViewModel>()
-                                                      .numerator,
-                                                  context
-                                                      .read<DeckViewModel>()
-                                                      .denominator,
-                                                  context.read<DeckViewModel>().isPremium
-                                                      ? Constants
-                                                          .premiumTimeSignatureOptions
-                                                      : Constants
-                                                          .freeNumeratorOptions,
-                                                  context
-                                                          .read<DeckViewModel>()
-                                                          .isPremium
-                                                      ? Constants
-                                                          .premiumTimeSignatureOptions
-                                                      : Constants
-                                                          .freeDenominatorOptions),
-                                              behavior: HitTestBehavior.opaque,
-                                              child: SizedBox(
-                                                  height:
-                                                      barConstraints.maxHeight,
-                                                  width: barConstraints.maxHeight /
-                                                      2,
-                                                  child: TimeSignatureButton(
-                                                      numerator: context
-                                                          .watch<DeckViewModel>()
-                                                          .numerator,
-                                                      denominator: context.watch<DeckViewModel>().denominator))))
+                                      TimeSignatureButton(
+                                          callback: (updatedTimeSignature) =>
+                                              context
+                                                  .read<DeckViewModel>()
+                                                  .setTimeSignature(
+                                                      updatedTimeSignature),
+                                          constraints: barConstraints,
+                                          denominatorOptions: context
+                                                  .read<DeckViewModel>()
+                                                  .isPremium
+                                              ? Constants
+                                                  .premiumTimeSignatureOptions
+                                              : Constants
+                                                  .freeDenominatorOptions,
+                                          numeratorOptions: context
+                                                  .read<DeckViewModel>()
+                                                  .isPremium
+                                              ? Constants
+                                                  .premiumTimeSignatureOptions
+                                              : Constants.freeNumeratorOptions,
+                                          timeSignature: context
+                                              .read<DeckViewModel>()
+                                              .timeSignature)
                                     ])),
                             Expanded(child: SizedBox())
                           ]))),

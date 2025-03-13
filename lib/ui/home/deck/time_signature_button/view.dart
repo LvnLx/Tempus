@@ -1,43 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:tempus/domain/models/time_signature.dart';
+import 'package:tempus/ui/core/outlined.dart';
 import 'package:tempus/ui/core/selector.dart';
 
 class TimeSignatureButton extends StatelessWidget {
-  final int denominator;
-  final int numerator;
+  final Future<void> Function(TimeSignature updatedTimeSignature) callback;
+  final BoxConstraints constraints;
+  final List<int> denominatorOptions;
+  final List<int> numeratorOptions;
+  final TimeSignature timeSignature;
 
   const TimeSignatureButton(
-      {super.key, required this.numerator, required this.denominator});
+      {super.key,
+      required this.callback,
+      required this.constraints,
+      required this.denominatorOptions,
+      required this.numeratorOptions,
+      required this.timeSignature});
 
   @override
-  Widget build(BuildContext context) => Column(children: [
-        Expanded(
-            child: SizedBox.expand(
-                child: FittedBox(
-                    child: Text(numerator.toString(),
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontFamily: "SFMono"))))),
-        Divider(height: 0),
-        Expanded(
-            child: SizedBox.expand(
-                child: FittedBox(
-                    child: Text(denominator.toString(),
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontFamily: "SFMono")))))
-      ]);
+  Widget build(BuildContext context) => Outlined(
+        child: GestureDetector(
+            onTap: () async => await _showDialog(context),
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+                height: constraints.maxHeight,
+                width: constraints.maxHeight / 2,
+                child: Column(children: [
+                  Expanded(
+                      child: SizedBox.expand(
+                          child: FittedBox(
+                              child: Text(timeSignature.numerator.toString(),
+                                  style: TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      fontFamily: "SFMono"))))),
+                  Divider(height: 0),
+                  Expanded(
+                      child: SizedBox.expand(
+                          child: FittedBox(
+                              child: Text(timeSignature.denominator.toString(),
+                                  style: TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      fontFamily: "SFMono")))))
+                ]))),
+      );
 
-  static Future<void> showDialog(
-      BuildContext context,
-      Future<void> Function(int) numeratorCallback,
-      Future<void> Function(int) denominatorCallback,
-      int numerator,
-      int denominator,
-      List<int> numeratorOptions,
-      List<int> denominatorOptions) async {
-    int updatedNumerator = numerator;
-    int updatedDenominator = denominator;
+  Future<void> _showDialog(BuildContext context) async {
+    TimeSignature updatedTimeSignature = timeSignature;
 
     return await showPlatformDialog(
         context: context,
@@ -61,11 +73,13 @@ class TimeSignatureButton extends StatelessWidget {
                             Expanded(
                                 child: Selector(
                                     callback: (index) async =>
-                                        updatedNumerator =
-                                            numeratorOptions[index],
+                                        updatedTimeSignature =
+                                            updatedTimeSignature.copyWith(
+                                                numerator:
+                                                    numeratorOptions[index]),
                                     itemExtent: constraints.maxWidth / 6,
-                                    initialItemIndex:
-                                        numeratorOptions.indexOf(numerator),
+                                    initialItemIndex: numeratorOptions
+                                        .indexOf(timeSignature.numerator),
                                     options: numeratorOptions
                                         .map((numeratorOption) => FittedBox(
                                               child: PlatformText(
@@ -80,11 +94,13 @@ class TimeSignatureButton extends StatelessWidget {
                             Expanded(
                                 child: Selector(
                                     callback: (index) async =>
-                                        updatedDenominator =
-                                            denominatorOptions[index],
+                                        updatedTimeSignature =
+                                            updatedTimeSignature.copyWith(
+                                                denominator:
+                                                    denominatorOptions[index]),
                                     itemExtent: constraints.maxWidth / 6,
-                                    initialItemIndex:
-                                        denominatorOptions.indexOf(denominator),
+                                    initialItemIndex: denominatorOptions
+                                        .indexOf(timeSignature.denominator),
                                     options: denominatorOptions
                                         .map((denominatorOption) => FittedBox(
                                               child: PlatformText(
@@ -109,8 +125,7 @@ class TimeSignatureButton extends StatelessWidget {
                       child: Text("Set"),
                       onPressed: () async {
                         Navigator.pop(context);
-                        await numeratorCallback(updatedNumerator);
-                        await denominatorCallback(updatedDenominator);
+                        await callback(updatedTimeSignature);
                       },
                       cupertino: (context, platform) =>
                           CupertinoDialogActionData(isDefaultAction: true))

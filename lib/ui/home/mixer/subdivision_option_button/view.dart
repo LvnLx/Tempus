@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:tempus/constants.dart';
-import 'package:tempus/ui/core/outlined.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/core/selector.dart';
 
