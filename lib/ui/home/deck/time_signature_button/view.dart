@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:tempus/domain/models/time_signature.dart';
+import 'package:tempus/domain/models/fraction.dart';
 import 'package:tempus/ui/core/outlined.dart';
 import 'package:tempus/ui/core/selector.dart';
 

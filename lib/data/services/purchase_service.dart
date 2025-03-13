@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:tempus/constants/strings.dart';
 import 'package:tempus/data/services/preference_service.dart';
-import 'package:tempus/constants.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 
 class PurchaseService {
@@ -57,7 +57,7 @@ class PurchaseService {
             "You now have access to premium features");
       } else {
         return PurchaseResult(PurchaseResultStatus.purchaseFailed,
-            "There was an error verifying your purchase. Please reach out to the app's support at ${Constants.supportEmail}");
+            "There was an error verifying your purchase. Please reach out to the app's support at ${Strings.supportEmail}");
       }
     } on PlatformException catch (error) {
       switch (PurchasesErrorHelper.getErrorCode(error)) {
@@ -93,7 +93,7 @@ class PurchaseService {
       } else {
         return PurchaseResult(
           PurchaseResultStatus.restoreFailed,
-          "It looks like your account has not purchased premium. If you believe this is incorrect, please reach out to support at ${Constants.supportEmail}",
+          "It looks like your account has not purchased premium. If you believe this is incorrect, please reach out to support at ${Strings.supportEmail}",
         );
       }
     } catch (_) {

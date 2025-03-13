@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:tempus/data/services/audio_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
-import 'package:tempus/domain/models/beat_unit.dart';
+import 'package:tempus/domain/models/fraction.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 

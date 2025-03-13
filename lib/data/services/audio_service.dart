@@ -2,13 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tempus/constants.dart';
+import 'package:tempus/constants/options.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
-import 'package:tempus/domain/models/beat_unit.dart';
+import 'package:tempus/domain/models/fraction.dart';
 import 'package:tempus/domain/models/sample_set.dart';
-import 'package:tempus/domain/models/time_signature.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Action {
@@ -121,7 +120,7 @@ class AudioService {
     UniqueKey key = UniqueKey();
     _subdivisionsValueNotifier.value = {
       ...subdivisions,
-      key: SubdivisionData(option: Constants.subdivisionOptions[0], volume: 0.0)
+      key: SubdivisionData(option: Options.subdivisionOptions[0], volume: 0.0)
     };
 
     await _addSubdivision(

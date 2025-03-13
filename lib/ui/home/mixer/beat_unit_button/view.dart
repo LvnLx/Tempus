@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tempus/domain/models/beat_unit.dart';
+import 'package:tempus/domain/models/fraction.dart';
 
 class BeatUnitButton extends StatelessWidget {
   final BeatUnit beatUnit;

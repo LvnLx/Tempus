@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/constants.dart';
+import 'package:tempus/constants/options.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
@@ -69,7 +69,7 @@ class MixerState extends State<Mixer> {
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
                 if (context.watch<MixerViewModel>().subdivisions.length <
-                    Constants.subdivisionOptions.length)
+                    Options.subdivisionOptions.length)
                   GestureDetector(
                       onTap: () async {
                         if (_canAddSubdivison()) {

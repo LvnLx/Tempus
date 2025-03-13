@@ -4,15 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
-import 'package:tempus/domain/models/beat_unit.dart';
+import 'package:tempus/domain/models/fraction.dart';
 import 'package:tempus/domain/models/sample_set.dart';
-import 'package:tempus/domain/models/time_signature.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Preference {
   appVolume(1.0),
   bpm(120),
-  beatUnit(BeatUnit.quarter),
+  beatUnit(BeatUnit(4, 4)),
   beatVolume(1.0),
   downbeatVolume(1.0),
   isPremium(false),

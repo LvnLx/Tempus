@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:tempus/constants.dart';
+import 'package:tempus/constants/options.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/core/selector.dart';
 
@@ -44,11 +44,11 @@ class SubdivisionOptionButton extends StatelessWidget {
                         builder: (_, constraints) => Selector(
                             callback: (index) async =>
                                 updatedSubdivisionOption =
-                                    Constants.subdivisionOptions[index],
+                                    Options.subdivisionOptions[index],
                             itemExtent: constraints.maxWidth / 6,
-                            initialItemIndex: Constants.subdivisionOptions
+                            initialItemIndex: Options.subdivisionOptions
                                 .indexOf(initialSubdivisionOption),
-                            options: Constants.subdivisionOptions
+                            options: Options.subdivisionOptions
                                 .map((numeratorOption) => FittedBox(
                                       child: PlatformText(
                                           numeratorOption.toString(),

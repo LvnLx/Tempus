@@ -4,7 +4,7 @@ import 'package:flutter/material.dart' hide showDialog;
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/constants.dart';
+import 'package:tempus/constants/strings.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/home/deck/settings/app_volume_settings/view.dart';
@@ -159,15 +159,15 @@ class _SettingsState extends State<Settings> {
             SettingsTile(
                 title: Text("Contact"),
                 onPressed: (context) async => await _showEmail(
-                    context, Constants.contactEmail, "Tempus%20Contact")),
+                    context, Strings.contactEmail, "Tempus%20Contact")),
             SettingsTile(
                 title: Text("Feedback"),
                 onPressed: (context) async => await _showEmail(
-                    context, Constants.feedbackEmail, "Tempus%20Feedback")),
+                    context, Strings.feedbackEmail, "Tempus%20Feedback")),
             SettingsTile(
                 title: Text("Support"),
                 onPressed: (context) async => await _showEmail(
-                    context, Constants.supportEmail, "Tempus%20Support")),
+                    context, Strings.supportEmail, "Tempus%20Support")),
           ])
         ],
       ),

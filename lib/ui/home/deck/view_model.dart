@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:tempus/data/services/audio_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
-import 'package:tempus/domain/models/time_signature.dart';
+import 'package:tempus/domain/models/fraction.dart';
 
 class DeckViewModel extends ChangeNotifier {
   final AudioService _audioService;
