@@ -5,7 +5,7 @@ import 'package:tempus/ui/core/outlined.dart';
 import 'package:tempus/ui/core/selector.dart';
 
 class TimeSignatureButton extends StatelessWidget {
-  final Future<void> Function(TimeSignature updatedTimeSignature) callback;
+  final Future<void> Function(TimeSignature timeSignature) setTimeSignature;
   final BoxConstraints constraints;
   final List<int> denominatorOptions;
   final List<int> numeratorOptions;
@@ -13,7 +13,7 @@ class TimeSignatureButton extends StatelessWidget {
 
   const TimeSignatureButton(
       {super.key,
-      required this.callback,
+      required this.setTimeSignature,
       required this.constraints,
       required this.denominatorOptions,
       required this.numeratorOptions,
@@ -125,7 +125,7 @@ class TimeSignatureButton extends StatelessWidget {
                       child: Text("Set"),
                       onPressed: () async {
                         Navigator.pop(context);
-                        await callback(updatedTimeSignature);
+                        await setTimeSignature(updatedTimeSignature);
                       },
                       cupertino: (context, platform) =>
                           CupertinoDialogActionData(isDefaultAction: true))

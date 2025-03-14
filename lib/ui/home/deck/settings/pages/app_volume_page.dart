@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
-import 'package:provider/provider.dart';
-import 'package:tempus/ui/home/deck/settings/app_volume_settings/view_model.dart';
-import 'package:tempus/ui/home/deck/settings/view.dart';
 
-class AppVolumeSettings extends StatelessWidget {
-  const AppVolumeSettings({super.key});
+class AppVolumePage extends StatelessWidget {
+  final double appVolume;
+  final SettingsThemeData Function(BuildContext context) getSettingsThemeData;
+  final Future<void> Function(double volume) setAppVolume;
+
+  const AppVolumePage(
+      {super.key,
+      required this.appVolume,
+      required this.getSettingsThemeData,
+      required this.setAppVolume});
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -29,12 +34,8 @@ class AppVolumeSettings extends StatelessWidget {
                     width: constraints.maxWidth * 0.95,
                     child: PlatformSlider(
                         activeColor: Theme.of(context).colorScheme.primary,
-                        value: context
-                            .watch<AppVolumeSettingsViewModel>()
-                            .appVolume,
-                        onChanged: (value) => context
-                            .read<AppVolumeSettingsViewModel>()
-                            .setAppVolume(value)),
+                        value: appVolume,
+                        onChanged: (value) => setAppVolume(value)),
                   ),
                 ),
                 description: Text(
@@ -44,8 +45,7 @@ class AppVolumeSettings extends StatelessWidget {
                         fontSize: 17,
                         color: getSettingsThemeData(context).trailingTextColor),
                     child: FittedBox(
-                      child: Text(
-                          "${(context.watch<AppVolumeSettingsViewModel>().appVolume * 100).round()}%"),
+                      child: Text("${(appVolume * 100).round()}%"),
                     )),
               )
             ])

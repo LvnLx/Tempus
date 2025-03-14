@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
-import 'package:provider/provider.dart';
 import 'package:tempus/domain/models/sample_set.dart';
-import 'package:tempus/ui/home/deck/settings/sample_settings/view_model.dart';
-import 'package:tempus/ui/home/deck/settings/view.dart';
 import 'package:tempus/domain/util.dart';
 
-class SampleSettings extends StatelessWidget {
-  const SampleSettings({super.key});
+class SamplePage extends StatelessWidget {
+  final SettingsThemeData Function(BuildContext context) getSettingsThemeData;
+  final bool isPremium;
+  final SampleSet sampleSet;
+  final List<SampleSet> sampleSets;
+  final Future<void> Function(SampleSet sampleSet) setSampleSet;
+
+  const SamplePage(
+      {super.key,
+      required this.getSettingsThemeData,
+      required this.isPremium,
+      required this.sampleSet,
+      required this.sampleSets,
+      required this.setSampleSet});
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +42,7 @@ class SampleSettings extends StatelessWidget {
           sections: [
             SettingsSection(
               title: Text("Free"),
-              tiles: context
-                  .watch<SampleSettingsViewModel>()
-                  .sampleSets
+              tiles: sampleSets
                   .where((sampleSet) => !sampleSet.isPremium)
                   .map((sampleSet) =>
                       getSampleSetSettingsTiles(context, sampleSet, true))
@@ -43,9 +50,7 @@ class SampleSettings extends StatelessWidget {
             ),
             SettingsSection(
                 title: Text("Premium"),
-                tiles: context
-                    .watch<SampleSettingsViewModel>()
-                    .sampleSets
+                tiles: sampleSets
                     .where((sampleSet) => sampleSet.isPremium)
                     .map((sampleSet) =>
                         getSampleSetSettingsTiles(context, sampleSet, false))
@@ -57,11 +62,10 @@ class SampleSettings extends StatelessWidget {
   SettingsTile getSampleSetSettingsTiles(
       BuildContext context, SampleSet sampleSet, bool isFree) {
     return SettingsTile(
-        enabled: isFree || context.watch<SampleSettingsViewModel>().isPremium,
+        enabled: isFree || isPremium,
         title: Text(capitalizeFirst(sampleSet.name)),
         trailing: () {
-          SampleSet activeSampleSet =
-              context.watch<SampleSettingsViewModel>().sampleSet;
+          SampleSet activeSampleSet = sampleSet;
           if (activeSampleSet.name == sampleSet.name &&
               activeSampleSet.isPremium == sampleSet.isPremium) {
             return Icon(PlatformIcons(context).checkMark);
@@ -69,8 +73,6 @@ class SampleSettings extends StatelessWidget {
             return null;
           }
         }(),
-        onPressed: (context) async => await context
-            .read<SampleSettingsViewModel>()
-            .setSampleSets(sampleSet));
+        onPressed: (context) async => await setSampleSet(sampleSet));
   }
 }

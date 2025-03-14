@@ -10,6 +10,7 @@ import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Preference {
   appVolume(1.0),
+  autoUpdateBeatUnit(true),
   bpm(120),
   beatUnit(BeatUnit(4, 4)),
   beatVolume(1.0),
@@ -26,11 +27,19 @@ enum Preference {
 
 class PreferenceService {
   final AssetService _assetService;
-
   final SharedPreferencesAsync _sharedPreferencesAsync =
       SharedPreferencesAsync();
 
+  late ValueNotifier<bool> _autoUpdateBeatUnitValueNotifier;
+
   PreferenceService(this._assetService);
+
+  Future<void> init() async => _autoUpdateBeatUnitValueNotifier =
+      ValueNotifier(await _getAutoUpdateBeatUnit());
+
+  bool get autoUpdateBeatUnit => autoUpdateBeatUnitValueNotifier.value;
+  ValueNotifier<bool> get autoUpdateBeatUnitValueNotifier =>
+      _autoUpdateBeatUnitValueNotifier;
 
   Future<double> getAppVolume() async {
     try {
@@ -187,6 +196,12 @@ class PreferenceService {
       await _sharedPreferencesAsync.setDouble(
           Preference.appVolume.name, volume);
 
+  Future<void> setAutoUpdateBeatUnit(bool value) async {
+    autoUpdateBeatUnitValueNotifier.value = value;
+    await _sharedPreferencesAsync.setBool(
+        Preference.autoUpdateBeatUnit.name, value);
+  }
+
   Future<void> setBpm(int bpm) async =>
       await _sharedPreferencesAsync.setInt(Preference.bpm.name, bpm);
 
@@ -220,4 +235,16 @@ class PreferenceService {
   Future<void> setTimeSignature(TimeSignature timeSignature) async =>
       await _sharedPreferencesAsync.setString(
           Preference.timeSignature.name, timeSignature.toJsonString());
+
+  Future<bool> _getAutoUpdateBeatUnit() async {
+    try {
+      bool? value = await _sharedPreferencesAsync
+          .getBool(Preference.autoUpdateBeatUnit.name);
+      return value ?? Preference.autoUpdateBeatUnit.defaultValue;
+    } catch (exception) {
+      print("Exception while getting auto update beat unit: $exception");
+      await setAutoUpdateBeatUnit(Preference.autoUpdateBeatUnit.defaultValue);
+      return Preference.autoUpdateBeatUnit.defaultValue;
+    }
+  }
 }

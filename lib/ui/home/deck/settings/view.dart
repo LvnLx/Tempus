@@ -7,9 +7,10 @@ import 'package:provider/provider.dart';
 import 'package:tempus/domain/constants/strings.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/core/dialogs.dart';
-import 'package:tempus/ui/home/deck/settings/app_volume_settings/view.dart';
-import 'package:tempus/ui/home/deck/settings/sample_settings/view.dart';
-import 'package:tempus/ui/home/deck/settings/theme_settings/view.dart';
+import 'package:tempus/ui/home/deck/settings/pages/app_volume_page.dart';
+import 'package:tempus/ui/home/deck/settings/pages/auto_update_beat_unit_page.dart';
+import 'package:tempus/ui/home/deck/settings/pages/sample_page.dart';
+import 'package:tempus/ui/home/deck/settings/pages/theme_page.dart';
 import 'package:tempus/ui/home/deck/settings/view_model.dart';
 import 'package:tempus/domain/util.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -40,20 +41,19 @@ class _SettingsState extends State<Settings> {
       ),
       body: SettingsList(
         applicationType: ApplicationType.both,
-        darkTheme: getSettingsThemeData(context),
-        lightTheme: getSettingsThemeData(context),
+        darkTheme: _getSettingsThemeData(context),
+        lightTheme: _getSettingsThemeData(context),
         sections: [
           SettingsSection(title: Text("Premium Access"), tiles: [
             SettingsTile(
               title: Text("Status"),
               trailing: DefaultTextStyle(
-                style: TextStyle(
-                    fontSize: 17,
-                    color: getSettingsThemeData(context).trailingTextColor),
-                child: Text(context.watch<SettingsViewModel>().isPremium
-                    ? "Active"
-                    : "Inactive"),
-              ),
+                  style: TextStyle(
+                      fontSize: 17,
+                      color: _getSettingsThemeData(context).trailingTextColor),
+                  child: Text(context.watch<SettingsViewModel>().isPremium
+                      ? "Active"
+                      : "Inactive")),
             ),
             SettingsTile(
                 title: Text("Purchase"),
@@ -74,38 +74,32 @@ class _SettingsState extends State<Settings> {
                   }
                 })
           ]),
-          SettingsSection(
-            title: Text("Audio"),
-            tiles: [
-              SettingsTile.navigation(
-                  title: Text("App volume"),
-                  value: Text(
-                      "${(context.watch<SettingsViewModel>().appVolume * 100).round()}%"),
-                  onPressed: (context) => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AppVolumeSettings()))),
-              SettingsTile.navigation(
-                title: Text("Sample"),
-                value: Text(capitalizeFirst(
-                    context.watch<SettingsViewModel>().sampleSet.name)),
-                onPressed: (context) => Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SampleSettings())),
-              )
-            ],
-          ),
-          SettingsSection(title: Text("Display"), tiles: [
+          SettingsSection(title: Text("Metronome"), tiles: [
             SettingsTile.navigation(
-              title: Text("Theme"),
-              value: Text(capitalizeFirst(
-                  context.watch<SettingsViewModel>().themeMode.name)),
-              onPressed: (context) => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => ThemeSettings())),
-            )
-          ]),
-          SettingsSection(title: Text("App State"), tiles: [
+                title: Text("Auto update beat unit"),
+                trailing: DefaultTextStyle(
+                    style: TextStyle(
+                        fontSize: 17,
+                        color:
+                            _getSettingsThemeData(context).trailingTextColor),
+                    child: Text(
+                        context.watch<SettingsViewModel>().autoUpdateBeatUnit
+                            ? "On"
+                            : "Off")),
+                onPressed: (context) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AutoUpdateBeatUnitPage(
+                            setAutoUpdateBeatUnit: (updatedValue) => context
+                                .read<SettingsViewModel>()
+                                .setAutoUpdateBeatUnit(updatedValue),
+                            initialValue: context
+                                .watch<SettingsViewModel>()
+                                .autoUpdateBeatUnit,
+                            getSettingsThemeData: (context) =>
+                                _getSettingsThemeData(context))))),
             SettingsTile(
-                title: Text("Reset metronome"),
+                title: Text("Reset"),
                 onPressed: (context) => showDialog(DialogConfiguration(
                         context,
                         "Reset Metronome",
@@ -128,7 +122,76 @@ class _SettingsState extends State<Settings> {
                               cupertino: (context, platform) =>
                                   CupertinoDialogActionData(
                                       isDestructiveAction: true))
-                        ]))),
+                        ])))
+          ]),
+          SettingsSection(title: Text("Audio"), tiles: [
+            SettingsTile.navigation(
+                title: Text("App volume"),
+                value: Text(
+                    "${(context.watch<SettingsViewModel>().appVolume * 100).round()}%"),
+                onPressed: (context) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AppVolumePage(
+                              appVolume:
+                                  context.watch<SettingsViewModel>().appVolume,
+                              getSettingsThemeData: _getSettingsThemeData,
+                              setAppVolume: (volume) => context
+                                  .read<SettingsViewModel>()
+                                  .setAppVolume(volume),
+                            )))),
+            SettingsTile.navigation(
+              title: Text("Sample"),
+              value: Text(capitalizeFirst(
+                  context.watch<SettingsViewModel>().sampleSet.name)),
+              onPressed: (context) => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SamplePage(
+                            getSettingsThemeData: _getSettingsThemeData,
+                            isPremium:
+                                context.watch<SettingsViewModel>().isPremium,
+                            sampleSet:
+                                context.watch<SettingsViewModel>().sampleSet,
+                            sampleSets:
+                                context.watch<SettingsViewModel>().sampleSets,
+                            setSampleSet:
+                                context.read<SettingsViewModel>().setSampleSet,
+                          ))),
+            )
+          ]),
+          SettingsSection(title: Text("Display"), tiles: [
+            SettingsTile.navigation(
+              title: Text("Theme"),
+              value: Text(capitalizeFirst(
+                  context.watch<SettingsViewModel>().themeMode.name)),
+              onPressed: (context) => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ThemeSettings(
+                            callback: (updatedThemeMode) => context
+                                .read<SettingsViewModel>()
+                                .setThemeMode(updatedThemeMode),
+                            getSettingsThemeData: (context) =>
+                                _getSettingsThemeData(context),
+                            themeMode:
+                                context.watch<SettingsViewModel>().themeMode,
+                          ))),
+            )
+          ]),
+          SettingsSection(title: Text("Other"), tiles: [
+            SettingsTile(
+                title: Text("Contact"),
+                onPressed: (context) async => await _showEmail(
+                    context, Strings.contactEmail, "Tempus%20Contact")),
+            SettingsTile(
+                title: Text("Feedback"),
+                onPressed: (context) async => await _showEmail(
+                    context, Strings.feedbackEmail, "Tempus%20Feedback")),
+            SettingsTile(
+                title: Text("Support"),
+                onPressed: (context) async => await _showEmail(
+                    context, Strings.supportEmail, "Tempus%20Support")),
             SettingsTile(
                 title: Text("Reset app"),
                 onPressed: (context) => showDialog(DialogConfiguration(
@@ -154,39 +217,13 @@ class _SettingsState extends State<Settings> {
                                   CupertinoDialogActionData(
                                       isDestructiveAction: true))
                         ])))
-          ]),
-          SettingsSection(title: Text("Help"), tiles: [
-            SettingsTile(
-                title: Text("Contact"),
-                onPressed: (context) async => await _showEmail(
-                    context, Strings.contactEmail, "Tempus%20Contact")),
-            SettingsTile(
-                title: Text("Feedback"),
-                onPressed: (context) async => await _showEmail(
-                    context, Strings.feedbackEmail, "Tempus%20Feedback")),
-            SettingsTile(
-                title: Text("Support"),
-                onPressed: (context) async => await _showEmail(
-                    context, Strings.supportEmail, "Tempus%20Support")),
           ])
         ],
       ),
     );
   }
-}
 
-Future<void> _showEmail(
-    BuildContext context, String email, String subject) async {
-  if (!await launchUrl(Uri.parse("mailto:$email?subject=$subject"))) {
-    if (context.mounted) {
-      showDialog(DialogConfiguration(context, "Email Failed",
-          "Unable to open the mail app. Please reach out to $email manually"));
-    }
-  }
-}
-
-SettingsThemeData getSettingsThemeData(context) {
-  return SettingsThemeData(
+  SettingsThemeData _getSettingsThemeData(context) => SettingsThemeData(
       dividerColor: Theme.of(context).colorScheme.surface,
       inactiveSubtitleColor: Colors.red,
       inactiveTitleColor: Colors.orange,
@@ -198,4 +235,14 @@ SettingsThemeData getSettingsThemeData(context) {
       tileHighlightColor: Theme.of(context).colorScheme.secondary,
       titleTextColor: Theme.of(context).colorScheme.secondary,
       trailingTextColor: Theme.of(context).colorScheme.secondary);
+}
+
+Future<void> _showEmail(
+    BuildContext context, String email, String subject) async {
+  if (!await launchUrl(Uri.parse("mailto:$email?subject=$subject"))) {
+    if (context.mounted) {
+      showDialog(DialogConfiguration(context, "Email Failed",
+          "Unable to open the mail app. Please reach out to $email manually"));
+    }
+  }
 }

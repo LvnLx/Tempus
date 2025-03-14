@@ -6,6 +6,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
 import 'package:tempus/ui/home/deck/view.dart';
@@ -19,6 +20,7 @@ class Home extends StatelessWidget {
   Future<void> initializeProviders(BuildContext context) async {
     try {
       await context.read<AssetService>().init();
+      await context.read<PreferenceService>().init();
       await context.read<AudioService>().init();
       await context.read<PurchaseService>().init();
       await context.read<ThemeService>().init();

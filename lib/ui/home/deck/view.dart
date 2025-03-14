@@ -10,10 +10,10 @@ import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/outlined.dart';
-import 'package:tempus/ui/home/deck/bpm_button/view.dart';
+import 'package:tempus/ui/home/deck/buttons/bpm_button.dart';
 import 'package:tempus/ui/home/deck/bpm_dial/view.dart';
 import 'package:tempus/ui/home/deck/settings/view.dart';
-import 'package:tempus/ui/home/deck/time_signature_button/view.dart';
+import 'package:tempus/ui/home/deck/buttons/time_signature_button.dart';
 import 'package:tempus/ui/home/deck/view_model.dart';
 import 'package:tempus/ui/home/deck/visualizer/view.dart';
 
@@ -122,7 +122,7 @@ class DeckState extends State<Deck> {
                                               .colorScheme
                                               .onSurface),
                                       TimeSignatureButton(
-                                          callback: (updatedTimeSignature) =>
+                                          setTimeSignature: (updatedTimeSignature) =>
                                               context
                                                   .read<DeckViewModel>()
                                                   .setTimeSignature(
