@@ -4,14 +4,14 @@ import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:tempus/domain/models/sample_set.dart';
 import 'package:tempus/domain/util.dart';
 
-class SamplePage extends StatelessWidget {
+class SampleSetPage extends StatelessWidget {
   final SettingsThemeData Function(BuildContext context) getSettingsThemeData;
   final bool isPremium;
   final SampleSet sampleSet;
   final List<SampleSet> sampleSets;
   final Future<void> Function(SampleSet sampleSet) setSampleSet;
 
-  const SamplePage(
+  const SampleSetPage(
       {super.key,
       required this.getSettingsThemeData,
       required this.isPremium,
@@ -30,7 +30,7 @@ class SamplePage extends StatelessWidget {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text("Select a sample",
+        title: Text("Select a sample set",
             style: TextStyle(
               color: Theme.of(context).colorScheme.primary,
             )),

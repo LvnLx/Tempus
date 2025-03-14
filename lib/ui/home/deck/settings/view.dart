@@ -9,7 +9,7 @@ import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/home/deck/settings/pages/app_volume_page.dart';
 import 'package:tempus/ui/home/deck/settings/pages/auto_update_beat_unit_page.dart';
-import 'package:tempus/ui/home/deck/settings/pages/sample_page.dart';
+import 'package:tempus/ui/home/deck/settings/pages/sample_set_page.dart';
 import 'package:tempus/ui/home/deck/settings/pages/theme_page.dart';
 import 'package:tempus/ui/home/deck/settings/view_model.dart';
 import 'package:tempus/domain/util.dart';
@@ -141,13 +141,13 @@ class _SettingsState extends State<Settings> {
                                   .setAppVolume(volume),
                             )))),
             SettingsTile.navigation(
-              title: Text("Sample"),
+              title: Text("Sample set"),
               value: Text(capitalizeFirst(
                   context.watch<SettingsViewModel>().sampleSet.name)),
               onPressed: (context) => Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => SamplePage(
+                      builder: (context) => SampleSetPage(
                             getSettingsThemeData: _getSettingsThemeData,
                             isPremium:
                                 context.watch<SettingsViewModel>().isPremium,
