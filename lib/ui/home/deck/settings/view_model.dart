@@ -21,6 +21,8 @@ class SettingsViewModel extends ChangeNotifier {
     _audioService.sampleSetValueNotifier.addListener(notifyListeners);
     _preferenceService.autoUpdateBeatUnitValueNotifier
         .addListener(notifyListeners);
+    _preferenceService.isVisualizerEnabledValueNotifier
+        .addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
     _themeService.themeModeValueNotifier.addListener(notifyListeners);
   }
@@ -30,6 +32,7 @@ class SettingsViewModel extends ChangeNotifier {
   bool get autoUpdateBeatUnit => _preferenceService.autoUpdateBeatUnit;
   SampleSet get sampleSet => _audioService.sampleSet;
   bool get isPremium => _purchaseService.isPremium;
+  bool get isVisualizerEnabled => _preferenceService.isVisualizerEnabled;
   ThemeMode get themeMode => _themeService.themeMode;
 
   Future<PurchaseResult> purchasePremium() async =>
@@ -68,6 +71,9 @@ class SettingsViewModel extends ChangeNotifier {
 
   Future<void> setAutoUpdateBeatUnit(bool value) async =>
       await _preferenceService.setAutoUpdateBeatUnit(value);
+
+  Future<void> setIsVisualizerEnabled(bool value) async =>
+      await _preferenceService.setIsVisualizerEnabled(value);
 
   Future<void> setSampleSet(SampleSet sampleSet) async =>
       await _audioService.setSampleSet(sampleSet);

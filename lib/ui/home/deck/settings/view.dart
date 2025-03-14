@@ -177,6 +177,14 @@ class _SettingsState extends State<Settings> {
                             themeMode:
                                 context.watch<SettingsViewModel>().themeMode,
                           ))),
+            ),
+            SettingsTile.switchTile(
+              title: Text("Visualizer"),
+              initialValue:
+                  context.watch<SettingsViewModel>().isVisualizerEnabled,
+              onToggle: (value) => context
+                  .read<SettingsViewModel>()
+                  .setIsVisualizerEnabled(value),
             )
           ]),
           SettingsSection(title: Text("Other"), tiles: [

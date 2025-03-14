@@ -16,6 +16,7 @@ enum Preference {
   beatVolume(1.0),
   downbeatVolume(1.0),
   isPremium(false),
+  isVisualizerEnabled(true),
   sampleSet(SampleSet("sine", false)),
   subdivisions(<Key, SubdivisionData>{}),
   themeMode(ThemeMode.system),
@@ -31,15 +32,23 @@ class PreferenceService {
       SharedPreferencesAsync();
 
   late ValueNotifier<bool> _autoUpdateBeatUnitValueNotifier;
+  late ValueNotifier<bool> _isVisualizerEnabledValueNotifier;
 
   PreferenceService(this._assetService);
 
-  Future<void> init() async => _autoUpdateBeatUnitValueNotifier =
-      ValueNotifier(await _getAutoUpdateBeatUnit());
+  Future<void> init() async {
+    _autoUpdateBeatUnitValueNotifier =
+        ValueNotifier(await _getAutoUpdateBeatUnit());
+    _isVisualizerEnabledValueNotifier =
+        ValueNotifier(await _getIsVisualizerEnabled());
+  }
 
   bool get autoUpdateBeatUnit => autoUpdateBeatUnitValueNotifier.value;
   ValueNotifier<bool> get autoUpdateBeatUnitValueNotifier =>
       _autoUpdateBeatUnitValueNotifier;
+  bool get isVisualizerEnabled => isVisualizerEnabledValueNotifier.value;
+  ValueNotifier<bool> get isVisualizerEnabledValueNotifier =>
+      _isVisualizerEnabledValueNotifier;
 
   Future<double> getAppVolume() async {
     try {
@@ -220,6 +229,12 @@ class PreferenceService {
   Future<void> setIsPremium(bool value) async =>
       await _sharedPreferencesAsync.setBool(Preference.isPremium.name, value);
 
+  Future<void> setIsVisualizerEnabled(bool value) async {
+    isVisualizerEnabledValueNotifier.value = value;
+    await _sharedPreferencesAsync.setBool(
+        Preference.isVisualizerEnabled.name, value);
+  }
+
   Future<void> setSampleSet(SampleSet sampleSet) async =>
       await _sharedPreferencesAsync.setString(
           Preference.sampleSet.name, sampleSet.toJsonString());
@@ -245,6 +260,18 @@ class PreferenceService {
       print("Exception while getting auto update beat unit: $exception");
       await setAutoUpdateBeatUnit(Preference.autoUpdateBeatUnit.defaultValue);
       return Preference.autoUpdateBeatUnit.defaultValue;
+    }
+  }
+
+  Future<bool> _getIsVisualizerEnabled() async {
+    try {
+      bool? value = await _sharedPreferencesAsync
+          .getBool(Preference.isVisualizerEnabled.name);
+      return value ?? Preference.isVisualizerEnabled.defaultValue;
+    } catch (exception) {
+      print("Exception while getting is visualizer enabled: $exception");
+      await setAutoUpdateBeatUnit(Preference.isVisualizerEnabled.defaultValue);
+      return Preference.isVisualizerEnabled.defaultValue;
     }
   }
 }

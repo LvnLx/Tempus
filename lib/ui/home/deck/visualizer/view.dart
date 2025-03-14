@@ -20,7 +20,10 @@ class Visualizer extends StatelessWidget {
               width: constraints.maxHeight / 2),
         )),
         AnimatedOpacity(
-            opacity: context.watch<VisualizerViewModel>().isVisible ? 1.0 : 0.0,
+            opacity: context.watch<VisualizerViewModel>().isVisible &&
+                    context.watch<VisualizerViewModel>().isVisualizerEnabled
+                ? 1.0
+                : 0.0,
             duration: context.watch<VisualizerViewModel>().isVisible
                 ? Duration(seconds: 0)
                 : Duration(milliseconds: 200),

@@ -57,8 +57,9 @@ class Main extends StatelessWidget {
                   context.read<PurchaseService>(),
                   context.read<ThemeService>())),
           ChangeNotifierProvider(
-              create: (context) =>
-                  VisualizerViewModel(context.read<AudioService>()))
+              create: (context) => VisualizerViewModel(
+                  context.read<AudioService>(),
+                  context.read<PreferenceService>()))
         ],
         builder: (context, child) => Home(),
       ),
