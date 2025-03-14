@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
-import 'package:tempus/constants/strings.dart';
+import 'package:tempus/domain/constants/strings.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 

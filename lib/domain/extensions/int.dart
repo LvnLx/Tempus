@@ -1,4 +1,4 @@
-import 'package:tempus/constants/symbols.dart';
+import 'package:tempus/domain/constants/symbols.dart';
 
 extension IntExtensions on int {
   bool isPowerOfTwo() => this > 0 && (this & (this - 1)) == 0;

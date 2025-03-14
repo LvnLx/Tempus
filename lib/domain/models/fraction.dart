@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:tempus/constants/symbols.dart';
+import 'package:tempus/domain/constants/symbols.dart';
 import 'package:tempus/domain/extensions/int.dart';
 
 class Fraction {

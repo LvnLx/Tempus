@@ -4,7 +4,7 @@ import 'package:flutter/material.dart' hide showDialog;
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:tempus/constants/strings.dart';
+import 'package:tempus/domain/constants/strings.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/home/deck/settings/app_volume_settings/view.dart';
