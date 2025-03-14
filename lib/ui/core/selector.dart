@@ -36,5 +36,5 @@ class Selector extends StatelessWidget {
               options.length,
               (index) => RotatedBox(
                   quarterTurns: orientation == Axis.horizontal ? 1 : 0,
-                  child: options[index]))));
+                  child: FittedBox(child: options[index])))));
 }

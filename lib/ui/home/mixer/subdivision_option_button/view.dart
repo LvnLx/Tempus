@@ -50,12 +50,10 @@ class SubdivisionOptionButton extends StatelessWidget {
                             initialItemIndex: Options.subdivisionOptions
                                 .indexOf(initialSubdivisionOption),
                             options: Options.subdivisionOptions
-                                .map((numeratorOption) => FittedBox(
-                                      child: PlatformText(
-                                          numeratorOption.toString(),
-                                          style:
-                                              TextStyle(fontFamily: "SFMono")),
-                                    ))
+                                .map((numeratorOption) => PlatformText(
+                                    numeratorOption.toString(),
+                                    style:
+                                        TextStyle(fontFamily: "SFMono")))
                                 .toList(),
                             orientation: Axis.horizontal,
                             useTheme: false),

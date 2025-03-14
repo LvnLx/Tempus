@@ -75,12 +75,10 @@ class TimeSignatureButton extends StatelessWidget {
                                     initialItemIndex: numeratorOptions
                                         .indexOf(timeSignature.numerator),
                                     options: numeratorOptions
-                                        .map((numeratorOption) => FittedBox(
-                                              child: PlatformText(
-                                                  numeratorOption.toString(),
-                                                  style: TextStyle(
-                                                      fontFamily: "SFMono")),
-                                            ))
+                                        .map((numeratorOption) => PlatformText(
+                                            numeratorOption.toString(),
+                                            style: TextStyle(
+                                                fontFamily: "SFMono")))
                                         .toList(),
                                     orientation: Axis.horizontal,
                                     useTheme: false)),
@@ -96,12 +94,10 @@ class TimeSignatureButton extends StatelessWidget {
                                     initialItemIndex: denominatorOptions
                                         .indexOf(timeSignature.denominator),
                                     options: denominatorOptions
-                                        .map((denominatorOption) => FittedBox(
-                                              child: PlatformText(
-                                                  denominatorOption.toString(),
-                                                  style: TextStyle(
-                                                      fontFamily: "SFMono")),
-                                            ))
+                                        .map((denominatorOption) => PlatformText(
+                                            denominatorOption.toString(),
+                                            style: TextStyle(
+                                                fontFamily: "SFMono")))
                                         .toList(),
                                     orientation: Axis.horizontal,
                                     useTheme: false))

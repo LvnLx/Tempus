@@ -20,6 +20,16 @@ class BeatUnit extends Fraction {
       BeatUnit(json["numerator"], json["denominator"]);
 
   @override
+  bool operator ==(Object other) {
+    return other is BeatUnit &&
+        other.numerator == numerator &&
+        other.denominator == denominator;
+  }
+
+  @override
+  int get hashCode => Object.hash(numerator, denominator);
+
+  @override
   String toString() {
     if (_isDotted()) {
       return "${Note.values.firstWhere((note) => note.denominator == denominator / 2).symbol} ${Symbols.augmentationDot}";
@@ -32,7 +42,8 @@ class BeatUnit extends Fraction {
     }
   }
 
-  bool _isDotted() => numerator == 3 && denominator.isPowerOfTwo() && denominator > 1;
+  bool _isDotted() =>
+      numerator == 3 && denominator.isPowerOfTwo() && denominator > 1;
 }
 
 class TimeSignature extends Fraction {
@@ -59,5 +70,5 @@ class TimeSignature extends Fraction {
   }
 
   bool _isCompound() =>
-      numerator % 3 == 0 && numerator != 3;
+      numerator % 3 == 0 && numerator != 3 && denominator.isPowerOfTwo();
 }

@@ -30,6 +30,9 @@ class MixerViewModel extends ChangeNotifier {
   Future<void> removeSubdivision(Key key) async =>
       await _audioService.removeSubdivision(key);
 
+  Future<void> setBeatUnit(BeatUnit beatUnit) async =>
+      await _audioService.setBeatUnit(beatUnit);
+
   Future<void> setBeatVolume(double volume) async =>
       await _audioService.setBeatVolume(volume);
 
