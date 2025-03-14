@@ -11,7 +11,7 @@ import 'package:tempus/ui/home/deck/settings/app_volume_settings/view.dart';
 import 'package:tempus/ui/home/deck/settings/sample_settings/view.dart';
 import 'package:tempus/ui/home/deck/settings/theme_settings/view.dart';
 import 'package:tempus/ui/home/deck/settings/view_model.dart';
-import 'package:tempus/util.dart';
+import 'package:tempus/domain/util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Settings extends StatefulWidget {
