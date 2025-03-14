@@ -28,7 +28,7 @@ Future<void> showDialog(DialogConfiguration dialogConfiguration) async =>
         builder: (context) => PlatformAlertDialog(
             title: Text(dialogConfiguration.title),
             content: Padding(
-                padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
+                padding: EdgeInsets.only(top: 8.0),
                 child: PlatformText(dialogConfiguration.message,
                     textAlign: TextAlign.center)),
             actions: dialogConfiguration.actions));
@@ -61,7 +61,7 @@ Future<void> showPurchaseResultDialog(
         builder: (context) => PlatformAlertDialog(
                 title: Text(purchaseResult.status.toString()),
                 content: Padding(
-                    padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
+                    padding: EdgeInsets.only(top: 8.0),
                     child: PlatformText(purchaseResult.message,
                         textAlign: TextAlign.center)),
                 actions: [
@@ -84,7 +84,7 @@ Future<void> showIntegerSettingDialog(
       builder: (context) => PlatformAlertDialog(
               title: Text(title),
               content: Padding(
-                  padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
+                  padding: EdgeInsets.only(top: 8.0),
                   child: PlatformTextField(
                     autofocus: true,
                     cursorColor: Colors.transparent,

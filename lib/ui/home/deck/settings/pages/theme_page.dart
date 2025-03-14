@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 
-class ThemeSettings extends StatelessWidget {
-  final Future<void> Function(ThemeMode updatedThemeMode) callback;
+class ThemeSettingsPage extends StatelessWidget {
+  final void Function(ThemeMode themeMode) setThemeMode;
   final SettingsThemeData Function(BuildContext context) getSettingsThemeData;
   final ThemeMode themeMode;
 
-  const ThemeSettings(
+  const ThemeSettingsPage(
       {super.key,
-      required this.callback,
+      required this.setThemeMode,
       required this.getSettingsThemeData,
       required this.themeMode});
 
@@ -41,21 +41,20 @@ class ThemeSettings extends StatelessWidget {
                     trailing: themeMode == ThemeMode.system
                         ? Icon(PlatformIcons(context).checkMark)
                         : null,
-                    onPressed: (_) async => await callback(ThemeMode.system)),
+                    onPressed: (_) async => setThemeMode(ThemeMode.system)),
                 SettingsTile(
                     title: Text("Light"),
                     trailing: themeMode == ThemeMode.light
                         ? Icon(PlatformIcons(context).checkMark)
                         : null,
                     onPressed: (context) async =>
-                        await callback(ThemeMode.light)),
+                        setThemeMode(ThemeMode.light)),
                 SettingsTile(
                     title: Text("Dark"),
                     trailing: themeMode == ThemeMode.dark
                         ? Icon(PlatformIcons(context).checkMark)
                         : null,
-                    onPressed: (context) async =>
-                        await callback(ThemeMode.dark)),
+                    onPressed: (context) async => setThemeMode(ThemeMode.dark)),
               ],
             ),
           ],

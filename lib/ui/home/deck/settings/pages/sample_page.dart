@@ -45,7 +45,7 @@ class SamplePage extends StatelessWidget {
               tiles: sampleSets
                   .where((sampleSet) => !sampleSet.isPremium)
                   .map((sampleSet) =>
-                      getSampleSetSettingsTiles(context, sampleSet, true))
+                      getSampleSetSettingsTile(context, sampleSet, true))
                   .toList(),
             ),
             SettingsSection(
@@ -53,26 +53,25 @@ class SamplePage extends StatelessWidget {
                 tiles: sampleSets
                     .where((sampleSet) => sampleSet.isPremium)
                     .map((sampleSet) =>
-                        getSampleSetSettingsTiles(context, sampleSet, false))
+                        getSampleSetSettingsTile(context, sampleSet, false))
                     .toList())
           ]),
     );
   }
 
-  SettingsTile getSampleSetSettingsTiles(
-      BuildContext context, SampleSet sampleSet, bool isFree) {
-    return SettingsTile(
-        enabled: isFree || isPremium,
-        title: Text(capitalizeFirst(sampleSet.name)),
-        trailing: () {
-          SampleSet activeSampleSet = sampleSet;
-          if (activeSampleSet.name == sampleSet.name &&
-              activeSampleSet.isPremium == sampleSet.isPremium) {
-            return Icon(PlatformIcons(context).checkMark);
-          } else {
-            return null;
-          }
-        }(),
-        onPressed: (context) async => await setSampleSet(sampleSet));
-  }
+  SettingsTile getSampleSetSettingsTile(
+          BuildContext context, SampleSet currentSampleSet, bool isFree) =>
+      SettingsTile(
+          enabled: isFree || isPremium,
+          title: Text(capitalizeFirst(currentSampleSet.name)),
+          trailing: () {
+            SampleSet activeSampleSet = sampleSet;
+            if (activeSampleSet.name == currentSampleSet.name &&
+                activeSampleSet.isPremium == currentSampleSet.isPremium) {
+              return Icon(PlatformIcons(context).checkMark);
+            } else {
+              return null;
+            }
+          }(),
+          onPressed: (context) async => await setSampleSet(currentSampleSet));
 }

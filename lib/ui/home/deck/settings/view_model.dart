@@ -40,7 +40,7 @@ class SettingsViewModel extends ChangeNotifier {
     await _audioService.setState(
         Preference.appVolume.defaultValue,
         Preference.bpm.defaultValue,
-        Preference.beatVolume.defaultValue,
+        Preference.beatUnit.defaultValue,
         Preference.beatVolume.defaultValue,
         Preference.downbeatVolume.defaultValue,
         Preference.sampleSet.defaultValue,
@@ -72,6 +72,6 @@ class SettingsViewModel extends ChangeNotifier {
   Future<void> setSampleSet(SampleSet sampleSet) async =>
       await _audioService.setSampleSet(sampleSet);
 
-  Future<void> setThemeMode(ThemeMode themeMode) async =>
-      await _preferenceService.setThemeMode(themeMode);
+  void setThemeMode(ThemeMode themeMode) =>
+      _themeService.setThemeMode(themeMode);
 }

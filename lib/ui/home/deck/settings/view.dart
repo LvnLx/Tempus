@@ -168,8 +168,8 @@ class _SettingsState extends State<Settings> {
               onPressed: (context) => Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => ThemeSettings(
-                            callback: (updatedThemeMode) => context
+                      builder: (context) => ThemeSettingsPage(
+                            setThemeMode: (updatedThemeMode) => context
                                 .read<SettingsViewModel>()
                                 .setThemeMode(updatedThemeMode),
                             getSettingsThemeData: (context) =>
