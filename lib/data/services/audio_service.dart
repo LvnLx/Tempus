@@ -258,7 +258,10 @@ class AudioService {
   Future<void> setTimeSignature(TimeSignature timeSignature) async {
     _timeSignatureValueNotifier.value = timeSignature;
 
-    await setBeatUnit(timeSignature.defaultBeatUnit());
+    if (_preferenceService.autoUpdateBeatUnit) {
+      await setBeatUnit(timeSignature.defaultBeatUnit());
+    }
+
     await _setNumerator(timeSignature.numerator);
     await _setDenominator(timeSignature.denominator);
 
