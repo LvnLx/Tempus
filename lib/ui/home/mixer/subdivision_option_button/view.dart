@@ -3,6 +3,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/core/selector.dart';
+import 'package:tempus/ui/core/themed_text.dart';
 
 class SubdivisionOptionButton extends StatelessWidget {
   final Future<void> Function(int updatedSubdivisionOption) callback;
@@ -17,7 +18,7 @@ class SubdivisionOptionButton extends StatelessWidget {
       onTap: () => showDialog(callback, context, subdivisionOption),
       child: ScaledPadding(
           scale: 0.8,
-          child: FittedBox(child: Text(subdivisionOption.toString()))));
+          child: FittedBox(child: ThemedText(subdivisionOption.toString()))));
 
   Future<void> showDialog(
       Future<void> Function(int updatedSubdivisionOption) callback,

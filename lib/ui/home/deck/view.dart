@@ -10,6 +10,7 @@ import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/outlined.dart';
+import 'package:tempus/ui/core/themed_text.dart';
 import 'package:tempus/ui/home/deck/buttons/bpm_button.dart';
 import 'package:tempus/ui/home/deck/bpm_dial/view.dart';
 import 'package:tempus/ui/home/deck/settings/view.dart';
@@ -86,44 +87,41 @@ class DeckState extends State<Deck> {
                                                 .onSurface),
                                       ),
                                       GestureDetector(
-                                          onTap: () async => await showIntegerSettingDialog(
-                                              context,
-                                              "Beats per minute",
-                                              3,
-                                              context
-                                                  .read<DeckViewModel>()
-                                                  .setBpm,
-                                              context
-                                                  .read<DeckViewModel>()
-                                                  .bpm),
+                                          onTap: () async =>
+                                              await showIntegerSettingDialog(
+                                                  context,
+                                                  "Beats per minute",
+                                                  3,
+                                                  context
+                                                      .read<DeckViewModel>()
+                                                      .setBpm,
+                                                  context
+                                                      .read<DeckViewModel>()
+                                                      .bpm),
                                           child: Outlined(
                                               child: SizedBox(
-                                                  height: barConstraints.maxHeight /
-                                                      2,
+                                                  height:
+                                                      barConstraints.maxHeight /
+                                                          2,
                                                   width:
                                                       barConstraints.maxHeight,
                                                   child: FittedBox(
-                                                      child: Text(
-                                                          tapTimes.length == 1
-                                                              ? "TAP"
-                                                              : context
-                                                                  .watch<
-                                                                      DeckViewModel>()
-                                                                  .bpm
-                                                                  .toString(),
-                                                          style: TextStyle(
-                                                              color: Theme.of(context)
-                                                                  .colorScheme
-                                                                  .primary,
-                                                              fontFamily: "SFMono"),
-                                                          textAlign: TextAlign.center))))),
+                                                      child: ThemedText(tapTimes
+                                                                  .length ==
+                                                              1
+                                                          ? "TAP"
+                                                          : context
+                                                              .watch<
+                                                                  DeckViewModel>()
+                                                              .bpm
+                                                              .toString()))))),
                                       VerticalDivider(
                                           color: Theme.of(context)
                                               .colorScheme
                                               .onSurface),
                                       TimeSignatureButton(
-                                          setTimeSignature: (updatedTimeSignature) =>
-                                              context
+                                          setTimeSignature:
+                                              (updatedTimeSignature) => context
                                                   .read<DeckViewModel>()
                                                   .setTimeSignature(
                                                       updatedTimeSignature),

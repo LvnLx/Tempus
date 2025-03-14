@@ -5,6 +5,7 @@ import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
+import 'package:tempus/ui/core/themed_text.dart';
 import 'package:tempus/ui/home/mixer/beat_unit_button/view.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
 import 'package:tempus/ui/home/mixer/fixed_channel/view.dart';
@@ -41,12 +42,7 @@ class MixerState extends State<Mixer> {
                         .downbeatVolumeValueNotifier,
                     child: ScaledPadding(
                         scale: 0.8,
-                        child: FittedBox(
-                            child: Text("ACC",
-                                style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    fontFamily: "SFMono"))))),
+                        child: FittedBox(child: ThemedText("ACC")))),
                 VerticalDivider(color: Theme.of(context).colorScheme.onSurface),
                 FixedChannel(
                     sliderCallback:

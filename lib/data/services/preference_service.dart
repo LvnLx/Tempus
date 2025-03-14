@@ -10,6 +10,7 @@ import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Preference {
   appVolume(1.0),
+  areBeatHapticsEnabled(false),
   autoUpdateBeatUnit(true),
   bpm(120),
   beatUnit(BeatUnit(4, 4)),
@@ -31,18 +32,24 @@ class PreferenceService {
   final SharedPreferencesAsync _sharedPreferencesAsync =
       SharedPreferencesAsync();
 
+  late ValueNotifier<bool> _areBeatHapticsEnabledValueNotifier;
   late ValueNotifier<bool> _autoUpdateBeatUnitValueNotifier;
   late ValueNotifier<bool> _isVisualizerEnabledValueNotifier;
 
   PreferenceService(this._assetService);
 
   Future<void> init() async {
+    _areBeatHapticsEnabledValueNotifier =
+        ValueNotifier(await _getAreBeatHapticsEnabled());
     _autoUpdateBeatUnitValueNotifier =
         ValueNotifier(await _getAutoUpdateBeatUnit());
     _isVisualizerEnabledValueNotifier =
         ValueNotifier(await _getIsVisualizerEnabled());
   }
 
+  bool get areBeatHapticsEnabled => areBeatHapticsEnabledValueNotifier.value;
+  ValueNotifier<bool> get areBeatHapticsEnabledValueNotifier =>
+      _areBeatHapticsEnabledValueNotifier;
   bool get autoUpdateBeatUnit => autoUpdateBeatUnitValueNotifier.value;
   ValueNotifier<bool> get autoUpdateBeatUnitValueNotifier =>
       _autoUpdateBeatUnitValueNotifier;
@@ -205,6 +212,12 @@ class PreferenceService {
       await _sharedPreferencesAsync.setDouble(
           Preference.appVolume.name, volume);
 
+  Future<void> setAreBeatHapticsEnabled(bool value) async {
+    areBeatHapticsEnabledValueNotifier.value = value;
+    await _sharedPreferencesAsync.setBool(
+        Preference.areBeatHapticsEnabled.name, value);
+  }
+
   Future<void> setAutoUpdateBeatUnit(bool value) async {
     autoUpdateBeatUnitValueNotifier.value = value;
     await _sharedPreferencesAsync.setBool(
@@ -251,6 +264,19 @@ class PreferenceService {
       await _sharedPreferencesAsync.setString(
           Preference.timeSignature.name, timeSignature.toJsonString());
 
+  Future<bool> _getAreBeatHapticsEnabled() async {
+    try {
+      bool? value = await _sharedPreferencesAsync
+          .getBool(Preference.areBeatHapticsEnabled.name);
+      return value ?? Preference.areBeatHapticsEnabled.defaultValue;
+    } catch (exception) {
+      print("Exception while getting are beat haptics enabled: $exception");
+      await setAreBeatHapticsEnabled(
+          Preference.areBeatHapticsEnabled.defaultValue);
+      return Preference.areBeatHapticsEnabled.defaultValue;
+    }
+  }
+
   Future<bool> _getAutoUpdateBeatUnit() async {
     try {
       bool? value = await _sharedPreferencesAsync
@@ -270,7 +296,7 @@ class PreferenceService {
       return value ?? Preference.isVisualizerEnabled.defaultValue;
     } catch (exception) {
       print("Exception while getting is visualizer enabled: $exception");
-      await setAutoUpdateBeatUnit(Preference.isVisualizerEnabled.defaultValue);
+      await setIsVisualizerEnabled(Preference.isVisualizerEnabled.defaultValue);
       return Preference.isVisualizerEnabled.defaultValue;
     }
   }

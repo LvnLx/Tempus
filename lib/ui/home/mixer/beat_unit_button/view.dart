@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tempus/domain/models/fraction.dart';
+import 'package:tempus/ui/core/themed_text.dart';
 
 class BeatUnitButton extends StatelessWidget {
   final BeatUnit beatUnit;
@@ -8,13 +9,8 @@ class BeatUnitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-        onTap: () => print("hi"),
-        behavior: HitTestBehavior.opaque,
-        child: FittedBox(
-            child: Text(beatUnit.toString(),
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontFamily: "NotoMusic",
-                    fontWeight: FontWeight.bold))),
-      );
+      onTap: () => print("hi"),
+      behavior: HitTestBehavior.opaque,
+      child: FittedBox(
+          child: ThemedText(beatUnit.toString(), isMusicalSymbal: true)));
 }

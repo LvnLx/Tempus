@@ -73,6 +73,16 @@ class _SettingsState extends State<Settings> {
                   }
                 })
           ]),
+          SettingsSection(title: Text("Accessibility"), tiles: [
+            SettingsTile.switchTile(
+              title: Text("Beat haptics"),
+              initialValue:
+                  context.watch<SettingsViewModel>().areBeatHapticsEnabled,
+              onToggle: (value) => context
+                  .read<SettingsViewModel>()
+                  .setAreBeatHapticsEnabled(value),
+            )
+          ]),
           SettingsSection(title: Text("Audio"), tiles: [
             SettingsTile.navigation(
                 title: Text("App volume"),
