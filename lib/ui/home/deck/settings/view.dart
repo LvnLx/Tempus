@@ -8,7 +8,6 @@ import 'package:tempus/domain/constants/strings.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/home/deck/settings/pages/app_volume_page.dart';
-import 'package:tempus/ui/home/deck/settings/pages/auto_update_beat_unit_page.dart';
 import 'package:tempus/ui/home/deck/settings/pages/sample_set_page.dart';
 import 'package:tempus/ui/home/deck/settings/pages/theme_page.dart';
 import 'package:tempus/ui/home/deck/settings/view_model.dart';
@@ -74,56 +73,6 @@ class _SettingsState extends State<Settings> {
                   }
                 })
           ]),
-          SettingsSection(title: Text("Metronome"), tiles: [
-            SettingsTile.navigation(
-                title: Text("Auto update beat unit"),
-                trailing: DefaultTextStyle(
-                    style: TextStyle(
-                        fontSize: 17,
-                        color:
-                            _getSettingsThemeData(context).trailingTextColor),
-                    child: Text(
-                        context.watch<SettingsViewModel>().autoUpdateBeatUnit
-                            ? "On"
-                            : "Off")),
-                onPressed: (context) => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AutoUpdateBeatUnitPage(
-                            setAutoUpdateBeatUnit: (updatedValue) => context
-                                .read<SettingsViewModel>()
-                                .setAutoUpdateBeatUnit(updatedValue),
-                            initialValue: context
-                                .watch<SettingsViewModel>()
-                                .autoUpdateBeatUnit,
-                            getSettingsThemeData: (context) =>
-                                _getSettingsThemeData(context))))),
-            SettingsTile(
-                title: Text("Reset"),
-                onPressed: (context) => showDialog(DialogConfiguration(
-                        context,
-                        "Reset Metronome",
-                        "All of the metronome's settings will be reset to their default values",
-                        [
-                          PlatformDialogAction(
-                              child: Text("Cancel"),
-                              onPressed: () => Navigator.pop(context),
-                              cupertino: (context, platform) =>
-                                  CupertinoDialogActionData(
-                                      isDefaultAction: true)),
-                          PlatformDialogAction(
-                              child: Text("Ok"),
-                              onPressed: () async {
-                                Navigator.pop(context);
-                                await context
-                                    .read<SettingsViewModel>()
-                                    .resetMetronome();
-                              },
-                              cupertino: (context, platform) =>
-                                  CupertinoDialogActionData(
-                                      isDestructiveAction: true))
-                        ])))
-          ]),
           SettingsSection(title: Text("Audio"), tiles: [
             SettingsTile.navigation(
                 title: Text("App volume"),
@@ -185,6 +134,43 @@ class _SettingsState extends State<Settings> {
               onToggle: (value) => context
                   .read<SettingsViewModel>()
                   .setIsVisualizerEnabled(value),
+            )
+          ]),
+          SettingsSection(title: Text("Metronome"), tiles: [
+            SettingsTile(
+                title: Text("Reset"),
+                onPressed: (context) => showDialog(DialogConfiguration(
+                        context,
+                        "Reset Metronome",
+                        "All of the metronome's settings will be reset to their default values",
+                        [
+                          PlatformDialogAction(
+                              child: Text("Cancel"),
+                              onPressed: () => Navigator.pop(context),
+                              cupertino: (context, platform) =>
+                                  CupertinoDialogActionData(
+                                      isDefaultAction: true)),
+                          PlatformDialogAction(
+                              child: Text("Ok"),
+                              onPressed: () async {
+                                Navigator.pop(context);
+                                await context
+                                    .read<SettingsViewModel>()
+                                    .resetMetronome();
+                              },
+                              cupertino: (context, platform) =>
+                                  CupertinoDialogActionData(
+                                      isDestructiveAction: true))
+                        ]))),
+            SettingsTile.switchTile(
+              title: Text("Auto update beat unit"),
+              description: Text(
+                  "Automatically updates the beat unit to the best matching option for the given time signature. For example, a time signature change to 6/8 would automatically update the beat unit to a dotted quarter note"),
+              initialValue:
+                  context.watch<SettingsViewModel>().autoUpdateBeatUnit,
+              onToggle: (value) => context
+                  .read<SettingsViewModel>()
+                  .setAutoUpdateBeatUnit(value),
             )
           ]),
           SettingsSection(title: Text("Other"), tiles: [
