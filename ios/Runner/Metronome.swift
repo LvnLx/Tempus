@@ -3,9 +3,10 @@ import AVFoundation
 class Metronome {
   private var appVolume: Float?
   private var audioUnit: AudioUnit?
+  private var beatSample: UnsafePointer<Sample>?
   private var beatVolume: Float?
   private var denominator: UInt16?
-  private var beatSample: UnsafePointer<Sample>?
+  private var downbeatSample: UnsafePointer<Sample>?
   private var downbeatVolume: Float?
   private var dispatchQueue: UnsafeMutablePointer<DispatchQueue> = UnsafeMutablePointer<DispatchQueue>.allocate(capacity: 1)
   private let nextFrame: UnsafeMutablePointer<Int> = UnsafeMutablePointer.allocate(capacity: 1)
@@ -14,7 +15,7 @@ class Metronome {
   private var innerBeatSample: UnsafePointer<Sample>?
   private let beatStarted: () -> Void
   private let validFrameCount: UnsafeMutablePointer<Int> = UnsafeMutablePointer<Int>.allocate(capacity: 1)
-
+  
   init(_ beatStarted: @escaping () -> Void) {
     self.beatStarted = beatStarted
     dispatchQueue.initialize(to: DispatchQueue(label: "com.lvnlx.tempus"))
@@ -56,15 +57,15 @@ class Metronome {
       dispatchQueue.pointee.sync {
         for index in 0..<inNumberFrames {
           inRefCon.nextFrame.pointee = inRefCon.nextFrame.pointee % validFrameCount
-
+          
           ioData.advanced(by: index).pointee = 0
-        
+          
           for clip in clips {
             if (clip.pointee.isActive && !clip.pointee.isPlaying && clip.pointee.startFrame == inRefCon.nextFrame.pointee) {
               clip.pointee.isPlaying = true
               clip.pointee.onStart()
             }
-          
+            
             if (clip.pointee.isPlaying) {
               if (clip.pointee.nextFrame < clip.pointee.sample.pointee.length) {
                 ioData.advanced(by: index).pointee += clip.pointee.sample.pointee.data.advanced(by: clip.pointee.nextFrame).pointee * clip.pointee.volume
@@ -75,7 +76,7 @@ class Metronome {
               }
             }
           }
-        
+          
           inRefCon.nextFrame.pointee += 1
         }
       }
@@ -141,23 +142,23 @@ class Metronome {
     updateClips()
   }
   
-  func setBeatSample(_ path: String) {
-    beatSample = samples[path]!
-    updateClips()
+  func setSampleSet(_ sampleSetAsJsonString: String, _ shouldUpdateClips: Bool = true) {
+    let sampleSetAsData: Data? = sampleSetAsJsonString.data(using: .utf8)
+    let sampleSetAsJson: [String: String] = try! JSONSerialization.jsonObject(with: sampleSetAsData!) as! [String: String]
+    
+    beatSample = samples[sampleSetAsJson["beatSamplePath"]!]
+    downbeatSample = samples[sampleSetAsJson["downbeatSamplePath"]!]
+    innerBeatSample = samples[sampleSetAsJson["innerBeatSamplePath"]!]
+    
+    if (shouldUpdateClips) {
+      updateClips()
+    }
   }
   
-  func setInnerBeatSample(_ path: String) {
-    innerBeatSample = samples[path]!
-    updateClips()
-  }
-  
-  func setState(_ appVolume: Float, _ bpm: UInt16, _ beatUnitAsJsonString: String, _ beatVolume: Float, _ denominator: UInt16, _ downbeatVolume: Float, _ numerator: UInt16, _ beatSamplePath: String, _ innerBeatSamplePath: String, _ subdivisionsAsJsonString: String) {
+  func setState(_ appVolume: Float, _ bpm: UInt16, _ beatUnitAsJsonString: String, _ beatVolume: Float, _ denominator: UInt16, _ downbeatVolume: Float, _ numerator: UInt16, _ subdivisionsAsJsonString: String) {
     let bps: Double = Double(bpm) / 60.0
     let beatDurationSeconds: Double = 1.0 / bps
     validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
-    
-    beatSample = samples[beatSamplePath]!
-    innerBeatSample = samples[innerBeatSamplePath]!
     
     subdivisions.removeAll()
     let subdivisionsAsData: Data? = subdivisionsAsJsonString.data(using: .utf8)

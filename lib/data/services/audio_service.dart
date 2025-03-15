@@ -15,14 +15,13 @@ enum Action {
   addSubdivision,
   removeSubdivision,
   setBpm,
-  setBeatSample,
   setBeatUnit,
   setBeatVolume,
   setDenominator,
   setDownbeatVolume,
-  setInnerBeatSample,
   setNumerator,
   setSamplePaths,
+  setSampleSet,
   setState,
   setSubdivisionOption,
   setSubdivisionVolume,
@@ -85,6 +84,7 @@ class AudioService {
         (accumulator, sampleSet) => {
               ...accumulator,
               sampleSet.getBeatSamplePath(),
+              sampleSet.getDownbeatSamplePath(),
               sampleSet.getInnerBeatSamplePath()
             }));
 
@@ -187,9 +187,7 @@ class AudioService {
   Future<void> setSampleSet(SampleSet sampleSet) async {
     _sampleSetValueNotifier.value = sampleSet;
 
-    await _setBeatSample(sampleSet.getBeatSamplePath());
-    await _setInnerBeatSample(sampleSet.getInnerBeatSamplePath());
-
+    await _setSampleSet(sampleSet);
     _preferenceService.setSampleSet(sampleSet);
   }
 
@@ -228,8 +226,7 @@ class AudioService {
       timeSignature.denominator.toString(),
       downbeatVolume.toString(),
       timeSignature.numerator.toString(),
-      sampleSet.getBeatSamplePath(),
-      sampleSet.getInnerBeatSamplePath(),
+      sampleSet.getPathsAsJsonString(),
       subdivisions.toJsonString(),
     ]);
     print(result);
@@ -305,12 +302,6 @@ class AudioService {
     print(result);
   }
 
-  Future<void> _setBeatSample(String path) async {
-    final result =
-        await _methodChannel.invokeMethod(Action.setBeatSample.name, [path]);
-    print(result);
-  }
-
   Future<void> _setBeatUnit(BeatUnit beatUnit) async {
     final result = await _methodChannel
         .invokeMethod(Action.setBeatUnit.name, [beatUnit.toJsonString()]);
@@ -335,12 +326,6 @@ class AudioService {
     print(result);
   }
 
-  Future<void> _setInnerBeatSample(String path) async {
-    final result = await _methodChannel
-        .invokeMethod(Action.setInnerBeatSample.name, [path]);
-    print(result);
-  }
-
   Future<void> _setNumerator(int value) async {
     final result = await _methodChannel
         .invokeMethod(Action.setNumerator.name, [value.toString()]);
@@ -350,6 +335,12 @@ class AudioService {
   Future<void> _setSamplePaths(Set<String> samplePaths) async {
     final result = await _methodChannel.invokeMethod(
         Action.setSamplePaths.name, samplePaths.toList());
+    print(result);
+  }
+
+  Future<void> _setSampleSet(SampleSet sampleSet) async {
+    final result = await _methodChannel.invokeMethod(
+        Action.setSampleSet.name, [sampleSet.getPathsAsJsonString()]);
     print(result);
   }
 

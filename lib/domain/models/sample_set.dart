@@ -24,8 +24,17 @@ class SampleSet {
   String getBeatSamplePath() =>
       "assets/audio/${isPremium ? "premium" : "free"}/$name/beat.wav";
 
+  String getDownbeatSamplePath() =>
+      "assets/audio/${isPremium ? "premium" : "free"}/$name/downbeat.wav";
+
   String getInnerBeatSamplePath() =>
       "assets/audio/${isPremium ? "premium" : "free"}/$name/inner_beat.wav";
+
+  String getPathsAsJsonString() => jsonEncode({
+        "beatSamplePath": getBeatSamplePath(),
+        "downbeatSamplePath": getDownbeatSamplePath(),
+        "innerBeatSamplePath": getInnerBeatSamplePath()
+      });
 
   String toJsonString() => jsonEncode({"name": name, "isPremium": isPremium});
 }
