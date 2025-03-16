@@ -17,14 +17,13 @@ enum Action {
   setBpm,
   setBeatUnit,
   setBeatVolume,
-  setDenominator,
   setDownbeatVolume,
-  setNumerator,
   setSamplePaths,
   setSampleSet,
   setState,
   setSubdivisionOption,
   setSubdivisionVolume,
+  setTimeSignature,
   startPlayback,
   stopPlayback,
 }
@@ -223,11 +222,10 @@ class AudioService {
       bpm.toString(),
       beatUnit.toJsonString(),
       beatVolume.toString(),
-      timeSignature.denominator.toString(),
       downbeatVolume.toString(),
-      timeSignature.numerator.toString(),
       sampleSet.getPathsAsJsonString(),
       subdivisions.toJsonString(),
+      timeSignature.toJsonString()
     ]);
     print(result);
   }
@@ -259,8 +257,7 @@ class AudioService {
       await setBeatUnit(timeSignature.defaultBeatUnit());
     }
 
-    await _setNumerator(timeSignature.numerator);
-    await _setDenominator(timeSignature.denominator);
+    await _setTimeSignature(timeSignature);
 
     _preferenceService.setTimeSignature(timeSignature);
   }
@@ -314,21 +311,9 @@ class AudioService {
     print(result);
   }
 
-  Future<void> _setDenominator(int value) async {
-    final result = await _methodChannel
-        .invokeMethod(Action.setDenominator.name, [value.toString()]);
-    print(result);
-  }
-
   Future<void> _setDownbeatVolume(double volume) async {
     final result = await _methodChannel
         .invokeMethod(Action.setDownbeatVolume.name, [volume.toString()]);
-    print(result);
-  }
-
-  Future<void> _setNumerator(int value) async {
-    final result = await _methodChannel
-        .invokeMethod(Action.setNumerator.name, [value.toString()]);
     print(result);
   }
 
@@ -354,6 +339,12 @@ class AudioService {
   Future<void> _setSubdivisionVolume(Key key, double volume) async {
     final result = await _methodChannel.invokeMethod(
         Action.setSubdivisionVolume.name, [key.toString(), volume.toString()]);
+    print(result);
+  }
+
+  Future<void> _setTimeSignature(TimeSignature timeSignature) async {
+    final result = await _methodChannel
+        .invokeMethod(Action.setTimeSignature.name, [timeSignature.toJsonString()]);
     print(result);
   }
 }

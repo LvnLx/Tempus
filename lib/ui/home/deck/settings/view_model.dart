@@ -42,6 +42,12 @@ class SettingsViewModel extends ChangeNotifier {
       await _purchaseService.purchasePremium();
 
   Future<void> resetApp() async {
+    _preferenceService.setAreBeatHapticsEnabled(
+        Preference.areBeatHapticsEnabled.defaultValue);
+    _preferenceService
+        .setAutoUpdateBeatUnit(Preference.autoUpdateBeatUnit.defaultValue);
+    _preferenceService
+        .setIsVisualizerEnabled(Preference.isVisualizerEnabled.defaultValue);
     _themeService.setThemeMode(Preference.themeMode.defaultValue);
     await _audioService.setState(
         Preference.appVolume.defaultValue,

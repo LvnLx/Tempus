@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		0B864CC42B81359000D0AE13 /* Subdivision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B864CC32B81359000D0AE13 /* Subdivision.swift */; };
 		0B864CC62B81625900D0AE13 /* Metronome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B864CC52B81625900D0AE13 /* Metronome.swift */; };
+		0B8C6EB22D8511350014C72B /* Fraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B8C6EB12D8511320014C72B /* Fraction.swift */; };
+		0B8C6EB42D8512DD0014C72B /* SampleSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B8C6EB32D8512D90014C72B /* SampleSet.swift */; };
 		0BA906B72D5C3594001D6BBF /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BA906B62D5C3594001D6BBF /* StoreKit.framework */; };
 		0BC3768F2BC234BF00E38D18 /* FileHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BC3768E2BC234BF00E38D18 /* FileHandler.swift */; };
 		0BECC0EE2CFA491300450289 /* Clip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BECC0ED2CFA491300450289 /* Clip.swift */; };
@@ -52,6 +54,8 @@
 /* Begin PBXFileReference section */
 		0B864CC32B81359000D0AE13 /* Subdivision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subdivision.swift; sourceTree = "<group>"; };
 		0B864CC52B81625900D0AE13 /* Metronome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metronome.swift; sourceTree = "<group>"; };
+		0B8C6EB12D8511320014C72B /* Fraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fraction.swift; sourceTree = "<group>"; };
+		0B8C6EB32D8512D90014C72B /* SampleSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleSet.swift; sourceTree = "<group>"; };
 		0BA906B62D5C3594001D6BBF /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		0BC3768E2BC234BF00E38D18 /* FileHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHandler.swift; sourceTree = "<group>"; };
 		0BECC0ED2CFA491300450289 /* Clip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clip.swift; sourceTree = "<group>"; };
@@ -157,6 +161,8 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				0B8C6EB32D8512D90014C72B /* SampleSet.swift */,
+				0B8C6EB12D8511320014C72B /* Fraction.swift */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
@@ -404,9 +410,11 @@
 				0BFF78102CE00E32004F81A8 /* Configuration.swift in Sources */,
 				0BECC0F02CFA4C7400450289 /* Sample.swift in Sources */,
 				0B864CC62B81625900D0AE13 /* Metronome.swift in Sources */,
+				0B8C6EB22D8511350014C72B /* Fraction.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				0BECC0EE2CFA491300450289 /* Clip.swift in Sources */,
 				0BECC0F22CFAC7B000450289 /* RefCon.swift in Sources */,
+				0B8C6EB42D8512DD0014C72B /* SampleSet.swift in Sources */,
 				0B864CC42B81359000D0AE13 /* Subdivision.swift in Sources */,
 				0BC3768F2BC234BF00E38D18 /* FileHandler.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,

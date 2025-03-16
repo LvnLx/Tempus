@@ -37,46 +37,44 @@ import AVFoundation
         self.metronome.setBpm(bpm)
         result("Set BPM")
       case "setBeatUnit":
-        let path: String = arguments[0]
-        // TODO set beat unit
+        let beatUnit: BeatUnit = BeatUnit(arguments[0])
+        self.metronome.setBeatUnit(beatUnit)
         result("Set beat unit")
       case "setBeatVolume":
         let volume: Float = Float(arguments[0])!
         self.metronome.setBeatVolume(volume)
         result("Set beat volume")
-      case "setDenominator":
-        let denominator: UInt16 = UInt16(arguments[0])!
-        // TODO set denominator
-        result("Set denominator")
       case "setDownbeatVolume":
         let volume: Float = Float(arguments[0])!
-        // TODO set downbeat volume
+        self.metronome.setDownbeatVolume(volume)
         result("Set downbeat volume")
-      case "setNumerator":
-        let numerator: UInt16 = UInt16(arguments[0])!
-        // TODO set numerator
-        result("Set numerator")
       case "setSamplePaths":
         for samplePath in arguments {
           loadAudioFile(samplePath, controller.lookupKey(forAsset: samplePath))
         }
         result("Set sample names")
       case "setSampleSet":
-        let sampleSetAsJsonString: String = arguments[0]
-        self.metronome.setSampleSet(sampleSetAsJsonString)
+        let sampleSet: SampleSet = SampleSet(arguments[0])
+        self.metronome.setSampleSet(sampleSet)
         result("Set sample set")
       case "setState":
         let appVolume: Float = Float(arguments[0])!
         let bpm: UInt16 = UInt16(arguments[1])!
-        let beatUnitAsJsonString: String = arguments[2]
+        let beatUnit: BeatUnit = BeatUnit(arguments[2])
         let beatVolume: Float = Float(arguments[3])!
-        let denominator: UInt16 = UInt16(arguments[4])!
-        let downbeatVolume: Float = Float(arguments[5])!
-        let numerator: UInt16 = UInt16(arguments[6])!
-        let sampleSetAsJsonString: String = arguments[7]
-        let subdivisionsAsJsonString: String = arguments[8]
-        self.metronome.setSampleSet(sampleSetAsJsonString, false)
-        self.metronome.setState(appVolume, bpm, beatUnitAsJsonString, beatVolume, denominator, downbeatVolume, numerator, subdivisionsAsJsonString)
+        let downbeatVolume: Float = Float(arguments[4])!
+        let sampleSet: SampleSet = SampleSet(arguments[5])
+        let subdivisionsAsJsonString: String = arguments[6]
+        let timeSignature: TimeSignature = TimeSignature(arguments[7])
+        
+        self.metronome.setAppVolume(appVolume, false)
+        self.metronome.setBeatUnit(beatUnit, false)
+        self.metronome.setBeatVolume(beatVolume, false)
+        self.metronome.setDownbeatVolume(downbeatVolume, false)
+        self.metronome.setSampleSet(sampleSet, false)
+        self.metronome.setTimeSignature(timeSignature, false)
+        self.metronome.setState(bpm, subdivisionsAsJsonString)
+        
         result("Set state")
       case "setSubdivisionOption":
         let key: String = arguments[0]
@@ -88,6 +86,10 @@ import AVFoundation
         let volume: Float = Float(arguments[1])!
         self.metronome.setSubdivisionVolume(key, volume)
         result("Set subdivision volume")
+      case "setTimeSignature":
+        let timeSignature: TimeSignature = TimeSignature(arguments[0])
+        self.metronome.setTimeSignature(timeSignature)
+        result("Set time signature")
       case "startPlayback":
         self.metronome.startPlayback()
         result("Started playback")
