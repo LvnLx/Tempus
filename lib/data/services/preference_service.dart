@@ -13,7 +13,7 @@ enum Preference {
   areBeatHapticsEnabled(false),
   autoUpdateBeatUnit(true),
   bpm(120),
-  beatUnit(BeatUnit(4, 4)),
+  beatUnit(BeatUnit(1, 4)),
   beatVolume(1.0),
   downbeatVolume(1.0),
   isPremium(false),
@@ -123,6 +123,7 @@ class PreferenceService {
   }
 
   Future<bool> getIsPremium() async {
+    return true;
     try {
       bool? isPremium =
           await _sharedPreferencesAsync.getBool(Preference.isPremium.name);

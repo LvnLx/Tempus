@@ -5,6 +5,7 @@ class Metronome {
   private var audioUnit: AudioUnit?
   private var beatUnit: BeatUnit?
   private var beatVolume: Float?
+  private var bpm: UInt16?
   private var downbeatVolume: Float?
   private var dispatchQueue: UnsafeMutablePointer<DispatchQueue> = UnsafeMutablePointer<DispatchQueue>.allocate(capacity: 1)
   private let nextFrame: UnsafeMutablePointer<Int> = UnsafeMutablePointer.allocate(capacity: 1)
@@ -125,8 +126,13 @@ class Metronome {
     }
   }
   
-  func setBeatUnit(_ beatUnit: BeatUnit, _ shouldUpdateClips: Bool = true) {
+  func setBeatUnit(_ beatUnit: BeatUnit, _ shouldUpdateClips: Bool = true, _ shouldUpdatedValidFrameCount: Bool = true) {
     self.beatUnit = beatUnit
+    
+    if (shouldUpdatedValidFrameCount) {
+      updateValidFrameCount()
+    }
+    
     if (shouldUpdateClips) {
       updateClips()
     }
@@ -139,16 +145,16 @@ class Metronome {
     }
   }
   
-  func setBpm(_ bpm: UInt16) {
-    let bps: Double = Double(bpm) / 60.0
-    let beatDurationSeconds: Double = 1.0 / bps
+  func setBpm(_ bpm: UInt16, _ shouldUpdateClips: Bool = true, _ shouldUpdatedValidFrameCount: Bool = true) {
+    self.bpm = bpm
     
-    let bufferLocation: Double = Double(nextFrame.pointee) / Double(validFrameCount.pointee)
+    if (shouldUpdatedValidFrameCount) {
+      updateValidFrameCount()
+    }
     
-    self.validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
-    self.nextFrame.pointee = Int(round(Double(self.validFrameCount.pointee) * bufferLocation))
-    
-    updateClips()
+    if (shouldUpdateClips) {
+      updateClips()
+    }
   }
   
   func setDownbeatVolume(_ volume: Float, _ shouldUpdateClips: Bool = true) {
@@ -165,11 +171,7 @@ class Metronome {
     }
   }
   
-  func setState(_ bpm: UInt16, _ subdivisionsAsJsonString: String) {
-    let bps: Double = Double(bpm) / 60.0
-    let beatDurationSeconds: Double = 1.0 / bps
-    validFrameCount.pointee = Int(beatDurationSeconds * Double(sampleRate))
-    
+  func setState(_ subdivisionsAsJsonString: String) {
     subdivisions.removeAll()
     let subdivisionsAsData: Data? = subdivisionsAsJsonString.data(using: .utf8)
     let subdivisionsAsJson: [String: [String: Any]] = try! JSONSerialization.jsonObject(with: subdivisionsAsData!) as! [String: [String: Any]]
@@ -177,6 +179,7 @@ class Metronome {
       subdivisions[key] = Subdivision(fields["option"] as! Int, Float(fields["volume"] as! Double))
     }
     
+    updateValidFrameCount(true)
     updateClips()
   }
   
@@ -190,8 +193,13 @@ class Metronome {
     updateClips()
   }
   
-  func setTimeSignature(_ timeSignature: TimeSignature, _ shouldUpdateClips: Bool = true) {
+  func setTimeSignature(_ timeSignature: TimeSignature, _ shouldUpdateClips: Bool = true, _ shouldUpdateValidFrameCount: Bool = true) {
     self.timeSignature = timeSignature
+    
+    if (shouldUpdateValidFrameCount) {
+      updateValidFrameCount()
+    }
+    
     if (shouldUpdateClips) {
       updateClips()
     }
@@ -218,6 +226,14 @@ class Metronome {
   }
   
   private func updateClips() {
+    let downbeatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
+    downbeatClip.initialize(to: Clip(sample: sampleSet!.downbeatSample, startFrame: 0, volume: downbeatVolume! * appVolume! * 1.5))
+    
+    let beatCount: Int = Int(floor((timeSignature! / beatUnit!).evaluate()))
+    let beatLength: Int = Int((Double(validFrameCount.pointee) / Double(beatCount)).rounded())
+
+    var beatClips: [UnsafeMutablePointer<Clip>] = []
+    var subdivisionClips: [UnsafeMutablePointer<Clip>] = []
     let subdivisionClipData: [(Int, Float)] = subdivisions.values
       .reduce(into: [Float:Float]()) { (accumulator, subdivision) in
         for location in subdivision.getLocations() {
@@ -227,17 +243,20 @@ class Metronome {
         }
       }
       .map { (location, volume) in
-        let exactLocation: Double = Double(validFrameCount.pointee) * Double(location)
+        let exactLocation: Double = Double(beatLength) * Double(location)
         return (Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat), volume)
       }
     
-    let downbeatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-    downbeatClip.initialize(to: Clip(onStart: self.beatStarted, sample: sampleSet!.beatSample, startFrame: 0, volume: beatVolume! * appVolume!))
-    
-    let subdivisionClips: [UnsafeMutablePointer<Clip>] = subdivisionClipData.map { (startFrame, volume) in
-      let subdivisionClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-      subdivisionClip.initialize(to: Clip(sample: sampleSet!.innerBeatSample, startFrame: startFrame, volume: volume * appVolume!))
-      return subdivisionClip
+    (0..<beatCount).forEach { (beat) in
+      let beatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
+      beatClip.initialize(to: Clip(sample: sampleSet!.beatSample, startFrame: beat * beatLength, volume: beatVolume! * appVolume!))
+      beatClips.append(beatClip)
+      
+      subdivisionClipData.forEach { (startFrame, volume) in
+        let subdivisionClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
+        subdivisionClip.initialize(to: Clip(sample: sampleSet!.innerBeatSample, startFrame: (beat * beatLength) + startFrame, volume: volume * appVolume!))
+        subdivisionClips.append(subdivisionClip)
+      }
     }
     
     dispatchQueue.pointee.async {
@@ -245,7 +264,23 @@ class Metronome {
       for index in clips.indices { clips[index].pointee.isActive = false }
       
       clips.append(downbeatClip)
+      clips.append(contentsOf: beatClips)
       clips.append(contentsOf: subdivisionClips)
+    }
+  }
+  
+  private func updateValidFrameCount(_ isSetState: Bool = false) {
+    let bufferLocation = Double(nextFrame.pointee) / Double(validFrameCount.pointee)
+    
+    let bps: Double = Double(bpm!) / 60.0
+    let beatDurationSeconds: Double = 1.0 / bps
+    
+    let beatCount: Double = (timeSignature! / beatUnit!).evaluate()
+    
+    self.validFrameCount.pointee = Int(beatDurationSeconds * beatCount * Double(sampleRate))
+    
+    if (!isSetState) {
+      self.nextFrame.pointee = Int(round(Double(self.validFrameCount.pointee) * bufferLocation))
     }
   }
 }

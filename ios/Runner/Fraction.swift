@@ -9,6 +9,19 @@ class Fraction {
     numerator = fractionAsJson["numerator"]!
     denominator = fractionAsJson["denominator"]!
   }
+  
+  init(_ numerator: UInt16, _ denominator: UInt16) {
+    self.numerator = numerator
+    self.denominator = denominator
+  }
+  
+  static func / (left: Fraction, right: Fraction) -> Fraction {
+    return Fraction(left.numerator * right.denominator, left.denominator * right.numerator)
+  }
+  
+  func evaluate() -> Double {
+    Double(numerator) / Double(denominator)
+  }
 }
 
 class BeatUnit: Fraction {}

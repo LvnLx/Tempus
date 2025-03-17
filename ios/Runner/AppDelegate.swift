@@ -68,12 +68,13 @@ import AVFoundation
         let timeSignature: TimeSignature = TimeSignature(arguments[7])
         
         self.metronome.setAppVolume(appVolume, false)
-        self.metronome.setBeatUnit(beatUnit, false)
+        self.metronome.setBeatUnit(beatUnit, false, false)
         self.metronome.setBeatVolume(beatVolume, false)
+        self.metronome.setBpm(bpm, false, false)
         self.metronome.setDownbeatVolume(downbeatVolume, false)
         self.metronome.setSampleSet(sampleSet, false)
-        self.metronome.setTimeSignature(timeSignature, false)
-        self.metronome.setState(bpm, subdivisionsAsJsonString)
+        self.metronome.setTimeSignature(timeSignature, false, false)
+        self.metronome.setState(subdivisionsAsJsonString)
         
         result("Set state")
       case "setSubdivisionOption":
