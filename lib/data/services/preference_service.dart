@@ -123,7 +123,6 @@ class PreferenceService {
   }
 
   Future<bool> getIsPremium() async {
-    return true;
     try {
       bool? isPremium =
           await _sharedPreferencesAsync.getBool(Preference.isPremium.name);
