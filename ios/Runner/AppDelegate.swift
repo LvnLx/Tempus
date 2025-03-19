@@ -11,7 +11,7 @@ import AVFoundation
     let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
     
     methodChannel = FlutterMethodChannel(name: "audio", binaryMessenger: controller.binaryMessenger)
-    metronome = Metronome()
+    metronome = Metronome(self.beatStarted)
     
     methodChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
@@ -28,27 +28,54 @@ import AVFoundation
         let key: String = arguments[0]
         self.metronome.removeSubdivision(key)
         result("Removed subdivision")
+      case "setAppVolume":
+        let volume: Float = Float(arguments[0])!
+        self.metronome.setAppVolume(volume)
+        result("Set app volume")
       case "setBpm":
         let bpm: UInt16 = UInt16(arguments[0])!
         self.metronome.setBpm(bpm)
         result("Set BPM")
-      case "setSample":
-        let isDownbeat: Bool = Bool(arguments[0])!
-        let sampleName: String = arguments[1]
-        self.metronome.setSample(isDownbeat, sampleName)
-        result("Set sample")
-      case "setSampleNames":
-        for sampleName in arguments {
-          loadAudioFile(sampleName, controller.lookupKey(forAsset: sampleName))
+      case "setBeatUnit":
+        let beatUnit: BeatUnit = BeatUnit(arguments[0])
+        self.metronome.setBeatUnit(beatUnit)
+        result("Set beat unit")
+      case "setBeatVolume":
+        let volume: Float = Float(arguments[0])!
+        self.metronome.setBeatVolume(volume)
+        result("Set beat volume")
+      case "setDownbeatVolume":
+        let volume: Float = Float(arguments[0])!
+        self.metronome.setDownbeatVolume(volume)
+        result("Set downbeat volume")
+      case "setSamplePaths":
+        for samplePath in arguments {
+          loadAudioFile(samplePath, controller.lookupKey(forAsset: samplePath))
         }
         result("Set sample names")
+      case "setSampleSet":
+        let sampleSet: SampleSet = SampleSet(arguments[0])
+        self.metronome.setSampleSet(sampleSet)
+        result("Set sample set")
       case "setState":
-        let bpm: UInt16 = UInt16(arguments[0])!
-        let downbeatSampleName: String = arguments[1]
-        let subdivisionSampleName: String = arguments[2]
-        let subdivisionsAsJsonString: String = arguments[3]
-        let volume: Float = Float(arguments[4])!
-        self.metronome.setState(bpm, downbeatSampleName, subdivisionSampleName, subdivisionsAsJsonString, volume)
+        let appVolume: Float = Float(arguments[0])!
+        let bpm: UInt16 = UInt16(arguments[1])!
+        let beatUnit: BeatUnit = BeatUnit(arguments[2])
+        let beatVolume: Float = Float(arguments[3])!
+        let downbeatVolume: Float = Float(arguments[4])!
+        let sampleSet: SampleSet = SampleSet(arguments[5])
+        let subdivisionsAsJsonString: String = arguments[6]
+        let timeSignature: TimeSignature = TimeSignature(arguments[7])
+        
+        self.metronome.setAppVolume(appVolume, false)
+        self.metronome.setBeatUnit(beatUnit, false, false)
+        self.metronome.setBeatVolume(beatVolume, false)
+        self.metronome.setBpm(bpm, false, false)
+        self.metronome.setDownbeatVolume(downbeatVolume, false)
+        self.metronome.setSampleSet(sampleSet, false)
+        self.metronome.setTimeSignature(timeSignature, false, false)
+        self.metronome.setState(subdivisionsAsJsonString)
+        
         result("Set state")
       case "setSubdivisionOption":
         let key: String = arguments[0]
@@ -60,10 +87,10 @@ import AVFoundation
         let volume: Float = Float(arguments[1])!
         self.metronome.setSubdivisionVolume(key, volume)
         result("Set subdivision volume")
-      case "setVolume":
-        let volume: Float = Float(arguments[0])!
-        self.metronome.setVolume(volume)
-        result("Set volume")
+      case "setTimeSignature":
+        let timeSignature: TimeSignature = TimeSignature(arguments[0])
+        self.metronome.setTimeSignature(timeSignature)
+        result("Set time signature")
       case "startPlayback":
         self.metronome.startPlayback()
         result("Started playback")
@@ -83,5 +110,11 @@ import AVFoundation
     
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+  
+  func beatStarted() {
+    DispatchQueue.main.async {
+      self.methodChannel.invokeMethod("beatStarted", arguments: nil)
+    }
   }
 }

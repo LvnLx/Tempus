@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
+import 'package:tempus/ui/core/themed_text.dart';
+import 'package:tempus/ui/home/mixer/beat_unit_button/view.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
+import 'package:tempus/ui/home/mixer/fixed_channel/view.dart';
 import 'package:tempus/ui/home/mixer/view_model.dart';
 
 class Mixer extends StatefulWidget {
@@ -18,16 +22,6 @@ class MixerState extends State<Mixer> {
   final ScrollController scrollController = ScrollController();
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override // Instead of initState, since we need access to context
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (_, constraints) => Align(
@@ -39,32 +33,26 @@ class MixerState extends State<Mixer> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                Column(
-                  children: [
-                    Expanded(
-                        flex: 5,
-                        child: RotatedBox(
-                          quarterTurns: 3,
-                          child: PlatformSlider(
-                            activeColor: Theme.of(context).colorScheme.primary,
-                            onChanged: (double value) =>
-                                context.read<MixerViewModel>().setVolume(value),
-                            value: context.watch<MixerViewModel>().volume,
-                          ),
-                        )),
-                    Expanded(
-                      child: AxisSizedBox(
-                        reference: Axis.vertical,
-                        child: ScaledPadding(
-                          child: Icon(
-                            volumeIcon(),
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                Padding(padding: EdgeInsets.only(left: 8.0)),
+                FixedChannel(
+                    sliderCallback:
+                        context.read<MixerViewModel>().setDownbeatVolume,
+                    volumeValueNotifier: context
+                        .read<MixerViewModel>()
+                        .downbeatVolumeValueNotifier,
+                    child: ScaledPadding(
+                        scale: 0.8,
+                        child: FittedBox(child: ThemedText("ACC")))),
+                VerticalDivider(color: Theme.of(context).colorScheme.onSurface),
+                FixedChannel(
+                    sliderCallback:
+                        context.read<MixerViewModel>().setBeatVolume,
+                    volumeValueNotifier:
+                        context.read<MixerViewModel>().beatVolumeValueNotifier,
+                    child: BeatUnitButton(
+                        beatUnit: context.watch<MixerViewModel>().beatUnit,
+                        isPremium: context.watch<MixerViewModel>().isPremium,
+                        setBeatUnit: context.read<MixerViewModel>().setBeatUnit)),
                 ...(context
                     .watch<MixerViewModel>()
                     .subdivisions
@@ -79,7 +67,7 @@ class MixerState extends State<Mixer> {
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
                 if (context.watch<MixerViewModel>().subdivisions.length <
-                    subdivisionOptions.length)
+                    Options.subdivisionOptions.length)
                   GestureDetector(
                       onTap: () async {
                         if (_canAddSubdivison()) {
@@ -114,17 +102,4 @@ class MixerState extends State<Mixer> {
   bool _canAddSubdivison() =>
       context.read<MixerViewModel>().subdivisions.isEmpty ||
       context.read<MixerViewModel>().isPremium;
-
-  IconData volumeIcon() {
-    double volume = context.watch<MixerViewModel>().volume;
-    if (volume > 0.66) {
-      return PlatformIcons(context).volumeUp;
-    } else if (volume > 0.33) {
-      return PlatformIcons(context).volumeDown;
-    } else if (volume > 0.0) {
-      return PlatformIcons(context).volumeMute;
-    } else {
-      return PlatformIcons(context).volumeOff;
-    }
-  }
 }

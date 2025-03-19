@@ -23,41 +23,56 @@ dev_dependencies:
 
 flutter:
   assets:
-    - audio/free/bell/downbeat.wav
-    - audio/free/bell/subdivision.wav
-    - audio/free/digital/downbeat.wav
-    - audio/free/digital/subdivision.wav
-    - audio/free/sine/downbeat.wav
-    - audio/free/sine/subdivision.wav
-    - audio/free/square/downbeat.wav
-    - audio/free/square/subdivision.wav
-    - audio/free/tambourine/downbeat.wav
-    - audio/free/tambourine/subdivision.wav
-    - audio/premium/bell/downbeat.wav
-    - audio/premium/bell/subdivision.wav
-    - audio/premium/block/downbeat.wav
-    - audio/premium/block/subdivision.wav
-    - audio/premium/castanet/downbeat.wav
-    - audio/premium/castanet/subdivision.wav
-    - audio/premium/clap/downbeat.wav
-    - audio/premium/clap/subdivision.wav
-    - audio/premium/glass/downbeat.wav
-    - audio/premium/glass/subdivision.wav
-    - audio/premium/snap/downbeat.wav
-    - audio/premium/snap/subdivision.wav
-    - audio/premium/square/downbeat.wav
-    - audio/premium/square/subdivision.wav
-    - audio/premium/tick/downbeat.wav
-    - audio/premium/tick/subdivision.wav
-    - audio/premium/weird/downbeat.wav
-    - audio/premium/weird/subdivision.wav
-    - audio/premium/whistle/downbeat.wav
-    - audio/premium/whistle/subdivision.wav
+    - assets/audio/free/bell/beat.wav
+    - assets/audio/free/bell/downbeat.wav
+    - assets/audio/free/bell/inner_beat.wav
+    - assets/audio/free/digital/beat.wav
+    - assets/audio/free/digital/downbeat.wav
+    - assets/audio/free/digital/inner_beat.wav
+    - assets/audio/free/sine/beat.wav
+    - assets/audio/free/sine/downbeat.wav
+    - assets/audio/free/sine/inner_beat.wav
+    - assets/audio/free/square/beat.wav
+    - assets/audio/free/square/downbeat.wav
+    - assets/audio/free/square/inner_beat.wav
+    - assets/audio/free/tambourine/beat.wav
+    - assets/audio/free/tambourine/downbeat.wav
+    - assets/audio/free/tambourine/inner_beat.wav
+    - assets/audio/premium/bell/beat.wav
+    - assets/audio/premium/bell/downbeat.wav
+    - assets/audio/premium/bell/inner_beat.wav
+    - assets/audio/premium/block/beat.wav
+    - assets/audio/premium/block/downbeat.wav
+    - assets/audio/premium/block/inner_beat.wav
+    - assets/audio/premium/castanet/beat.wav
+    - assets/audio/premium/castanet/downbeat.wav
+    - assets/audio/premium/castanet/inner_beat.wav
+    - assets/audio/premium/clap/beat.wav
+    - assets/audio/premium/clap/downbeat.wav
+    - assets/audio/premium/clap/inner_beat.wav
+    - assets/audio/premium/glass/beat.wav
+    - assets/audio/premium/glass/downbeat.wav
+    - assets/audio/premium/glass/inner_beat.wav
+    - assets/audio/premium/snap/beat.wav
+    - assets/audio/premium/snap/downbeat.wav
+    - assets/audio/premium/snap/inner_beat.wav
+    - assets/audio/premium/square/beat.wav
+    - assets/audio/premium/square/downbeat.wav
+    - assets/audio/premium/square/inner_beat.wav
+    - assets/audio/premium/tick/beat.wav
+    - assets/audio/premium/tick/downbeat.wav
+    - assets/audio/premium/tick/inner_beat.wav
+    - assets/audio/premium/weird/beat.wav
+    - assets/audio/premium/weird/downbeat.wav
+    - assets/audio/premium/weird/inner_beat.wav
+    - assets/audio/premium/whistle/beat.wav
+    - assets/audio/premium/whistle/downbeat.wav
+    - assets/audio/premium/whistle/inner_beat.wav
   fonts:
     - family: NotoMusic
       fonts:
-        - asset: fonts/NotoMusic.ttf
+        - asset: assets/fonts/NotoMusic.ttf
     - family: SFMono
       fonts:
-        - asset: fonts/SFMono.otf
+        - asset: assets/fonts/SFMono.otf
   uses-material-design: true

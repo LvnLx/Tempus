@@ -3,9 +3,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart' hide Selector;
 import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/home/mixer/channel/view_model.dart';
-import 'package:tempus/ui/home/mixer/channel/selector/view.dart';
-
-final List<int> subdivisionOptions = List.generate(8, (index) => (index + 2));
+import 'package:tempus/ui/home/mixer/subdivision_option_button/view.dart';
 
 class Channel extends StatefulWidget {
   final void Function(Key key) onRemove;
@@ -17,26 +15,6 @@ class Channel extends StatefulWidget {
 }
 
 class ChannelState extends State<Channel> {
-  late Key key;
-  PageController scrollController = PageController(viewportFraction: 0.5);
-
-  @override
-  void initState() {
-    super.initState();
-
-    key = widget.key!;
-    scrollController.addListener(() {
-      if (scrollController.position.isScrollingNotifier.value == false) {
-        final int currentPage = scrollController.page!.round();
-        scrollController.animateToPage(
-          currentPage,
-          curve: Curves.easeOut,
-          duration: Duration(),
-        );
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -49,7 +27,7 @@ class ChannelState extends State<Channel> {
             width: constraints.maxHeight / 6,
             child: Column(children: [
               Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: RotatedBox(
                       quarterTurns: 3,
                       child: PlatformSlider(
@@ -59,25 +37,19 @@ class ChannelState extends State<Channel> {
                             .setSubdivisionVolume(widget.key!, value),
                         value: context
                             .watch<ChannelViewModel>()
-                            .subdivisions[key]!
+                            .subdivisions[widget.key]!
                             .volume,
                       ))),
               Expanded(
-                flex: 2,
-                child: LayoutBuilder(
-                  builder: (_, constraints) => Selector(
-                      key: widget.key!,
-                      height: constraints.maxHeight,
-                      initialItem: context
-                              .read<ChannelViewModel>()
-                              .subdivisions[key]!
-                              .option -
-                          2,
-                      callback: context
+                  child: SubdivisionOptionButton(
+                      callback: (updatedSubdivisionOption) => context
                           .read<ChannelViewModel>()
-                          .setSubdivisionOption),
-                ),
-              ),
+                          .setSubdivisionOption(
+                              widget.key!, updatedSubdivisionOption),
+                      subdivisionOption: context
+                          .watch<ChannelViewModel>()
+                          .subdivisions[widget.key]!
+                          .option)),
               Expanded(
                 child: GestureDetector(
                   onTap: () => widget.onRemove(widget.key!),

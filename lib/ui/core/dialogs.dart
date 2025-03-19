@@ -1,4 +1,6 @@
-import 'package:flutter/widgets.dart';
+import 'dart:math';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 
@@ -26,7 +28,7 @@ Future<void> showDialog(DialogConfiguration dialogConfiguration) async =>
         builder: (context) => PlatformAlertDialog(
             title: Text(dialogConfiguration.title),
             content: Padding(
-                padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
+                padding: EdgeInsets.only(top: 8.0),
                 child: PlatformText(dialogConfiguration.message,
                     textAlign: TextAlign.center)),
             actions: dialogConfiguration.actions));
@@ -59,7 +61,7 @@ Future<void> showPurchaseResultDialog(
         builder: (context) => PlatformAlertDialog(
                 title: Text(purchaseResult.status.toString()),
                 content: Padding(
-                    padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
+                    padding: EdgeInsets.only(top: 8.0),
                     child: PlatformText(purchaseResult.message,
                         textAlign: TextAlign.center)),
                 actions: [
@@ -69,3 +71,43 @@ Future<void> showPurchaseResultDialog(
                       cupertino: (context, platform) =>
                           CupertinoDialogActionData(isDefaultAction: true))
                 ]));
+
+Future<void> showIntegerSettingDialog(
+    BuildContext context,
+    String title,
+    int maxInputLength,
+    Future<void> Function(int value) callback,
+    int initialValue) async {
+  int? updatedValue;
+  await showPlatformDialog(
+      context: context,
+      builder: (context) => PlatformAlertDialog(
+              title: Text(title),
+              content: Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: PlatformTextField(
+                    autofocus: true,
+                    cursorColor: Colors.transparent,
+                    hintText: initialValue.toString(),
+                    keyboardType: TextInputType.number,
+                    makeCupertinoDecorationNull: true,
+                    maxLength: maxInputLength,
+                    onChanged: (text) => updatedValue = int.parse(text),
+                    textAlign: TextAlign.center,
+                  )),
+              actions: [
+                PlatformDialogAction(
+                    child: Text("Cancel"),
+                    onPressed: () => Navigator.pop(context),
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDestructiveAction: true)),
+                PlatformDialogAction(
+                    child: Text("Set"),
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      await callback(max(updatedValue ?? initialValue, 1));
+                    },
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDefaultAction: true))
+              ]));
+}
