@@ -249,7 +249,7 @@ class Metronome {
     
     (0..<beatCount).forEach { (beat) in
       let beatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-      beatClip.initialize(to: Clip(sample: sampleSet!.beatSample, startFrame: beat * beatLength, volume: beatVolume! * appVolume!))
+      beatClip.initialize(to: Clip(onStart: beatStarted, sample: sampleSet!.beatSample, startFrame: beat * beatLength, volume: beatVolume! * appVolume!))
       beatClips.append(beatClip)
       
       subdivisionClipData.forEach { (startFrame, volume) in

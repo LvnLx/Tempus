@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class Selector extends StatelessWidget {
   final Future<void> Function(int index)? callback;
@@ -26,6 +27,7 @@ class Selector extends StatelessWidget {
           itemExtent: itemExtent,
           onSelectedItemChanged: (index) {
             if (callback != null) {
+              HapticFeedback.lightImpact();
               callback!(index);
             }
           },
