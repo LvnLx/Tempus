@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
@@ -12,8 +11,6 @@ import 'package:tempus/ui/home/mixer/channel/view.dart';
 
 enum Action {
   setAppVolume,
-  addSubdivision,
-  removeSubdivision,
   setBpm,
   setBeatUnit,
   setBeatVolume,
@@ -21,8 +18,7 @@ enum Action {
   setSamplePaths,
   setSampleSet,
   setState,
-  setSubdivisionOption,
-  setSubdivisionVolume,
+  setSubdivisions,
   setTimeSignature,
   startPlayback,
   stopPlayback,
@@ -114,25 +110,6 @@ class AudioService {
   TimeSignature get timeSignature => _timeSignatureValueNotifier.value;
   ValueNotifier<TimeSignature> get timeSignatureValueNotifier =>
       _timeSignatureValueNotifier;
-
-  Future<void> addSubdivision() async {
-    UniqueKey key = UniqueKey();
-    _subdivisionsValueNotifier.value = {
-      ...subdivisions,
-      key: SubdivisionData(option: Options.subdivisionOptions[0], volume: 0.0)
-    };
-
-    await _addSubdivision(
-        key, subdivisions[key]!.option, subdivisions[key]!.volume);
-    _preferenceService.setSubdivisions(subdivisions);
-  }
-
-  Future<void> removeSubdivision(Key key) async {
-    _subdivisionsValueNotifier.value = {...subdivisions}..remove(key);
-
-    await _removeSubdivision(key);
-    _preferenceService.setSubdivisions(subdivisions);
-  }
 
   Future<void> setAppVolume(double volume) async {
     _appVolumeValueNotifier.value = volume;
@@ -231,23 +208,10 @@ class AudioService {
     print(result);
   }
 
-  Future<void> setSubdivisionOption(Key key, int option) async {
-    _subdivisionsValueNotifier.value = {...subdivisions}..update(
-        key,
-        (subdivisionData) =>
-            SubdivisionData(option: option, volume: subdivisionData.volume));
+  Future<void> setSubdivisions(Map<Key, SubdivisionData> subdivisions) async {
+    _subdivisionsValueNotifier.value = subdivisions;
 
-    await _setSubdivisionOption(key, option);
-    _preferenceService.setSubdivisions(subdivisions);
-  }
-
-  Future<void> setSubdivisionVolume(Key key, double volume) async {
-    _subdivisionsValueNotifier.value = {...subdivisions}..update(
-        key,
-        (subdivisionData) =>
-            SubdivisionData(option: subdivisionData.option, volume: volume));
-
-    await _setSubdivisionVolume(key, volume);
+    await _setSubdivisions(subdivisions);
     _preferenceService.setSubdivisions(subdivisions);
   }
 
@@ -270,20 +234,6 @@ class AudioService {
 
   Future<void> stopPlayback() async {
     final result = await _methodChannel.invokeMethod(Action.stopPlayback.name);
-    print(result);
-  }
-
-  Future<void> _addSubdivision(Key key, int option, double volume) async {
-    await HapticFeedback.mediumImpact();
-    final result = await _methodChannel.invokeMethod(Action.addSubdivision.name,
-        [key.toString(), option.toString(), volume.toString()]);
-    print(result);
-  }
-
-  Future<void> _removeSubdivision(Key key) async {
-    await HapticFeedback.mediumImpact();
-    final result = await _methodChannel
-        .invokeMethod(Action.removeSubdivision.name, [key.toString()]);
     print(result);
   }
 
@@ -330,22 +280,15 @@ class AudioService {
     print(result);
   }
 
-  Future<void> _setSubdivisionOption(Key key, int option) async {
-    await HapticFeedback.lightImpact();
+  Future<void> _setSubdivisions(Map<Key, SubdivisionData> subdivisions) async {
     final result = await _methodChannel.invokeMethod(
-        Action.setSubdivisionOption.name, [key.toString(), option.toString()]);
-    print(result);
-  }
-
-  Future<void> _setSubdivisionVolume(Key key, double volume) async {
-    final result = await _methodChannel.invokeMethod(
-        Action.setSubdivisionVolume.name, [key.toString(), volume.toString()]);
+        Action.setSubdivisions.name, [subdivisions.toJsonString()]);
     print(result);
   }
 
   Future<void> _setTimeSignature(TimeSignature timeSignature) async {
-    final result = await _methodChannel
-        .invokeMethod(Action.setTimeSignature.name, [timeSignature.toJsonString()]);
+    final result = await _methodChannel.invokeMethod(
+        Action.setTimeSignature.name, [timeSignature.toJsonString()]);
     print(result);
   }
 }

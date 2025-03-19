@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:tempus/data/services/audio_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
+import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/domain/models/fraction.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/home/mixer/channel/view.dart';
@@ -25,10 +26,14 @@ class MixerViewModel extends ChangeNotifier {
   bool get isPremium => _purchaseService.isPremium;
   Map<Key, SubdivisionData> get subdivisions => _audioService.subdivisions;
 
-  Future<void> addSubdivision() async => await _audioService.addSubdivision();
+  Future<void> addSubdivision() async => await _audioService.setSubdivisions({
+        ...subdivisions,
+        UniqueKey():
+            SubdivisionData(option: Options.subdivisionOptions[0], volume: 0.0)
+      });
 
   Future<void> removeSubdivision(Key key) async =>
-      await _audioService.removeSubdivision(key);
+      await _audioService.setSubdivisions({...subdivisions}..remove(key));
 
   Future<void> setBeatUnit(BeatUnit beatUnit) async =>
       await _audioService.setBeatUnit(beatUnit);

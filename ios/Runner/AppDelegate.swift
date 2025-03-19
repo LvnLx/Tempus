@@ -18,16 +18,6 @@ import AVFoundation
       let arguments = call.arguments as? [String] ?? []
       
       switch call.method {
-      case "addSubdivision":
-        let key: String = arguments[0]
-        let option: Int = Int(arguments[1])!
-        let volume: Float = Float(arguments[2])!
-        self.metronome.addSubdivision(key, option, volume)
-        result("Added subdivision")
-      case "removeSubdivision":
-        let key: String = arguments[0]
-        self.metronome.removeSubdivision(key)
-        result("Removed subdivision")
       case "setAppVolume":
         let volume: Float = Float(arguments[0])!
         self.metronome.setAppVolume(volume)
@@ -64,7 +54,7 @@ import AVFoundation
         let beatVolume: Float = Float(arguments[3])!
         let downbeatVolume: Float = Float(arguments[4])!
         let sampleSet: SampleSet = SampleSet(arguments[5])
-        let subdivisionsAsJsonString: String = arguments[6]
+        let subdivisions: [String: Subdivision] = self.subdivisionsFromJsonString(arguments[6])
         let timeSignature: TimeSignature = TimeSignature(arguments[7])
         
         self.metronome.setAppVolume(appVolume, false)
@@ -73,20 +63,17 @@ import AVFoundation
         self.metronome.setBpm(bpm, false, false)
         self.metronome.setDownbeatVolume(downbeatVolume, false)
         self.metronome.setSampleSet(sampleSet, false)
+        self.metronome.setSubdivisions(subdivisions, false)
         self.metronome.setTimeSignature(timeSignature, false, false)
-        self.metronome.setState(subdivisionsAsJsonString)
+        
+        self.metronome.updateValidFrameCount(true)
+        self.metronome.updateClips()
         
         result("Set state")
-      case "setSubdivisionOption":
-        let key: String = arguments[0]
-        let option: Int = Int(arguments[1])!
-        self.metronome.setSubdivisionOption(key, option)
-        result("Set subdivision option")
-      case "setSubdivisionVolume":
-        let key: String = arguments[0]
-        let volume: Float = Float(arguments[1])!
-        self.metronome.setSubdivisionVolume(key, volume)
-        result("Set subdivision volume")
+      case "setSubdivisions":
+        let subdivisions: [String: Subdivision] = self.subdivisionsFromJsonString(arguments[0])
+        self.metronome.setSubdivisions(subdivisions)
+        result("Set subdivisions")
       case "setTimeSignature":
         let timeSignature: TimeSignature = TimeSignature(arguments[0])
         self.metronome.setTimeSignature(timeSignature)
@@ -115,6 +102,14 @@ import AVFoundation
   func beatStarted() {
     DispatchQueue.main.async {
       self.methodChannel.invokeMethod("beatStarted", arguments: nil)
+    }
+  }
+      
+  private func subdivisionsFromJsonString(_ subdivisionsAsJsonString: String) -> [String: Subdivision] {
+    let subdivisionsAsData: Data? = subdivisionsAsJsonString.data(using: .utf8)
+    let subdivisionsAsJson: [String: [String: Any]] = try! JSONSerialization.jsonObject(with: subdivisionsAsData!) as! [String: [String: Any]]
+    return subdivisionsAsJson.reduce(into: [String: Subdivision]()) { accumulator, element in
+      accumulator[element.key] = Subdivision(element.value)
     }
   }
 }

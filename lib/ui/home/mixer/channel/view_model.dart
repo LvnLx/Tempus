@@ -10,10 +10,16 @@ class ChannelViewModel extends ChangeNotifier {
   }
 
   Future<void> setSubdivisionOption(Key key, int option) async =>
-      await _audioService.setSubdivisionOption(key, option);
+      await _audioService.setSubdivisions({...subdivisions}..update(
+          key,
+          (subdivisionData) =>
+              SubdivisionData(option: option, volume: subdivisionData.volume)));
 
   Future<void> setSubdivisionVolume(Key key, double volume) async =>
-      await _audioService.setSubdivisionVolume(key, volume);
+      await _audioService.setSubdivisions({...subdivisions}..update(
+          key,
+          (subdivisionData) =>
+              SubdivisionData(option: subdivisionData.option, volume: volume)));
 
   Map<Key, SubdivisionData> get subdivisions => _audioService.subdivisions;
 }
