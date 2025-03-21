@@ -78,7 +78,7 @@ Future<void> showIntegerSettingDialog(
     int maxInputLength,
     Future<void> Function(int value) callback,
     int initialValue) async {
-  int? updatedValue;
+  String updatedValue = "";
   await showPlatformDialog(
       context: context,
       builder: (context) => PlatformAlertDialog(
@@ -92,7 +92,7 @@ Future<void> showIntegerSettingDialog(
                     keyboardType: TextInputType.number,
                     makeCupertinoDecorationNull: true,
                     maxLength: maxInputLength,
-                    onChanged: (text) => updatedValue = int.parse(text),
+                    onChanged: (text) => updatedValue = text,
                     textAlign: TextAlign.center,
                   )),
               actions: [
@@ -105,7 +105,7 @@ Future<void> showIntegerSettingDialog(
                     child: Text("Set"),
                     onPressed: () async {
                       Navigator.pop(context);
-                      await callback(max(updatedValue ?? initialValue, 1));
+                      await callback(max(int.tryParse(updatedValue) ?? initialValue, 1));
                     },
                     cupertino: (context, platform) =>
                         CupertinoDialogActionData(isDefaultAction: true))
