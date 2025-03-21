@@ -204,8 +204,8 @@ class Metronome {
     let downbeatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
     downbeatClip.initialize(to: Clip(sample: sampleSet!.downbeatSample, startFrame: 0, volume: downbeatVolume! * appVolume! * 1.5))
     
-    let beatCount: Int = Int(floor((timeSignature! / beatUnit!).evaluate()))
-    let beatLength: Int = Int((Double(validFrameCount.pointee) / Double(beatCount)).rounded())
+    let beatCount: Double = (timeSignature! / beatUnit!).evaluate()
+    let beatLength: Int = Int((Double(validFrameCount.pointee) / beatCount).rounded())
 
     var beatClips: [UnsafeMutablePointer<Clip>] = []
     var subdivisionClips: [UnsafeMutablePointer<Clip>] = []
@@ -222,7 +222,7 @@ class Metronome {
         return (Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat), volume)
       }
     
-    (0..<beatCount).forEach { (beat) in
+    (0..<Int(ceil(beatCount))).forEach { (beat) in
       let beatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
       beatClip.initialize(to: Clip(onStart: beatStarted, sample: sampleSet!.beatSample, startFrame: beat * beatLength, volume: beatVolume! * appVolume!))
       beatClips.append(beatClip)
