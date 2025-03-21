@@ -5,45 +5,25 @@ import 'package:flutter/services.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
-import 'package:tempus/domain/models/fraction.dart';
-import 'package:tempus/domain/models/sample_set.dart';
+import 'package:tempus/domain/models/fraction.dart' as fraction;
+import 'package:tempus/domain/models/sample_set.dart' as sample_set;
 import 'package:tempus/ui/home/mixer/channel/view.dart';
-
-enum Action {
-  setAppVolume,
-  setBpm,
-  setBeatUnit,
-  setBeatVolume,
-  setDownbeatVolume,
-  setSamplePaths,
-  setSampleSet,
-  setState,
-  setSubdivisions,
-  setTimeSignature,
-  startPlayback,
-  stopPlayback,
-}
-
-enum Event { beatStarted }
 
 class AudioService {
   final AssetService _assetService;
-  final PreferenceService _preferenceService;
-
-  final MethodChannel _methodChannel = MethodChannel('audio');
   final StreamController<Event> _eventController =
       StreamController<Event>.broadcast();
+  final MethodChannel _methodChannel = MethodChannel('audio');
+  final PreferenceService _preferenceService;
 
-  late ValueNotifier<double> _appVolumeValueNotifier;
-  late ValueNotifier<int> _bpmValueNotifier;
-  late ValueNotifier<BeatUnit> _beatUnitValueNotifier;
-  late ValueNotifier<double> _beatVolumeValueNotifier;
-  late ValueNotifier<double> _downbeatVolumeValueNotifier;
-  late ValueNotifier<SampleSet> _sampleSetValueNotifier;
-  late ValueNotifier<TimeSignature> _timeSignatureValueNotifier;
-
-  late final ValueNotifier<Map<Key, SubdivisionData>>
-      _subdivisionsValueNotifier;
+  late AppVolume _appVolume;
+  late BeatUnit _beatUnit;
+  late BeatVolume _beatVolume;
+  late Bpm _bpm;
+  late DownbeatVolume _downbeatVolume;
+  late SampleSet _sampleSet;
+  late Subdivisions _subdivisions;
+  late TimeSignature _timeSignature;
 
   AudioService(this._assetService, this._preferenceService) {
     _methodChannel.setMethodCallHandler((call) async {
@@ -58,23 +38,24 @@ class AudioService {
   }
 
   Future<void> init() async {
-    _appVolumeValueNotifier =
-        ValueNotifier(await _preferenceService.getAppVolume());
-    _bpmValueNotifier = ValueNotifier(await _preferenceService.getBpm());
-    _beatUnitValueNotifier =
-        ValueNotifier(await _preferenceService.getBeatUnit());
-    _beatVolumeValueNotifier =
-        ValueNotifier(await _preferenceService.getBeatVolume());
-    _downbeatVolumeValueNotifier =
-        ValueNotifier(await _preferenceService.getDownbeatVolume());
-    _sampleSetValueNotifier =
-        ValueNotifier(await _preferenceService.getSampleSet());
-    _subdivisionsValueNotifier =
-        ValueNotifier(await _preferenceService.getSubdivisions());
-    _timeSignatureValueNotifier =
-        ValueNotifier(await _preferenceService.getTimeSignature());
+    _appVolume = AppVolume(this, _preferenceService.setAppVolume,
+        ValueNotifier(await _preferenceService.getAppVolume()));
+    _beatUnit = BeatUnit(this, _preferenceService.setBeatUnit,
+        ValueNotifier(await _preferenceService.getBeatUnit()));
+    _beatVolume = BeatVolume(this, _preferenceService.setBeatVolume,
+        ValueNotifier(await _preferenceService.getBeatVolume()));
+    _bpm = Bpm(this, _preferenceService.setBpm,
+        ValueNotifier(await _preferenceService.getBpm()));
+    _downbeatVolume = DownbeatVolume(this, _preferenceService.setDownbeatVolume,
+        ValueNotifier(await _preferenceService.getDownbeatVolume()));
+    _sampleSet = SampleSet(this, _preferenceService.setSampleSet,
+        ValueNotifier(await _preferenceService.getSampleSet()));
+    _subdivisions = Subdivisions(this, _preferenceService.setSubdivisions,
+        ValueNotifier(await _preferenceService.getSubdivisions()));
+    _timeSignature = TimeSignature(this, _preferenceService.setTimeSignature,
+        ValueNotifier(await _preferenceService.getTimeSignature()));
 
-    await _setSamplePaths(_assetService.sampleSets.fold<Set<String>>(
+    await _setSamplePaths(_assetService.sampleSets.fold(
         {},
         (accumulator, sampleSet) => {
               ...accumulator,
@@ -83,212 +64,177 @@ class AudioService {
               sampleSet.getInnerBeatSamplePath()
             }));
 
-    await setState(appVolume, bpm, beatUnit, beatVolume, downbeatVolume,
-        sampleSet, subdivisions, timeSignature);
+    await setState(
+        _appVolume.value,
+        _bpm.value,
+        _beatUnit.value,
+        _beatVolume.value,
+        _downbeatVolume.value,
+        _sampleSet.value,
+        _subdivisions.value,
+        _timeSignature.value);
   }
 
   Stream<Event> get eventStream => _eventController.stream;
 
-  double get appVolume => _appVolumeValueNotifier.value;
-  ValueNotifier get appVolumeValueNotifier => _appVolumeValueNotifier;
-  int get bpm => _bpmValueNotifier.value;
-  ValueNotifier<int> get bpmValueNotifier => _bpmValueNotifier;
-  BeatUnit get beatUnit => _beatUnitValueNotifier.value;
-  ValueNotifier<BeatUnit> get beatUnitValueNotifier => _beatUnitValueNotifier;
-  double get beatVolume => _beatVolumeValueNotifier.value;
-  ValueNotifier<double> get beatVolumeValueNotifier => _beatVolumeValueNotifier;
-  double get downbeatVolume => _downbeatVolumeValueNotifier.value;
-  ValueNotifier<double> get downbeatVolumeValueNotifier =>
-      _downbeatVolumeValueNotifier;
-  SampleSet get sampleSet => _sampleSetValueNotifier.value;
-  ValueNotifier<SampleSet> get sampleSetValueNotifier =>
-      _sampleSetValueNotifier;
-  Map<Key, SubdivisionData> get subdivisions =>
-      _subdivisionsValueNotifier.value;
-  ValueNotifier<Map<Key, SubdivisionData>> get subdivisionsValueNotifier =>
-      _subdivisionsValueNotifier;
-  TimeSignature get timeSignature => _timeSignatureValueNotifier.value;
-  ValueNotifier<TimeSignature> get timeSignatureValueNotifier =>
-      _timeSignatureValueNotifier;
-
-  Future<void> setAppVolume(double volume) async {
-    _appVolumeValueNotifier.value = volume;
-
-    await _setAppVolume(volume);
-    _preferenceService.setAppVolume(volume);
-  }
-
-  Future<void> setBpm(int bpm, [bool skipUnchanged = true]) async {
-    late int validatedBpm;
-
-    if (bpm < 1) {
-      validatedBpm = 1;
-    } else if (bpm > 999) {
-      validatedBpm = 999;
-    } else {
-      validatedBpm = bpm;
-    }
-
-    if (skipUnchanged && validatedBpm == bpmValueNotifier.value) {
-      return;
-    } else {
-      _bpmValueNotifier.value = validatedBpm;
-    }
-
-    await _setBpm(validatedBpm);
-    _preferenceService.setBpm(validatedBpm);
-  }
-
-  Future<void> setBeatUnit(BeatUnit beatUnit) async {
-    _beatUnitValueNotifier.value = beatUnit;
-
-    await _setBeatUnit(beatUnit);
-    _preferenceService.setBeatUnit(beatUnit);
-  }
-
-  Future<void> setBeatVolume(double volume) async {
-    _beatVolumeValueNotifier.value = volume;
-
-    await _setBeatVolume(volume);
-    _preferenceService.setBeatVolume(volume);
-  }
-
-  Future<void> setDownbeatVolume(double volume) async {
-    _downbeatVolumeValueNotifier.value = volume;
-
-    await _setDownbeatVolume(volume);
-    _preferenceService.setDownbeatVolume(volume);
-  }
-
-  Future<void> setSampleSet(SampleSet sampleSet) async {
-    _sampleSetValueNotifier.value = sampleSet;
-
-    await _setSampleSet(sampleSet);
-    _preferenceService.setSampleSet(sampleSet);
-  }
+  AppVolume get appVolume => _appVolume;
+  BeatUnit get beatUnit => _beatUnit;
+  BeatVolume get beatVolume => _beatVolume;
+  Bpm get bpm => _bpm;
+  DownbeatVolume get downbeatVolume => _downbeatVolume;
+  SampleSet get sampleSet => _sampleSet;
+  Subdivisions get subdivisions => _subdivisions;
+  TimeSignature get timeSignature => _timeSignature;
 
   Future<void> setState(
       double appVolume,
       int bpm,
-      BeatUnit beatUnit,
+      fraction.BeatUnit beatUnit,
       double beatVolume,
       double downbeatVolume,
-      SampleSet sampleSet,
+      sample_set.SampleSet sampleSet,
       Map<Key, SubdivisionData> subdivisions,
-      TimeSignature timeSignature) async {
-    _appVolumeValueNotifier.value = appVolume;
-    _bpmValueNotifier.value = bpm;
-    _beatUnitValueNotifier.value = beatUnit;
-    _beatVolumeValueNotifier.value = beatVolume;
-    _downbeatVolumeValueNotifier.value = downbeatVolume;
-    _sampleSetValueNotifier.value = sampleSet;
-    _subdivisionsValueNotifier.value = subdivisions;
-    _timeSignatureValueNotifier.value = timeSignature;
+      fraction.TimeSignature timeSignature) async {
+    await _appVolume.set(appVolume, isMetronomeInitialization: true);
+    await _bpm.set(bpm, flag: false, isMetronomeInitialization: true);
+    await _beatUnit.set(beatUnit, isMetronomeInitialization: true);
+    await _beatVolume.set(beatVolume, isMetronomeInitialization: true);
+    await _downbeatVolume.set(downbeatVolume, isMetronomeInitialization: true);
+    await _sampleSet.set(sampleSet, isMetronomeInitialization: true);
+    await _subdivisions.set(subdivisions, isMetronomeInitialization: true);
+    await _timeSignature.set(timeSignature, isMetronomeInitialization: true);
 
-    _preferenceService.setAppVolume(appVolume);
-    _preferenceService.setBpm(bpm);
-    _preferenceService.setBeatUnit(beatUnit);
-    _preferenceService.setBeatVolume(beatVolume);
-    _preferenceService.setDownbeatVolume(downbeatVolume);
-    _preferenceService.setSampleSet(sampleSet);
-    _preferenceService.setSubdivisions(subdivisions);
-    _preferenceService.setTimeSignature(timeSignature);
-
-    final result = await _methodChannel.invokeMethod(Action.setState.name, [
-      appVolume.toString(),
-      bpm.toString(),
-      beatUnit.toJsonString(),
-      beatVolume.toString(),
-      downbeatVolume.toString(),
-      sampleSet.getPathsAsJsonString(),
-      subdivisions.toJsonString(),
-      timeSignature.toJsonString()
-    ]);
-
+    final result = await _methodChannel.invokeMethod("initializeMetronome");
     print(result);
   }
 
-  Future<void> setSubdivisions(Map<Key, SubdivisionData> subdivisions) async {
-    _subdivisionsValueNotifier.value = subdivisions;
-
-    await _setSubdivisions(subdivisions);
-    _preferenceService.setSubdivisions(subdivisions);
-  }
-
-  Future<void> setTimeSignature(TimeSignature timeSignature) async {
-    _timeSignatureValueNotifier.value = timeSignature;
-
-    if (_preferenceService.autoUpdateBeatUnit) {
-      await setBeatUnit(timeSignature.defaultBeatUnit());
-    }
-
-    await _setTimeSignature(timeSignature);
-
-    _preferenceService.setTimeSignature(timeSignature);
-  }
-
   Future<void> startPlayback() async {
-    final result = await _methodChannel.invokeMethod(Action.startPlayback.name);
+    final result = await _methodChannel.invokeMethod("startPlayback");
     print(result);
   }
 
   Future<void> stopPlayback() async {
-    final result = await _methodChannel.invokeMethod(Action.stopPlayback.name);
-    print(result);
-  }
-
-  Future<void> _setAppVolume(double volume) async {
-    final result = await _methodChannel
-        .invokeMethod(Action.setAppVolume.name, [volume.toString()]);
-    print(result);
-  }
-
-  Future<void> _setBpm(int bpm) async {
-    await HapticFeedback.lightImpact();
-    final result =
-        await _methodChannel.invokeMethod(Action.setBpm.name, [bpm.toString()]);
-    print(result);
-  }
-
-  Future<void> _setBeatUnit(BeatUnit beatUnit) async {
-    final result = await _methodChannel
-        .invokeMethod(Action.setBeatUnit.name, [beatUnit.toJsonString()]);
-    print(result);
-  }
-
-  Future<void> _setBeatVolume(double volume) async {
-    final result = await _methodChannel
-        .invokeMethod(Action.setBeatVolume.name, [volume.toString()]);
-    print(result);
-  }
-
-  Future<void> _setDownbeatVolume(double volume) async {
-    final result = await _methodChannel
-        .invokeMethod(Action.setDownbeatVolume.name, [volume.toString()]);
+    final result = await _methodChannel.invokeMethod("stopPlayback");
     print(result);
   }
 
   Future<void> _setSamplePaths(Set<String> samplePaths) async {
     final result = await _methodChannel.invokeMethod(
-        Action.setSamplePaths.name, samplePaths.toList());
+        "setSamplePaths", samplePaths.toList());
+    print(result);
+  }
+}
+
+enum Event { beatStarted }
+
+abstract class _Action<T> {
+  final AudioService _audioService;
+  final Future<void> Function(T value) _setPreference;
+  final ValueNotifier<T> _valueNotifier;
+
+  _Action(this._audioService, this._setPreference, this._valueNotifier);
+
+  T get value => _valueNotifier.value;
+  ValueNotifier<T> get valueNotifier => _valueNotifier;
+
+  Future<void> set(T value,
+      {bool? flag, bool isMetronomeInitialization = false}) async {
+    _valueNotifier.value = value;
+    await _invokeMethodChannel(value, isMetronomeInitialization);
+    _setPreference.call(value);
+  }
+
+  Future<void> _invokeMethodChannel(
+      T value, bool isMetronomeInitialization) async {
+    final result = await _audioService._methodChannel.invokeMethod(
+        "set${runtimeType.toString()}",
+        [_getString(value), isMetronomeInitialization.toString()]);
     print(result);
   }
 
-  Future<void> _setSampleSet(SampleSet sampleSet) async {
-    final result = await _methodChannel.invokeMethod(
-        Action.setSampleSet.name, [sampleSet.getPathsAsJsonString()]);
-    print(result);
-  }
+  String _getString(T value) => value.toString();
+}
 
-  Future<void> _setSubdivisions(Map<Key, SubdivisionData> subdivisions) async {
-    final result = await _methodChannel.invokeMethod(
-        Action.setSubdivisions.name, [subdivisions.toJsonString()]);
-    print(result);
-  }
+class AppVolume extends _Action<double> {
+  AppVolume(super._audioService, super._setPreference, super.valueNotifier);
+}
 
-  Future<void> _setTimeSignature(TimeSignature timeSignature) async {
-    final result = await _methodChannel.invokeMethod(
-        Action.setTimeSignature.name, [timeSignature.toJsonString()]);
-    print(result);
+class BeatUnit extends _Action<fraction.BeatUnit> {
+  BeatUnit(super.audioService, super._setPreference, super.valueNotifier);
+
+  @override
+  String _getString(fraction.BeatUnit value) => value.toJsonString();
+}
+
+class BeatVolume extends _Action<double> {
+  BeatVolume(super.audioService, super._setPreference, super.valueNotifier);
+}
+
+class Bpm extends _Action<int> {
+  Bpm(super._audioService, super._setPreference, super._valueNotifier);
+
+  @override
+  Future<void> set(int value,
+      {flag = true, bool isMetronomeInitialization = false}) async {
+    late int bpm;
+
+    if (value < 1) {
+      bpm = 1;
+    } else if (value > 999) {
+      bpm = 999;
+    } else {
+      bpm = value;
+    }
+
+    if (flag! && bpm == _valueNotifier.value) {
+      return;
+    }
+
+    _valueNotifier.value = bpm;
+
+    if (!isMetronomeInitialization) await HapticFeedback.lightImpact();
+    super._invokeMethodChannel(bpm, isMetronomeInitialization);
+
+    super._setPreference(bpm);
+  }
+}
+
+class DownbeatVolume extends _Action<double> {
+  DownbeatVolume(super.audioService, super._setPreference, super.valueNotifier);
+}
+
+class SampleSet extends _Action<sample_set.SampleSet> {
+  SampleSet(super.audioService, super._setPreference, super.valueNotifier);
+
+  @override
+  String _getString(sample_set.SampleSet value) => value.getPathsAsJsonString();
+}
+
+class Subdivisions extends _Action<Map<Key, SubdivisionData>> {
+  Subdivisions(super.audioService, super._setPreference, super.valueNotifier);
+
+  @override
+  String _getString(Map<Key, SubdivisionData> value) => value.toJsonString();
+}
+
+class TimeSignature extends _Action<fraction.TimeSignature> {
+  TimeSignature(super.audioService, super._setPreference, super.valueNotifier);
+
+  @override
+  String _getString(fraction.TimeSignature value) => value.toJsonString();
+
+  @override
+  Future<void> set(fraction.TimeSignature value,
+      {bool? flag, bool isMetronomeInitialization = false}) async {
+    _valueNotifier.value = value;
+
+    if (_audioService._preferenceService.autoUpdateBeatUnit &&
+        !isMetronomeInitialization) {
+      await _audioService.beatUnit.set(value.defaultBeatUnit());
+    }
+
+    super._invokeMethodChannel(value, isMetronomeInitialization);
+
+    _setPreference(value);
   }
 }

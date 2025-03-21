@@ -109,73 +109,73 @@ class Metronome {
     }
   }
   
-  func setAppVolume(_ volume: Float, _ shouldUpdateClips: Bool = true) {
+  func setAppVolume(_ volume: Float, _ isInitialization: Bool) {
     appVolume = volume
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setBeatUnit(_ beatUnit: BeatUnit, _ shouldUpdateClips: Bool = true, _ shouldUpdatedValidFrameCount: Bool = true) {
+  func setBeatUnit(_ beatUnit: BeatUnit, _ isInitialization: Bool) {
     self.beatUnit = beatUnit
     
-    if (shouldUpdatedValidFrameCount) {
+    if (!isInitialization) {
       updateValidFrameCount()
     }
     
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setBeatVolume(_ volume: Float, _ shouldUpdateClips: Bool = true) {
+  func setBeatVolume(_ volume: Float, _ isInitialization: Bool) {
     beatVolume = volume
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setBpm(_ bpm: UInt16, _ shouldUpdateClips: Bool = true, _ shouldUpdatedValidFrameCount: Bool = true) {
+  func setBpm(_ bpm: UInt16, _ isInitialization: Bool) {
     self.bpm = bpm
     
-    if (shouldUpdatedValidFrameCount) {
+    if (!isInitialization) {
       updateValidFrameCount()
     }
     
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setDownbeatVolume(_ volume: Float, _ shouldUpdateClips: Bool = true) {
+  func setDownbeatVolume(_ volume: Float, _ isInitialization: Bool) {
     downbeatVolume = volume
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setSampleSet(_ sampleSet: SampleSet, _ shouldUpdateClips: Bool = true) {
+  func setSampleSet(_ sampleSet: SampleSet, _ isInitialization: Bool) {
     self.sampleSet = sampleSet
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setSubdivisions(_ subdivisions: [String: Subdivision], _ shouldUpdateClips: Bool = true) {
+  func setSubdivisions(_ subdivisions: [String: Subdivision], _ isInitialization: Bool) {
     self.subdivisions = subdivisions
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setTimeSignature(_ timeSignature: TimeSignature, _ shouldUpdateClips: Bool = true, _ shouldUpdateValidFrameCount: Bool = true) {
+  func setTimeSignature(_ timeSignature: TimeSignature, _ isInitialization: Bool) {
     self.timeSignature = timeSignature
     
-    if (shouldUpdateValidFrameCount) {
+    if (!isInitialization) {
       updateValidFrameCount()
     }
     
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
@@ -244,7 +244,7 @@ class Metronome {
     }
   }
   
-  func updateValidFrameCount(_ isSetState: Bool = false) {
+  func updateValidFrameCount(_ isInitialization: Bool = false) {
     let bufferLocation = Double(nextFrame.pointee) / Double(validFrameCount.pointee)
     
     let bps: Double = Double(bpm!) / 60.0
@@ -254,7 +254,7 @@ class Metronome {
     
     self.validFrameCount.pointee = Int(beatDurationSeconds * beatCount * Double(sampleRate))
     
-    if (!isSetState) {
+    if (!isInitialization) {
       self.nextFrame.pointee = Int(round(Double(self.validFrameCount.pointee) * bufferLocation))
     }
   }

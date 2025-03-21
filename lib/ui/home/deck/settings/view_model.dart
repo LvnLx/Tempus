@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tempus/data/services/asset_service.dart';
-import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/data/services/audio_service.dart' hide SampleSet;
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
@@ -17,8 +17,8 @@ class SettingsViewModel extends ChangeNotifier {
   SettingsViewModel(this._assetService, this._audioService,
       this._preferenceService, this._purchaseService, this._themeService) {
     _assetService.sampleSetsValueNotifier.addListener(notifyListeners);
-    _audioService.appVolumeValueNotifier.addListener(notifyListeners);
-    _audioService.sampleSetValueNotifier.addListener(notifyListeners);
+    _audioService.appVolume.valueNotifier.addListener(notifyListeners);
+    _audioService.sampleSet.valueNotifier.addListener(notifyListeners);
     _preferenceService.areBeatHapticsEnabledValueNotifier
         .addListener(notifyListeners);
     _preferenceService.autoUpdateBeatUnitValueNotifier
@@ -29,12 +29,12 @@ class SettingsViewModel extends ChangeNotifier {
     _themeService.themeModeValueNotifier.addListener(notifyListeners);
   }
 
-  double get appVolume => _audioService.appVolume;
+  double get appVolume => _audioService.appVolume.value;
   bool get areBeatHapticsEnabled => _preferenceService.areBeatHapticsEnabled;
   bool get autoUpdateBeatUnit => _preferenceService.autoUpdateBeatUnit;
   bool get isPremium => _purchaseService.isPremium;
   bool get isVisualizerEnabled => _preferenceService.isVisualizerEnabled;
-  SampleSet get sampleSet => _audioService.sampleSet;
+  SampleSet get sampleSet => _audioService.sampleSet.value;
   List<SampleSet> get sampleSets => _assetService.sampleSets;
   ThemeMode get themeMode => _themeService.themeMode;
 
@@ -62,7 +62,7 @@ class SettingsViewModel extends ChangeNotifier {
 
   Future<void> resetMetronome() async {
     await _audioService.setState(
-        _audioService.appVolume,
+        _audioService.appVolume.value,
         Preference.bpm.defaultValue,
         Preference.beatUnit.defaultValue,
         Preference.beatVolume.defaultValue,
@@ -76,7 +76,7 @@ class SettingsViewModel extends ChangeNotifier {
       await _purchaseService.restorePremium();
 
   Future<void> setAppVolume(double volume) async =>
-      await _audioService.setAppVolume(volume);
+      await _audioService.appVolume.set(volume);
 
   Future<void> setAreBeatHapticsEnabled(bool value) async =>
       await _preferenceService.setAreBeatHapticsEnabled(value);
@@ -88,7 +88,7 @@ class SettingsViewModel extends ChangeNotifier {
       await _preferenceService.setIsVisualizerEnabled(value);
 
   Future<void> setSampleSet(SampleSet sampleSet) async =>
-      await _audioService.setSampleSet(sampleSet);
+      await _audioService.sampleSet.set(sampleSet);
 
   void setThemeMode(ThemeMode themeMode) =>
       _themeService.setThemeMode(themeMode);

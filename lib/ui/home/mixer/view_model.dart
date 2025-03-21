@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/data/services/audio_service.dart' hide BeatUnit;
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/domain/models/fraction.dart';
@@ -11,38 +11,39 @@ class MixerViewModel extends ChangeNotifier {
   final PurchaseService _purchaseService;
 
   MixerViewModel(this._audioService, this._purchaseService) {
-    _audioService.beatUnitValueNotifier.addListener(notifyListeners);
-    _audioService.beatVolumeValueNotifier.addListener(notifyListeners);
-    _audioService.downbeatVolumeValueNotifier.addListener(notifyListeners);
-    _audioService.subdivisionsValueNotifier.addListener(notifyListeners);
+    _audioService.beatUnit.valueNotifier.addListener(notifyListeners);
+    _audioService.beatVolume.valueNotifier.addListener(notifyListeners);
+    _audioService.downbeatVolume.valueNotifier.addListener(notifyListeners);
+    _audioService.subdivisions.valueNotifier.addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
   }
 
-  BeatUnit get beatUnit => _audioService.beatUnit;
+  BeatUnit get beatUnit => _audioService.beatUnit.value;
   ValueNotifier<double> get beatVolumeValueNotifier =>
-      _audioService.beatVolumeValueNotifier;
+      _audioService.beatVolume.valueNotifier;
   ValueNotifier<double> get downbeatVolumeValueNotifier =>
-      _audioService.downbeatVolumeValueNotifier;
+      _audioService.downbeatVolume.valueNotifier;
   bool get isPremium => _purchaseService.isPremium;
-  Map<Key, SubdivisionData> get subdivisions => _audioService.subdivisions;
+  Map<Key, SubdivisionData> get subdivisions =>
+      _audioService.subdivisions.value;
 
-  Future<void> addSubdivision() async => await _audioService.setSubdivisions({
+  Future<void> addSubdivision() async => await _audioService.subdivisions.set({
         ...subdivisions,
         UniqueKey():
             SubdivisionData(option: Options.subdivisionOptions[0], volume: 0.0)
       });
 
   Future<void> removeSubdivision(Key key) async =>
-      await _audioService.setSubdivisions({...subdivisions}..remove(key));
+      await _audioService.subdivisions.set({...subdivisions}..remove(key));
 
   Future<void> setBeatUnit(BeatUnit beatUnit) async =>
-      await _audioService.setBeatUnit(beatUnit);
+      await _audioService.beatUnit.set(beatUnit);
 
   Future<void> setBeatVolume(double volume) async =>
-      await _audioService.setBeatVolume(volume);
+      await _audioService.beatVolume.set(volume);
 
   Future<void> setDownbeatVolume(double volume) async =>
-      await _audioService.setDownbeatVolume(volume);
+      await _audioService.downbeatVolume.set(volume);
 
   Future<PurchaseResult> purchasePremium() async =>
       await _purchaseService.purchasePremium();
