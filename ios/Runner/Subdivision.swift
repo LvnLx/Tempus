@@ -4,9 +4,9 @@ class Subdivision {
   var option: Int
   var volume: Float
   
-  init(_ option: Int, _  volume: Float) {
-    self.option = option
-    self.volume = volume
+  init(_ subdivisionAsJson: [String: Any]) {
+    self.option = subdivisionAsJson["option"] as! Int
+    self.volume = Float(subdivisionAsJson["volume"] as! Double)
   }
   
   func getLocations() -> [Float] {

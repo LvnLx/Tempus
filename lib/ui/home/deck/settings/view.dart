@@ -5,13 +5,13 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/domain/constants/strings.dart';
+import 'package:tempus/domain/extensions/string.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/home/deck/settings/pages/app_volume_page.dart';
 import 'package:tempus/ui/home/deck/settings/pages/sample_set_page.dart';
 import 'package:tempus/ui/home/deck/settings/pages/theme_page.dart';
 import 'package:tempus/ui/home/deck/settings/view_model.dart';
-import 'package:tempus/domain/util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Settings extends StatefulWidget {
@@ -101,8 +101,11 @@ class _SettingsState extends State<Settings> {
                             )))),
             SettingsTile.navigation(
               title: Text("Sample set"),
-              value: Text(capitalizeFirst(
-                  context.watch<SettingsViewModel>().sampleSet.name)),
+              value: Text(context
+                  .watch<SettingsViewModel>()
+                  .sampleSet
+                  .name
+                  .capitalizeFirst()),
               onPressed: (context) => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -122,8 +125,11 @@ class _SettingsState extends State<Settings> {
           SettingsSection(title: Text("Display"), tiles: [
             SettingsTile.navigation(
               title: Text("Theme"),
-              value: Text(capitalizeFirst(
-                  context.watch<SettingsViewModel>().themeMode.name)),
+              value: Text(context
+                  .watch<SettingsViewModel>()
+                  .themeMode
+                  .name
+                  .capitalizeFirst()),
               onPressed: (context) => Navigator.push(
                   context,
                   MaterialPageRoute(

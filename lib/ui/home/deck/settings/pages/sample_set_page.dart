@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
+import 'package:tempus/domain/extensions/string.dart';
 import 'package:tempus/domain/models/sample_set.dart';
-import 'package:tempus/domain/util.dart';
 
 class SampleSetPage extends StatelessWidget {
   final SettingsThemeData Function(BuildContext context) getSettingsThemeData;
@@ -63,7 +63,7 @@ class SampleSetPage extends StatelessWidget {
           BuildContext context, SampleSet currentSampleSet, bool isFree) =>
       SettingsTile(
           enabled: isFree || isPremium,
-          title: Text(capitalizeFirst(currentSampleSet.name)),
+          title: Text(currentSampleSet.name.capitalizeFirst()),
           trailing: () {
             SampleSet activeSampleSet = sampleSet;
             if (activeSampleSet.name == currentSampleSet.name &&
