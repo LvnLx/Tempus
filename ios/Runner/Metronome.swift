@@ -9,7 +9,7 @@ class Metronome {
   private var downbeatVolume: Float?
   private var dispatchQueue: UnsafeMutablePointer<DispatchQueue> = UnsafeMutablePointer<DispatchQueue>.allocate(capacity: 1)
   private let nextFrame: UnsafeMutablePointer<Int> = UnsafeMutablePointer.allocate(capacity: 1)
-  private var subdivisions: [String: Subdivision] = [:]
+  private var subdivisions: [String: Subdivision]?
   private let beatStarted: () -> Void
   private var sampleSet: SampleSet?
   private var timeSignature: TimeSignature?
@@ -109,98 +109,73 @@ class Metronome {
     }
   }
   
-  func addSubdivision(_ key: String, _ option: Int, _ volume: Float) {
-    subdivisions[key] = Subdivision(option, volume)
-    updateClips()
-  }
-  
-  func removeSubdivision(_ key: String) {
-    subdivisions.removeValue(forKey: key)
-    updateClips()
-  }
-  
-  func setAppVolume(_ volume: Float, _ shouldUpdateClips: Bool = true) {
+  func setAppVolume(_ volume: Float, _ isInitialization: Bool) {
     appVolume = volume
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setBeatUnit(_ beatUnit: BeatUnit, _ shouldUpdateClips: Bool = true, _ shouldUpdatedValidFrameCount: Bool = true) {
+  func setBeatUnit(_ beatUnit: BeatUnit, _ isInitialization: Bool) {
     self.beatUnit = beatUnit
     
-    if (shouldUpdatedValidFrameCount) {
+    if (!isInitialization) {
       updateValidFrameCount()
     }
     
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setBeatVolume(_ volume: Float, _ shouldUpdateClips: Bool = true) {
+  func setBeatVolume(_ volume: Float, _ isInitialization: Bool) {
     beatVolume = volume
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setBpm(_ bpm: UInt16, _ shouldUpdateClips: Bool = true, _ shouldUpdatedValidFrameCount: Bool = true) {
+  func setBpm(_ bpm: UInt16, _ isInitialization: Bool) {
     self.bpm = bpm
     
-    if (shouldUpdatedValidFrameCount) {
+    if (!isInitialization) {
       updateValidFrameCount()
     }
     
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setDownbeatVolume(_ volume: Float, _ shouldUpdateClips: Bool = true) {
+  func setDownbeatVolume(_ volume: Float, _ isInitialization: Bool) {
     downbeatVolume = volume
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setSampleSet(_ sampleSet: SampleSet, _ shouldUpdateClips: Bool = true) {
+  func setSampleSet(_ sampleSet: SampleSet, _ isInitialization: Bool) {
     self.sampleSet = sampleSet
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
   
-  func setState(_ subdivisionsAsJsonString: String) {
-    subdivisions.removeAll()
-    let subdivisionsAsData: Data? = subdivisionsAsJsonString.data(using: .utf8)
-    let subdivisionsAsJson: [String: [String: Any]] = try! JSONSerialization.jsonObject(with: subdivisionsAsData!) as! [String: [String: Any]]
-    for (key, fields) in subdivisionsAsJson {
-      subdivisions[key] = Subdivision(fields["option"] as! Int, Float(fields["volume"] as! Double))
+  func setSubdivisions(_ subdivisions: [String: Subdivision], _ isInitialization: Bool) {
+    self.subdivisions = subdivisions
+    if (!isInitialization) {
+      updateClips()
     }
-    
-    updateValidFrameCount(true)
-    updateClips()
   }
   
-  func setSubdivisionOption(_ key: String, _ option: Int) {
-    subdivisions[key]!.option = option
-    updateClips()
-  }
-  
-  func setSubdivisionVolume(_ key: String, _ volume: Float) {
-    subdivisions[key]!.volume = volume
-    updateClips()
-  }
-  
-  func setTimeSignature(_ timeSignature: TimeSignature, _ shouldUpdateClips: Bool = true, _ shouldUpdateValidFrameCount: Bool = true) {
+  func setTimeSignature(_ timeSignature: TimeSignature, _ isInitialization: Bool) {
     self.timeSignature = timeSignature
     
-    if (shouldUpdateValidFrameCount) {
+    if (!isInitialization) {
       updateValidFrameCount()
     }
     
-    if (shouldUpdateClips) {
+    if (!isInitialization) {
       updateClips()
     }
   }
@@ -225,16 +200,16 @@ class Metronome {
     }
   }
   
-  private func updateClips() {
+  func updateClips() {
     let downbeatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
     downbeatClip.initialize(to: Clip(sample: sampleSet!.downbeatSample, startFrame: 0, volume: downbeatVolume! * appVolume! * 1.5))
     
-    let beatCount: Int = Int(floor((timeSignature! / beatUnit!).evaluate()))
-    let beatLength: Int = Int((Double(validFrameCount.pointee) / Double(beatCount)).rounded())
+    let beatCount: Double = (timeSignature! / beatUnit!).evaluate()
+    let beatLength: Int = Int((Double(validFrameCount.pointee) / beatCount).rounded())
 
     var beatClips: [UnsafeMutablePointer<Clip>] = []
     var subdivisionClips: [UnsafeMutablePointer<Clip>] = []
-    let subdivisionClipData: [(Int, Float)] = subdivisions.values
+    let subdivisionClipData: [(Int, Float)] = subdivisions!.values
       .reduce(into: [Float:Float]()) { (accumulator, subdivision) in
         for location in subdivision.getLocations() {
           if (subdivision.volume >= accumulator[location] ?? 0) {
@@ -247,7 +222,7 @@ class Metronome {
         return (Int((exactLocation / Double(sizeOfFloat)).rounded()) * Int(sizeOfFloat), volume)
       }
     
-    (0..<beatCount).forEach { (beat) in
+    (0..<Int(ceil(beatCount))).forEach { (beat) in
       let beatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
       beatClip.initialize(to: Clip(onStart: beatStarted, sample: sampleSet!.beatSample, startFrame: beat * beatLength, volume: beatVolume! * appVolume!))
       beatClips.append(beatClip)
@@ -269,7 +244,7 @@ class Metronome {
     }
   }
   
-  private func updateValidFrameCount(_ isSetState: Bool = false) {
+  func updateValidFrameCount(_ isInitialization: Bool = false) {
     let bufferLocation = Double(nextFrame.pointee) / Double(validFrameCount.pointee)
     
     let bps: Double = Double(bpm!) / 60.0
@@ -279,7 +254,7 @@ class Metronome {
     
     self.validFrameCount.pointee = Int(beatDurationSeconds * beatCount * Double(sampleRate))
     
-    if (!isSetState) {
+    if (!isInitialization) {
       self.nextFrame.pointee = Int(round(Double(self.validFrameCount.pointee) * bufferLocation))
     }
   }
