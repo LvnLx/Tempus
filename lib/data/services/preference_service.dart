@@ -1,303 +1,269 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' as material;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
-import 'package:tempus/domain/models/fraction.dart';
-import 'package:tempus/domain/models/sample_set.dart';
+import 'package:tempus/domain/models/fraction.dart' as fraction;
+import 'package:tempus/domain/models/sample_set.dart' as sample_set;
 import 'package:tempus/ui/home/mixer/channel/view.dart';
-
-enum Preference {
-  appVolume(1.0),
-  areBeatHapticsEnabled(false),
-  autoUpdateBeatUnit(true),
-  bpm(120),
-  beatUnit(BeatUnit(1, 4)),
-  beatVolume(1.0),
-  downbeatVolume(1.0),
-  isPremium(false),
-  isVisualizerEnabled(true),
-  sampleSet(SampleSet("sine", false)),
-  subdivisions(<Key, SubdivisionData>{}),
-  themeMode(ThemeMode.system),
-  timeSignature(TimeSignature(4, 4));
-
-  final dynamic defaultValue;
-  const Preference(this.defaultValue);
-}
 
 class PreferenceService {
   final AssetService _assetService;
   final SharedPreferencesAsync _sharedPreferencesAsync =
       SharedPreferencesAsync();
 
-  late ValueNotifier<bool> _areBeatHapticsEnabledValueNotifier;
-  late ValueNotifier<bool> _autoUpdateBeatUnitValueNotifier;
-  late ValueNotifier<bool> _isVisualizerEnabledValueNotifier;
+  late final AppVolume appVolume;
+  late final AutoUpdateBeatUnit autoUpdateBeatUnit;
+  late final BeatHaptics beatHaptics;
+  late final BeatUnit beatUnit;
+  late final BeatVolume beatVolume;
+  late final Bpm bpm;
+  late final DownbeatVolume downbeatVolume;
+  late final Premium premium;
+  late final SampleSet sampleSet;
+  late final Subdivisions subdivisions;
+  late final ThemeMode themeMode;
+  late final TimeSignature timeSignature;
+  late final Visualizer visualizer;
 
-  PreferenceService(this._assetService);
+  PreferenceService(this._assetService) {
+    appVolume = AppVolume(this, 1.0);
+    autoUpdateBeatUnit = AutoUpdateBeatUnit(this, true);
+    beatHaptics = BeatHaptics(this, false);
+    beatUnit = BeatUnit(this, fraction.BeatUnit(1, 4));
+    beatVolume = BeatVolume(this, 1.0);
+    bpm = Bpm(this, 120);
+    downbeatVolume = DownbeatVolume(this, 1.0);
+    premium = Premium(this, false);
+    sampleSet = SampleSet(this, sample_set.SampleSet("sine", false));
+    subdivisions = Subdivisions(this, {});
+    themeMode = ThemeMode(this, material.ThemeMode.system);
+    timeSignature = TimeSignature(this, fraction.TimeSignature(4, 4));
+    visualizer = Visualizer(this, true);
+  }
 
   Future<void> init() async {
-    _areBeatHapticsEnabledValueNotifier =
-        ValueNotifier(await _getAreBeatHapticsEnabled());
-    _autoUpdateBeatUnitValueNotifier =
-        ValueNotifier(await _getAutoUpdateBeatUnit());
-    _isVisualizerEnabledValueNotifier =
-        ValueNotifier(await _getIsVisualizerEnabled());
+    await ServiceOwned.initInstances();
+  }
+}
+
+abstract class Preference<T> {
+  final T defaultValue;
+
+  final PreferenceService _service;
+
+  late final String _name;
+
+  Preference(this._service, this.defaultValue) {
+    _name = runtimeType.toString();
   }
 
-  bool get areBeatHapticsEnabled => areBeatHapticsEnabledValueNotifier.value;
-  ValueNotifier<bool> get areBeatHapticsEnabledValueNotifier =>
-      _areBeatHapticsEnabledValueNotifier;
-  bool get autoUpdateBeatUnit => autoUpdateBeatUnitValueNotifier.value;
-  ValueNotifier<bool> get autoUpdateBeatUnitValueNotifier =>
-      _autoUpdateBeatUnitValueNotifier;
-  bool get isVisualizerEnabled => isVisualizerEnabledValueNotifier.value;
-  ValueNotifier<bool> get isVisualizerEnabledValueNotifier =>
-      _isVisualizerEnabledValueNotifier;
-
-  Future<double> getAppVolume() async {
+  /// Use `.value` instead, unless you are accessing the value in the `.init()`
+  /// method of another service
+  Future<T> get() async {
     try {
-      double? volume =
-          await _sharedPreferencesAsync.getDouble(Preference.appVolume.name);
-      return volume ?? Preference.appVolume.defaultValue;
+      return await _unsafeGet();
     } catch (exception) {
-      print("Exception while getting app volume: $exception");
-      await setAppVolume(Preference.appVolume.defaultValue);
-      return Preference.appVolume.defaultValue;
+      print("Exception while getting $_name preference: $exception");
+      await set(defaultValue);
+      return defaultValue;
     }
   }
 
-  Future<int> getBpm() async {
-    try {
-      int? bpm = await _sharedPreferencesAsync.getInt(Preference.bpm.name);
-      return bpm ?? Preference.bpm.defaultValue;
-    } catch (exception) {
-      print("Exception while getting BPM: $exception");
-      await setBpm(Preference.bpm.defaultValue);
-      return Preference.bpm.defaultValue;
+  Future<void> set(T value) async => await _rawSet(value);
+
+  Future<void> _rawSet(T value) async {
+    if (T == bool) {
+      await _service._sharedPreferencesAsync.setBool(_name, value as bool);
+    } else if (T == double) {
+      await _service._sharedPreferencesAsync.setDouble(_name, value as double);
+    } else if (T == int) {
+      await _service._sharedPreferencesAsync.setInt(_name, value as int);
+    } else {
+      throw UnimplementedError();
     }
   }
 
-  Future<BeatUnit> getBeatUnit() async {
-    try {
-      String? beatUnitAsJsonString =
-          await _sharedPreferencesAsync.getString(Preference.beatUnit.name);
-
-      if (beatUnitAsJsonString != null) {
-        Map<String, dynamic> beatUnitAsJson = jsonDecode(beatUnitAsJsonString);
-        return BeatUnit.fromJson(beatUnitAsJson);
-      } else {
-        return Preference.beatUnit.defaultValue;
-      }
-    } catch (exception) {
-      print("Exception while getting beat unit: $exception");
-      await setBpm(Preference.beatUnit.defaultValue);
-      return Preference.beatUnit.defaultValue;
+  Future<T> _unsafeGet() async {
+    if (T == bool) {
+      return (await _service._sharedPreferencesAsync.getBool(_name) ??
+          defaultValue) as T;
+    } else if (T == double) {
+      return (await _service._sharedPreferencesAsync.getDouble(_name) ??
+          defaultValue) as T;
+    } else if (T == int) {
+      return (await _service._sharedPreferencesAsync.getInt(_name) ??
+          defaultValue) as T;
+    } else {
+      throw UnimplementedError();
     }
   }
+}
 
-  Future<double> getBeatVolume() async {
-    try {
-      double? volume =
-          await _sharedPreferencesAsync.getDouble(Preference.beatVolume.name);
-      return volume ?? Preference.beatVolume.defaultValue;
-    } catch (exception) {
-      print("Exception while getting beat volume: $exception");
-      await setBeatVolume(Preference.beatVolume.defaultValue);
-      return Preference.beatVolume.defaultValue;
+abstract class ServiceOwned<T> extends Preference<T> {
+  static final List<ServiceOwned> _instances = List.empty(growable: true);
+
+  late final ValueNotifier<T> valueNotifier;
+
+  ServiceOwned(super.service, super.defaultValue) {
+    ServiceOwned._instances.add(this);
+  }
+
+  static Future<void> initInstances() async =>
+      await Future.wait(_instances.map((instance) async =>
+          instance.valueNotifier = ValueNotifier(await instance.get())));
+
+  T get value => valueNotifier.value;
+
+  @override
+  Future<void> set(T value) async {
+    await super.set(value);
+    valueNotifier.value = value;
+  }
+}
+
+class AppVolume extends Preference<double> {
+  AppVolume(super._service, super.defaultValue);
+}
+
+class AutoUpdateBeatUnit extends ServiceOwned<bool> {
+  AutoUpdateBeatUnit(super._service, super.defaultValue);
+}
+
+class BeatHaptics extends ServiceOwned<bool> {
+  BeatHaptics(super._service, super.defaultValue);
+}
+
+class BeatUnit extends Preference<fraction.BeatUnit> {
+  BeatUnit(super._service, super.defaultValue);
+
+  @override
+  Future<void> _rawSet(fraction.BeatUnit value) async =>
+      await _service._sharedPreferencesAsync
+          .setString(_name, value.toJsonString());
+
+  @override
+  Future<fraction.BeatUnit> _unsafeGet() async {
+    String? beatUnitAsJsonString =
+        await _service._sharedPreferencesAsync.getString(_name);
+
+    if (beatUnitAsJsonString != null) {
+      Map<String, dynamic> beatUnitAsJson = jsonDecode(beatUnitAsJsonString);
+      return fraction.BeatUnit.fromJson(beatUnitAsJson);
+    } else {
+      return defaultValue;
     }
   }
+}
 
-  Future<double> getDownbeatVolume() async {
-    try {
-      double? volume = await _sharedPreferencesAsync
-          .getDouble(Preference.downbeatVolume.name);
-      return volume ?? Preference.downbeatVolume.defaultValue;
-    } catch (exception) {
-      print("Exception while getting downbeat volume: $exception");
-      await setDownbeatVolume(Preference.downbeatVolume.defaultValue);
-      return Preference.downbeatVolume.defaultValue;
+class BeatVolume extends Preference<double> {
+  BeatVolume(super._service, super.defaultValue);
+}
+
+class Bpm extends Preference<int> {
+  Bpm(super._service, super.defaultValue);
+}
+
+class DownbeatVolume extends Preference<double> {
+  DownbeatVolume(super._service, super.defaultValue);
+}
+
+class Premium extends Preference<bool> {
+  Premium(super._service, super.defaultValue);
+}
+
+class SampleSet extends Preference<sample_set.SampleSet> {
+  SampleSet(super._service, super.defaultValue);
+
+  @override
+  Future<void> _rawSet(sample_set.SampleSet value) async =>
+      await _service._sharedPreferencesAsync
+          .setString(_name, value.toJsonString());
+
+  @override
+  Future<sample_set.SampleSet> _unsafeGet() async {
+    String? sampleSetAsJsonString =
+        await _service._sharedPreferencesAsync.getString(_name);
+
+    if (sampleSetAsJsonString != null) {
+      return _service._assetService.sampleSets.firstWhere((sampleSet) =>
+          sampleSet ==
+          sample_set.SampleSet.fromJsonString(sampleSetAsJsonString));
+    } else {
+      return defaultValue;
     }
   }
+}
 
-  Future<bool> getIsPremium() async {
-    try {
-      bool? isPremium =
-          await _sharedPreferencesAsync.getBool(Preference.isPremium.name);
-      return isPremium ?? Preference.isPremium.defaultValue;
-    } catch (exception) {
-      print("Exception while getting premium status: $exception");
-      await setIsPremium(Preference.isPremium.defaultValue);
-      return Preference.isPremium.defaultValue;
+class Subdivisions extends Preference<Map<Key, SubdivisionData>> {
+  Subdivisions(super.service, super.defaultValue);
+
+  @override
+  Future<void> _rawSet(Map<Key, SubdivisionData> value) async =>
+      await _service._sharedPreferencesAsync
+          .setString(_name, value.toJsonString());
+
+  @override
+  Future<Map<Key, SubdivisionData>> _unsafeGet() async {
+    String? subdivisionsAsJsonString =
+        await _service._sharedPreferencesAsync.getString(_name);
+
+    if (subdivisionsAsJsonString != null) {
+      Map<String, dynamic> subdivisionsAsJson =
+          jsonDecode(subdivisionsAsJsonString);
+      return subdivisionsAsJson.map(
+          (key, value) => MapEntry(Key(key), SubdivisionData.fromJson(value)));
+    } else {
+      return defaultValue;
     }
   }
+}
 
-  Future<SampleSet> getSampleSet() async {
-    try {
-      String? sampleSetAsJsonString =
-          await _sharedPreferencesAsync.getString(Preference.sampleSet.name);
+class ThemeMode extends Preference<material.ThemeMode> {
+  ThemeMode(super.service, super.defaultValue);
 
-      if (sampleSetAsJsonString != null) {
-        return _assetService.sampleSets.firstWhere((sampleSet) =>
-            sampleSet == SampleSet.fromJsonString(sampleSetAsJsonString));
-      } else {
-        return Preference.sampleSet.defaultValue;
-      }
-    } catch (exception) {
-      print("Exception while getting sample pair: $exception");
-      await setSampleSet(Preference.sampleSet.defaultValue);
-      return Preference.sampleSet.defaultValue;
+  @override
+  Future<void> _rawSet(material.ThemeMode value) async =>
+      await _service._sharedPreferencesAsync.setString(_name, value.name);
+
+  @override
+  Future<material.ThemeMode> _unsafeGet() async {
+    String? themeModeAsString =
+        await _service._sharedPreferencesAsync.getString(_name);
+
+    if (themeModeAsString != null) {
+      return material.ThemeMode.values
+          .firstWhere((themeMode) => themeMode.name == themeModeAsString);
+    } else {
+      return defaultValue;
     }
   }
+}
 
-  Future<Map<Key, SubdivisionData>> getSubdivisions() async {
-    try {
-      String? subdivisionsAsJsonString =
-          await _sharedPreferencesAsync.getString(Preference.subdivisions.name);
+class TimeSignature extends Preference<fraction.TimeSignature> {
+  TimeSignature(super.service, super.defaultValue);
 
-      if (subdivisionsAsJsonString != null) {
-        Map<String, dynamic> subdivisionsAsJson =
-            jsonDecode(subdivisionsAsJsonString);
-        return subdivisionsAsJson.map((key, value) =>
-            MapEntry(Key(key), SubdivisionData.fromJson(value)));
-      } else {
-        return Preference.subdivisions.defaultValue;
-      }
-    } catch (exception) {
-      print("Exception while getting subdivisions: $exception");
-      await setSubdivisions(Preference.subdivisions.defaultValue);
-      return Preference.subdivisions.defaultValue;
+  @override
+  Future<void> _rawSet(fraction.TimeSignature value) async =>
+      await _service._sharedPreferencesAsync
+          .setString(_name, value.toJsonString());
+
+  @override
+  Future<fraction.TimeSignature> _unsafeGet() async {
+    String? timeSignatureAsJsonString =
+        await _service._sharedPreferencesAsync.getString(_name);
+    if (timeSignatureAsJsonString != null) {
+      Map<String, dynamic> timeSignatureAsJson =
+          jsonDecode(timeSignatureAsJsonString);
+      return fraction.TimeSignature.fromJson(timeSignatureAsJson);
+    } else {
+      return defaultValue;
     }
   }
+}
 
-  Future<ThemeMode> getThemeMode() async {
-    try {
-      String? themeModeAsString =
-          await _sharedPreferencesAsync.getString(Preference.themeMode.name);
-
-      if (themeModeAsString != null) {
-        return ThemeMode.values
-            .firstWhere((themeMode) => themeMode.name == themeModeAsString);
-      } else {
-        return Preference.themeMode.defaultValue;
-      }
-    } catch (exception) {
-      print("Exception while getting theme mode: $exception");
-      await setThemeMode(Preference.themeMode.defaultValue);
-      return Preference.themeMode.defaultValue;
-    }
-  }
-
-  Future<TimeSignature> getTimeSignature() async {
-    try {
-      String? timeSignatureAsJsonString = await _sharedPreferencesAsync
-          .getString(Preference.timeSignature.name);
-      if (timeSignatureAsJsonString != null) {
-        Map<String, dynamic> timeSignatureAsJson =
-            jsonDecode(timeSignatureAsJsonString);
-        return TimeSignature.fromJson(timeSignatureAsJson);
-      } else {
-        return Preference.timeSignature.defaultValue;
-      }
-    } catch (exception) {
-      print("Exception while getting time signature: $exception");
-      await setTimeSignature(Preference.timeSignature.defaultValue);
-      return Preference.timeSignature.defaultValue;
-    }
-  }
-
-  Future<void> setAppVolume(double volume) async =>
-      await _sharedPreferencesAsync.setDouble(
-          Preference.appVolume.name, volume);
-
-  Future<void> setAreBeatHapticsEnabled(bool value) async {
-    areBeatHapticsEnabledValueNotifier.value = value;
-    await _sharedPreferencesAsync.setBool(
-        Preference.areBeatHapticsEnabled.name, value);
-  }
-
-  Future<void> setAutoUpdateBeatUnit(bool value) async {
-    autoUpdateBeatUnitValueNotifier.value = value;
-    await _sharedPreferencesAsync.setBool(
-        Preference.autoUpdateBeatUnit.name, value);
-  }
-
-  Future<void> setBpm(int bpm) async =>
-      await _sharedPreferencesAsync.setInt(Preference.bpm.name, bpm);
-
-  Future<void> setBeatUnit(BeatUnit beatUnit) async =>
-      await _sharedPreferencesAsync.setString(
-          Preference.beatUnit.name, beatUnit.toJsonString());
-
-  Future<void> setBeatVolume(double volume) async =>
-      await _sharedPreferencesAsync.setDouble(
-          Preference.beatVolume.name, volume);
-
-  Future<void> setDownbeatVolume(double volume) async =>
-      await _sharedPreferencesAsync.setDouble(
-          Preference.downbeatVolume.name, volume);
-
-  Future<void> setIsPremium(bool value) async =>
-      await _sharedPreferencesAsync.setBool(Preference.isPremium.name, value);
-
-  Future<void> setIsVisualizerEnabled(bool value) async {
-    isVisualizerEnabledValueNotifier.value = value;
-    await _sharedPreferencesAsync.setBool(
-        Preference.isVisualizerEnabled.name, value);
-  }
-
-  Future<void> setSampleSet(SampleSet sampleSet) async =>
-      await _sharedPreferencesAsync.setString(
-          Preference.sampleSet.name, sampleSet.toJsonString());
-
-  Future<void> setSubdivisions(Map<Key, SubdivisionData> subdivisions) async =>
-      await _sharedPreferencesAsync.setString(
-          Preference.subdivisions.name, subdivisions.toJsonString());
-
-  Future<void> setThemeMode(ThemeMode themeMode) async =>
-      await _sharedPreferencesAsync.setString(
-          Preference.themeMode.name, themeMode.name);
-
-  Future<void> setTimeSignature(TimeSignature timeSignature) async =>
-      await _sharedPreferencesAsync.setString(
-          Preference.timeSignature.name, timeSignature.toJsonString());
-
-  Future<bool> _getAreBeatHapticsEnabled() async {
-    try {
-      bool? value = await _sharedPreferencesAsync
-          .getBool(Preference.areBeatHapticsEnabled.name);
-      return value ?? Preference.areBeatHapticsEnabled.defaultValue;
-    } catch (exception) {
-      print("Exception while getting are beat haptics enabled: $exception");
-      await setAreBeatHapticsEnabled(
-          Preference.areBeatHapticsEnabled.defaultValue);
-      return Preference.areBeatHapticsEnabled.defaultValue;
-    }
-  }
-
-  Future<bool> _getAutoUpdateBeatUnit() async {
-    try {
-      bool? value = await _sharedPreferencesAsync
-          .getBool(Preference.autoUpdateBeatUnit.name);
-      return value ?? Preference.autoUpdateBeatUnit.defaultValue;
-    } catch (exception) {
-      print("Exception while getting auto update beat unit: $exception");
-      await setAutoUpdateBeatUnit(Preference.autoUpdateBeatUnit.defaultValue);
-      return Preference.autoUpdateBeatUnit.defaultValue;
-    }
-  }
-
-  Future<bool> _getIsVisualizerEnabled() async {
-    try {
-      bool? value = await _sharedPreferencesAsync
-          .getBool(Preference.isVisualizerEnabled.name);
-      return value ?? Preference.isVisualizerEnabled.defaultValue;
-    } catch (exception) {
-      print("Exception while getting is visualizer enabled: $exception");
-      await setIsVisualizerEnabled(Preference.isVisualizerEnabled.defaultValue);
-      return Preference.isVisualizerEnabled.defaultValue;
-    }
-  }
+class Visualizer extends ServiceOwned<bool> {
+  Visualizer(super._service, super.defaultValue);
 }

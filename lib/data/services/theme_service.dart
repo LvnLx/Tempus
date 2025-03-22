@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tempus/data/services/preference_service.dart';
+import 'package:tempus/data/services/preference_service.dart' hide ThemeMode;
 
 class ThemeService {
   final PreferenceService _preferenceService;
@@ -33,7 +33,7 @@ class ThemeService {
 
   Future<void> init() async {
     _themeModeValueNotifier =
-        ValueNotifier(await _preferenceService.getThemeMode());
+        ValueNotifier(await _preferenceService.themeMode.get());
   }
 
   ThemeData get darkThemeData => _darkThemeData;
@@ -44,6 +44,6 @@ class ThemeService {
 
   void setThemeMode(ThemeMode themeMode) {
     _themeModeValueNotifier.value = themeMode;
-    _preferenceService.setThemeMode(themeMode);
+    _preferenceService.themeMode.set(themeMode);
   }
 }

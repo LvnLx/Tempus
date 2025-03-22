@@ -21,10 +21,9 @@ class VisualizerViewModel extends ChangeNotifier {
       }
     });
 
-    _preferenceService.isVisualizerEnabledValueNotifier
-        .addListener(notifyListeners);
+    _preferenceService.visualizer.valueNotifier.addListener(notifyListeners);
   }
 
   bool get isVisible => _isVisible;
-  bool get isVisualizerEnabled => _preferenceService.isVisualizerEnabled;
+  bool get isVisualizerEnabled => _preferenceService.visualizer.value;
 }

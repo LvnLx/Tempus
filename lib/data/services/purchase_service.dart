@@ -19,7 +19,7 @@ class PurchaseService {
 
   Future<void> init() async {
     _isPremiumValueNotifier =
-        ValueNotifier(await _preferenceService.getIsPremium());
+        ValueNotifier(await _preferenceService.premium.get());
 
     if (!kReleaseMode) {
       await Purchases.setLogLevel(LogLevel.debug);
@@ -51,7 +51,7 @@ class PurchaseService {
       CustomerInfo customerInfo = await Purchases.purchasePackage(package);
       if (customerInfo.entitlements.active.containsKey(_entitlementId)) {
         _isPremiumValueNotifier.value = true;
-        _preferenceService.setIsPremium(true);
+        _preferenceService.premium.set(true);
 
         return PurchaseResult(PurchaseResultStatus.purchaseSucceeded,
             "You now have access to premium features");
@@ -84,7 +84,7 @@ class PurchaseService {
       CustomerInfo customerInfo = await Purchases.restorePurchases();
       if (customerInfo.entitlements.active.containsKey("premium")) {
         _isPremiumValueNotifier.value = true;
-        _preferenceService.setIsPremium(true);
+        _preferenceService.premium.set(true);
 
         return PurchaseResult(
           PurchaseResultStatus.restoreSucceeded,

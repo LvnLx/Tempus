@@ -38,22 +38,24 @@ class AudioService {
   }
 
   Future<void> init() async {
-    _appVolume = AppVolume(this, _preferenceService.setAppVolume,
-        ValueNotifier(await _preferenceService.getAppVolume()));
-    _beatUnit = BeatUnit(this, _preferenceService.setBeatUnit,
-        ValueNotifier(await _preferenceService.getBeatUnit()));
-    _beatVolume = BeatVolume(this, _preferenceService.setBeatVolume,
-        ValueNotifier(await _preferenceService.getBeatVolume()));
-    _bpm = Bpm(this, _preferenceService.setBpm,
-        ValueNotifier(await _preferenceService.getBpm()));
-    _downbeatVolume = DownbeatVolume(this, _preferenceService.setDownbeatVolume,
-        ValueNotifier(await _preferenceService.getDownbeatVolume()));
-    _sampleSet = SampleSet(this, _preferenceService.setSampleSet,
-        ValueNotifier(await _preferenceService.getSampleSet()));
-    _subdivisions = Subdivisions(this, _preferenceService.setSubdivisions,
-        ValueNotifier(await _preferenceService.getSubdivisions()));
-    _timeSignature = TimeSignature(this, _preferenceService.setTimeSignature,
-        ValueNotifier(await _preferenceService.getTimeSignature()));
+    _appVolume = AppVolume(this, _preferenceService.appVolume.set,
+        ValueNotifier(await _preferenceService.appVolume.get()));
+    _beatUnit = BeatUnit(this, _preferenceService.beatUnit.set,
+        ValueNotifier(await _preferenceService.beatUnit.get()));
+    _beatVolume = BeatVolume(this, _preferenceService.beatVolume.set,
+        ValueNotifier(await _preferenceService.beatVolume.get()));
+    _bpm = Bpm(this, _preferenceService.bpm.set,
+        ValueNotifier(await _preferenceService.bpm.get()));
+    _downbeatVolume = DownbeatVolume(
+        this,
+        _preferenceService.downbeatVolume.set,
+        ValueNotifier(await _preferenceService.downbeatVolume.get()));
+    _sampleSet = SampleSet(this, _preferenceService.sampleSet.set,
+        ValueNotifier(await _preferenceService.sampleSet.get()));
+    _subdivisions = Subdivisions(this, _preferenceService.subdivisions.set,
+        ValueNotifier(await _preferenceService.subdivisions.get()));
+    _timeSignature = TimeSignature(this, _preferenceService.timeSignature.set,
+        ValueNotifier(await _preferenceService.timeSignature.get()));
 
     await _setSamplePaths(_assetService.sampleSets.fold(
         {},
@@ -141,7 +143,7 @@ abstract class _Action<T> {
       {bool? flag, bool isMetronomeInitialization = false}) async {
     _valueNotifier.value = value;
     await _invokeMethodChannel(value, isMetronomeInitialization);
-    _setPreference.call(value);
+    _setPreference(value);
   }
 
   Future<void> _invokeMethodChannel(
@@ -228,7 +230,7 @@ class TimeSignature extends _Action<fraction.TimeSignature> {
       {bool? flag, bool isMetronomeInitialization = false}) async {
     _valueNotifier.value = value;
 
-    if (_audioService._preferenceService.autoUpdateBeatUnit &&
+    if (_audioService._preferenceService.autoUpdateBeatUnit.value &&
         !isMetronomeInitialization) {
       await _audioService.beatUnit.set(value.defaultBeatUnit());
     }
