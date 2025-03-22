@@ -45,18 +45,18 @@ class PreferenceService {
   }
 
   Future<void> init() async {
-    await ServiceOwned.initInstances();
+    await _ServiceOwned.initInstances();
   }
 }
 
-abstract class Preference<T> {
+abstract class _Preference<T> {
   final T defaultValue;
 
   final PreferenceService _service;
 
   late final String _name;
 
-  Preference(this._service, this.defaultValue) {
+  _Preference(this._service, this.defaultValue) {
     _name = runtimeType.toString();
   }
 
@@ -75,40 +75,43 @@ abstract class Preference<T> {
   Future<void> set(T value) async => await _rawSet(value);
 
   Future<void> _rawSet(T value) async {
-    if (T == bool) {
-      await _service._sharedPreferencesAsync.setBool(_name, value as bool);
-    } else if (T == double) {
-      await _service._sharedPreferencesAsync.setDouble(_name, value as double);
-    } else if (T == int) {
-      await _service._sharedPreferencesAsync.setInt(_name, value as int);
-    } else {
-      throw UnimplementedError();
+    switch (T) {
+      case const (bool):
+        await _service._sharedPreferencesAsync.setBool(_name, value as bool);
+      case const (double):
+        await _service._sharedPreferencesAsync
+            .setDouble(_name, value as double);
+      case const (int):
+        await _service._sharedPreferencesAsync.setInt(_name, value as int);
+      default:
+        throw UnimplementedError();
     }
   }
 
   Future<T> _unsafeGet() async {
-    if (T == bool) {
-      return (await _service._sharedPreferencesAsync.getBool(_name) ??
-          defaultValue) as T;
-    } else if (T == double) {
-      return (await _service._sharedPreferencesAsync.getDouble(_name) ??
-          defaultValue) as T;
-    } else if (T == int) {
-      return (await _service._sharedPreferencesAsync.getInt(_name) ??
-          defaultValue) as T;
-    } else {
-      throw UnimplementedError();
+    switch (T) {
+      case const (bool):
+        return (await _service._sharedPreferencesAsync.getBool(_name) ??
+            defaultValue) as T;
+      case const (double):
+        return (await _service._sharedPreferencesAsync.getDouble(_name) ??
+            defaultValue) as T;
+      case const (int):
+        return (await _service._sharedPreferencesAsync.getInt(_name) ??
+            defaultValue) as T;
+      default:
+        throw UnimplementedError();
     }
   }
 }
 
-abstract class ServiceOwned<T> extends Preference<T> {
-  static final List<ServiceOwned> _instances = List.empty(growable: true);
+abstract class _ServiceOwned<T> extends _Preference<T> {
+  static final List<_ServiceOwned> _instances = List.empty(growable: true);
 
   late final ValueNotifier<T> valueNotifier;
 
-  ServiceOwned(super.service, super.defaultValue) {
-    ServiceOwned._instances.add(this);
+  _ServiceOwned(super.service, super.defaultValue) {
+    _ServiceOwned._instances.add(this);
   }
 
   static Future<void> initInstances() async =>
@@ -124,19 +127,19 @@ abstract class ServiceOwned<T> extends Preference<T> {
   }
 }
 
-class AppVolume extends Preference<double> {
+class AppVolume extends _Preference<double> {
   AppVolume(super._service, super.defaultValue);
 }
 
-class AutoUpdateBeatUnit extends ServiceOwned<bool> {
+class AutoUpdateBeatUnit extends _ServiceOwned<bool> {
   AutoUpdateBeatUnit(super._service, super.defaultValue);
 }
 
-class BeatHaptics extends ServiceOwned<bool> {
+class BeatHaptics extends _ServiceOwned<bool> {
   BeatHaptics(super._service, super.defaultValue);
 }
 
-class BeatUnit extends Preference<fraction.BeatUnit> {
+class BeatUnit extends _Preference<fraction.BeatUnit> {
   BeatUnit(super._service, super.defaultValue);
 
   @override
@@ -158,23 +161,23 @@ class BeatUnit extends Preference<fraction.BeatUnit> {
   }
 }
 
-class BeatVolume extends Preference<double> {
+class BeatVolume extends _Preference<double> {
   BeatVolume(super._service, super.defaultValue);
 }
 
-class Bpm extends Preference<int> {
+class Bpm extends _Preference<int> {
   Bpm(super._service, super.defaultValue);
 }
 
-class DownbeatVolume extends Preference<double> {
+class DownbeatVolume extends _Preference<double> {
   DownbeatVolume(super._service, super.defaultValue);
 }
 
-class Premium extends Preference<bool> {
+class Premium extends _Preference<bool> {
   Premium(super._service, super.defaultValue);
 }
 
-class SampleSet extends Preference<sample_set.SampleSet> {
+class SampleSet extends _Preference<sample_set.SampleSet> {
   SampleSet(super._service, super.defaultValue);
 
   @override
@@ -197,7 +200,7 @@ class SampleSet extends Preference<sample_set.SampleSet> {
   }
 }
 
-class Subdivisions extends Preference<Map<Key, SubdivisionData>> {
+class Subdivisions extends _Preference<Map<Key, SubdivisionData>> {
   Subdivisions(super.service, super.defaultValue);
 
   @override
@@ -221,7 +224,7 @@ class Subdivisions extends Preference<Map<Key, SubdivisionData>> {
   }
 }
 
-class ThemeMode extends Preference<material.ThemeMode> {
+class ThemeMode extends _Preference<material.ThemeMode> {
   ThemeMode(super.service, super.defaultValue);
 
   @override
@@ -242,7 +245,7 @@ class ThemeMode extends Preference<material.ThemeMode> {
   }
 }
 
-class TimeSignature extends Preference<fraction.TimeSignature> {
+class TimeSignature extends _Preference<fraction.TimeSignature> {
   TimeSignature(super.service, super.defaultValue);
 
   @override
@@ -264,6 +267,6 @@ class TimeSignature extends Preference<fraction.TimeSignature> {
   }
 }
 
-class Visualizer extends ServiceOwned<bool> {
+class Visualizer extends _ServiceOwned<bool> {
   Visualizer(super._service, super.defaultValue);
 }
