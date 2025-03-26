@@ -21,6 +21,7 @@ class AudioService {
   late BeatVolume _beatVolume;
   late Bpm _bpm;
   late DownbeatVolume _downbeatVolume;
+  late Playback _playback;
   late SampleSet _sampleSet;
   late Subdivisions _subdivisions;
   late TimeSignature _timeSignature;
@@ -50,6 +51,7 @@ class AudioService {
         this,
         _preferenceService.downbeatVolume.set,
         ValueNotifier(await _preferenceService.downbeatVolume.get()));
+    _playback = Playback(this, ValueNotifier(false));
     _sampleSet = SampleSet(this, _preferenceService.sampleSet.set,
         ValueNotifier(await _preferenceService.sampleSet.get()));
     _subdivisions = Subdivisions(this, _preferenceService.subdivisions.set,
@@ -84,6 +86,7 @@ class AudioService {
   BeatVolume get beatVolume => _beatVolume;
   Bpm get bpm => _bpm;
   DownbeatVolume get downbeatVolume => _downbeatVolume;
+  Playback get playback => _playback;
   SampleSet get sampleSet => _sampleSet;
   Subdivisions get subdivisions => _subdivisions;
   TimeSignature get timeSignature => _timeSignature;
@@ -110,16 +113,6 @@ class AudioService {
     print(result);
   }
 
-  Future<void> startPlayback() async {
-    final result = await _methodChannel.invokeMethod("startPlayback");
-    print(result);
-  }
-
-  Future<void> stopPlayback() async {
-    final result = await _methodChannel.invokeMethod("stopPlayback");
-    print(result);
-  }
-
   Future<void> _setSamplePaths(Set<String> samplePaths) async {
     final result = await _methodChannel.invokeMethod(
         "setSamplePaths", samplePaths.toList());
@@ -131,10 +124,9 @@ enum Event { beatStarted, downbeatStarted, innerBeatStarted }
 
 abstract class _Action<T> {
   final AudioService _audioService;
-  final Future<void> Function(T value) _setPreference;
   final ValueNotifier<T> _valueNotifier;
 
-  _Action(this._audioService, this._setPreference, this._valueNotifier);
+  _Action(this._audioService, this._valueNotifier);
 
   T get value => _valueNotifier.value;
   ValueNotifier<T> get valueNotifier => _valueNotifier;
@@ -143,7 +135,6 @@ abstract class _Action<T> {
       {bool? flag, bool isMetronomeInitialization = false}) async {
     _valueNotifier.value = value;
     await _invokeMethodChannel(value, isMetronomeInitialization);
-    _setPreference(value);
   }
 
   Future<void> _invokeMethodChannel(
@@ -157,22 +148,36 @@ abstract class _Action<T> {
   String _getString(T value) => value.toString();
 }
 
-class AppVolume extends _Action<double> {
+abstract class _Preferenced<T> extends _Action<T> {
+  final Future<void> Function(T value) _setPreference;
+
+  _Preferenced(super.audioService, this._setPreference, super.valueNotifier);
+
+  @override
+  Future<void> set(T value,
+      {bool? flag, bool isMetronomeInitialization = false}) async {
+    super.set(value,
+        flag: flag, isMetronomeInitialization: isMetronomeInitialization);
+    _setPreference(value);
+  }
+}
+
+class AppVolume extends _Preferenced<double> {
   AppVolume(super._audioService, super._setPreference, super.valueNotifier);
 }
 
-class BeatUnit extends _Action<fraction.BeatUnit> {
+class BeatUnit extends _Preferenced<fraction.BeatUnit> {
   BeatUnit(super.audioService, super._setPreference, super.valueNotifier);
 
   @override
   String _getString(fraction.BeatUnit value) => value.toJsonString();
 }
 
-class BeatVolume extends _Action<double> {
+class BeatVolume extends _Preferenced<double> {
   BeatVolume(super.audioService, super._setPreference, super.valueNotifier);
 }
 
-class Bpm extends _Action<int> {
+class Bpm extends _Preferenced<int> {
   Bpm(super._audioService, super._setPreference, super._valueNotifier);
 
   @override
@@ -201,25 +206,29 @@ class Bpm extends _Action<int> {
   }
 }
 
-class DownbeatVolume extends _Action<double> {
+class DownbeatVolume extends _Preferenced<double> {
   DownbeatVolume(super.audioService, super._setPreference, super.valueNotifier);
 }
 
-class SampleSet extends _Action<sample_set.SampleSet> {
+class Playback extends _Action<bool> {
+  Playback(super.audioService, super.valueNotifier);
+}
+
+class SampleSet extends _Preferenced<sample_set.SampleSet> {
   SampleSet(super.audioService, super._setPreference, super.valueNotifier);
 
   @override
   String _getString(sample_set.SampleSet value) => value.getPathsAsJsonString();
 }
 
-class Subdivisions extends _Action<Map<Key, SubdivisionData>> {
+class Subdivisions extends _Preferenced<Map<Key, SubdivisionData>> {
   Subdivisions(super.audioService, super._setPreference, super.valueNotifier);
 
   @override
   String _getString(Map<Key, SubdivisionData> value) => value.toJsonString();
 }
 
-class TimeSignature extends _Action<fraction.TimeSignature> {
+class TimeSignature extends _Preferenced<fraction.TimeSignature> {
   TimeSignature(super.audioService, super._setPreference, super.valueNotifier);
 
   @override

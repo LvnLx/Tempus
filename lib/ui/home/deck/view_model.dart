@@ -7,16 +7,15 @@ class DeckViewModel extends ChangeNotifier {
   final AudioService _audioService;
   final PurchaseService _purchaseService;
 
-  bool _playback = false;
-
   DeckViewModel(this._audioService, this._purchaseService) {
     _audioService.bpm.valueNotifier.addListener(notifyListeners);
+    _audioService.playback.valueNotifier.addListener(notifyListeners);
     _audioService.timeSignature.valueNotifier.addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
   }
 
   Future<void> init() async {
-    await _audioService.stopPlayback();
+    await _audioService.playback.set(false);
   }
 
   int get bpm => _audioService.bpm.value;
@@ -31,10 +30,9 @@ class DeckViewModel extends ChangeNotifier {
       await _audioService.timeSignature.set(timeSignature);
 
   Future<void> togglePlayback() async {
-    _playback
-        ? await _audioService.stopPlayback()
-        : await _audioService.startPlayback();
-    _playback = !playback;
+    playback
+        ? await _audioService.playback.set(false)
+        : await _audioService.playback.set(true);
 
     notifyListeners();
   }

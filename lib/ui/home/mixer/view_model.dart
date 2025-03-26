@@ -16,14 +16,26 @@ class MixerViewModel extends ChangeNotifier {
     _audioService.downbeatVolume.valueNotifier.addListener(notifyListeners);
     _audioService.subdivisions.valueNotifier.addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
+
+    _audioService.playback.valueNotifier.addListener(() {
+      _count = 1;
+      notifyListeners();
+    });
+
+    _audioService.eventStream.listen((event) {
+      if (event is Beat) {
+        _count = event.count;
+        notifyListeners();
+      }
+    });
   }
 
-  BeatUnit get beatUnit => _audioService.beatUnit.value;
   ValueNotifier<double> get beatVolumeValueNotifier =>
       _audioService.beatVolume.valueNotifier;
   ValueNotifier<double> get downbeatVolumeValueNotifier =>
       _audioService.downbeatVolume.valueNotifier;
   bool get isPremium => _purchaseService.isPremium;
+  bool get playback => _audioService.playback.value;
   Map<Key, SubdivisionData> get subdivisions =>
       _audioService.subdivisions.value;
 

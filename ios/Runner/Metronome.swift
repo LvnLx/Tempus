@@ -158,6 +158,26 @@ class Metronome {
     }
   }
   
+  func setPlayback(_ value: Bool) {
+    if (value) {
+      guard AudioOutputUnitStart(audioUnit!) == noErr else {
+        print("Error starting audio output unit")
+        return
+      }
+    } else {
+      guard AudioOutputUnitStop(audioUnit!) == noErr else {
+        print("Error stopping audio output unit")
+        return
+      }
+      
+      nextFrame.pointee = 0
+      for clip in clips {
+        clip.pointee.isPlaying = false
+        clip.pointee.nextFrame = 0
+      }
+    }
+  }
+  
   func setSampleSet(_ sampleSet: SampleSet, _ isInitialization: Bool) {
     self.sampleSet = sampleSet
     if (!isInitialization) {
@@ -181,26 +201,6 @@ class Metronome {
     
     if (!isInitialization) {
       updateClips()
-    }
-  }
-  
-  func startPlayback() {
-    guard AudioOutputUnitStart(audioUnit!) == noErr else {
-      print("Error starting audio output unit")
-      return
-    }
-  }
-  
-  func stopPlayback() {
-    guard AudioOutputUnitStop(audioUnit!) == noErr else {
-      print("Error stopping audio output unit")
-      return
-    }
-    
-    nextFrame.pointee = 0
-    for clip in clips {
-      clip.pointee.isPlaying = false
-      clip.pointee.nextFrame = 0
     }
   }
   
