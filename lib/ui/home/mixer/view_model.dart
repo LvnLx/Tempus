@@ -3,7 +3,7 @@ import 'package:tempus/data/services/audio_service.dart' hide BeatUnit;
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
-import 'package:tempus/ui/home/mixer/channel.dart';
+import 'package:tempus/domain/models/subdivision.dart';
 
 class MixerViewModel extends ChangeNotifier {
   final AudioService _audioService;
@@ -37,13 +37,12 @@ class MixerViewModel extends ChangeNotifier {
       _audioService.downbeatVolume.valueNotifier;
   bool get isPremium => _purchaseService.isPremium;
   bool get playback => _audioService.playback.value;
-  Map<Key, SubdivisionData> get subdivisions =>
-      _audioService.subdivisions.value;
+  Map<Key, Subdivision> get subdivisions => _audioService.subdivisions.value;
 
   Future<void> addSubdivision() async => await _audioService.subdivisions.set({
         ...subdivisions,
         UniqueKey():
-            SubdivisionData(option: Options.subdivisionOptions[0], volume: 0.0)
+            Subdivision(option: Options.subdivisionOptions[0], volume: 0.0)
       });
 
   Future<void> removeSubdivision(Key key) async =>
@@ -58,14 +57,14 @@ class MixerViewModel extends ChangeNotifier {
   Future<void> setSubdivisionOption(Key key, int option) async =>
       await _audioService.subdivisions.set({...subdivisions}..update(
           key,
-          (subdivisionData) =>
-              SubdivisionData(option: option, volume: subdivisionData.volume)));
+          (subdivision) =>
+              Subdivision(option: option, volume: subdivision.volume)));
 
   Future<void> setSubdivisionVolume(Key key, double volume) async =>
       await _audioService.subdivisions.set({...subdivisions}..update(
           key,
-          (subdivisionData) =>
-              SubdivisionData(option: subdivisionData.option, volume: volume)));
+          (subdivision) =>
+              Subdivision(option: subdivision.option, volume: volume)));
 
   Future<PurchaseResult> purchasePremium() async =>
       await _purchaseService.purchasePremium();

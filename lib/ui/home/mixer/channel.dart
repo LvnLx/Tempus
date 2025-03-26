@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:tempus/domain/models/subdivision.dart';
 import 'package:tempus/ui/core/bar.dart';
 import 'package:tempus/ui/core/outlined.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
@@ -9,7 +10,7 @@ class Channel extends StatelessWidget {
   final void Function(Key key) onRemove;
   final Future<void> Function(Key key, int option) setSubdivisionOption;
   final Future<void> Function(Key key, double volume) setSubdivisionVolume;
-  final Map<Key, SubdivisionData> subdivisions;
+  final Map<Key, Subdivision> subdivisions;
 
   Channel(
       {required Key key,
@@ -65,16 +66,4 @@ class Channel extends StatelessWidget {
       ),
     );
   }
-}
-
-class SubdivisionData {
-  int option;
-  double volume;
-
-  SubdivisionData({required this.option, required this.volume});
-
-  Map<String, dynamic> toJson() => {"option": option, "volume": volume};
-
-  static SubdivisionData fromJson(Map<String, dynamic> json) =>
-      SubdivisionData(option: json["option"], volume: json["volume"]);
 }

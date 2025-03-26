@@ -7,7 +7,7 @@ import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
 import 'package:tempus/domain/models/fraction.dart' as fraction;
 import 'package:tempus/domain/models/sample_set.dart' as sample_set;
-import 'package:tempus/ui/home/mixer/channel.dart';
+import 'package:tempus/domain/models/subdivision.dart';
 
 class AudioService {
   final AssetService _assetService;
@@ -102,7 +102,7 @@ class AudioService {
       double beatVolume,
       double downbeatVolume,
       sample_set.SampleSet sampleSet,
-      Map<Key, SubdivisionData> subdivisions,
+      Map<Key, Subdivision> subdivisions,
       fraction.TimeSignature timeSignature) async {
     await _appVolume.set(appVolume, isMetronomeInitialization: true);
     await _bpm.set(bpm, flag: false, isMetronomeInitialization: true);
@@ -235,11 +235,11 @@ class SampleSet extends _Preferenced<sample_set.SampleSet> {
   String _getString(sample_set.SampleSet value) => value.getPathsAsJsonString();
 }
 
-class Subdivisions extends _Preferenced<Map<Key, SubdivisionData>> {
+class Subdivisions extends _Preferenced<Map<Key, Subdivision>> {
   Subdivisions(super.audioService, super._setPreference, super.valueNotifier);
 
   @override
-  String _getString(Map<Key, SubdivisionData> value) => value.toJsonString();
+  String _getString(Map<Key, Subdivision> value) => value.toJsonString();
 }
 
 class TimeSignature extends _Preferenced<fraction.TimeSignature> {
