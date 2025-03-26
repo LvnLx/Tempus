@@ -141,33 +141,24 @@ class _SettingsState extends State<Settings> {
           ]),
           SettingsSection(title: Text("Display"), tiles: [
             SettingsTile.navigation(
-              title: Text("Theme"),
-              value: Text(context
-                  .watch<SettingsViewModel>()
-                  .themeMode
-                  .name
-                  .capitalizeFirst()),
-              onPressed: (context) => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ThemeSettingsPage(
-                            setThemeMode: (updatedThemeMode) => context
-                                .read<SettingsViewModel>()
-                                .setThemeMode(updatedThemeMode),
-                            getSettingsThemeData: (context) =>
-                                _getSettingsThemeData(context),
-                            themeMode:
-                                context.watch<SettingsViewModel>().themeMode,
-                          ))),
-            ),
-            SettingsTile.switchTile(
-              title: Text("Visualizer"),
-              initialValue:
-                  context.watch<SettingsViewModel>().isVisualizerEnabled,
-              onToggle: (value) => context
-                  .read<SettingsViewModel>()
-                  .setIsVisualizerEnabled(value),
-            )
+                title: Text("Theme"),
+                value: Text(context
+                    .watch<SettingsViewModel>()
+                    .themeMode
+                    .name
+                    .capitalizeFirst()),
+                onPressed: (context) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ThemeSettingsPage(
+                              setThemeMode: (updatedThemeMode) => context
+                                  .read<SettingsViewModel>()
+                                  .setThemeMode(updatedThemeMode),
+                              getSettingsThemeData: (context) =>
+                                  _getSettingsThemeData(context),
+                              themeMode:
+                                  context.watch<SettingsViewModel>().themeMode,
+                            ))))
           ]),
           SettingsSection(title: Text("Metronome"), tiles: [
             SettingsTile(

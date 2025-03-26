@@ -47,6 +47,10 @@ import AVFoundation
         let isMetronomeInitialization: Bool = Bool(arguments[1])!
         self.metronome.setDownbeatVolume(volume, isMetronomeInitialization)
         result("Set downbeat volume")
+      case "setPlayback":
+        let value: Bool = Bool(arguments[0])!
+        self.metronome.setPlayback(value)
+        result("Set playback")
       case "setSamplePaths":
         for samplePath in arguments {
           loadAudioFile(samplePath, controller.lookupKey(forAsset: samplePath))
@@ -67,12 +71,6 @@ import AVFoundation
         let isMetronomeInitialization: Bool = Bool(arguments[1])!
         self.metronome.setTimeSignature(timeSignature, isMetronomeInitialization)
         result("Set time signature")
-      case "startPlayback":
-        self.metronome.startPlayback()
-        result("Started playback")
-      case "stopPlayback":
-        self.metronome.stopPlayback()
-        result("Stopped playback")
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -88,9 +86,9 @@ import AVFoundation
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
   
-  func beatStarted() {
+  func beatStarted(_ count: Int) {
     DispatchQueue.main.async {
-      self.methodChannel.invokeMethod("beatStarted", arguments: nil)
+      self.methodChannel.invokeMethod("beatStarted", arguments: [String(count)])
     }
   }
   

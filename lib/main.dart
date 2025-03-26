@@ -7,8 +7,6 @@ import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
 import 'package:tempus/ui/home/deck/settings/view_model.dart';
 import 'package:tempus/ui/home/deck/view_model.dart';
-import 'package:tempus/ui/home/deck/visualizer/view_model.dart';
-import 'package:tempus/ui/home/mixer/channel/view_model.dart';
 import 'package:tempus/ui/home/mixer/view_model.dart';
 import 'package:tempus/ui/home/view.dart';
 import 'package:tempus/ui/home/view_model.dart';
@@ -39,9 +37,6 @@ class Main extends StatelessWidget {
               create: (context) =>
                   ThemeService(context.read<PreferenceService>())),
           ChangeNotifierProvider(
-              create: (context) =>
-                  ChannelViewModel(context.read<AudioService>())),
-          ChangeNotifierProvider(
               create: (context) => DeckViewModel(context.read<AudioService>(),
                   context.read<PurchaseService>())),
           ChangeNotifierProvider(
@@ -58,11 +53,7 @@ class Main extends StatelessWidget {
                   context.read<AudioService>(),
                   context.read<PreferenceService>(),
                   context.read<PurchaseService>(),
-                  context.read<ThemeService>())),
-          ChangeNotifierProvider(
-              create: (context) => VisualizerViewModel(
-                  context.read<AudioService>(),
-                  context.read<PreferenceService>()))
+                  context.read<ThemeService>()))
         ],
         builder: (context, child) => Home(),
       ),
