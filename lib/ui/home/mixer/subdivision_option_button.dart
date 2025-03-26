@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:tempus/domain/constants/options.dart';
-import 'package:tempus/ui/core/outlined.dart';
+import 'package:tempus/ui/core/themed_button.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/core/selector.dart';
 import 'package:tempus/ui/core/themed_text.dart';
@@ -14,14 +14,11 @@ class SubdivisionOptionButton extends StatelessWidget {
       {super.key, required this.callback, required this.subdivisionOption});
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => showDialog(callback, context, subdivisionOption),
-      child: Outlined(
-        child: ScaledPadding(
-            scale: 0.8,
-            child: FittedBox(child: ThemedText(subdivisionOption.toString()))),
-      ));
+  Widget build(BuildContext context) => ThemedButton(
+      onPressed: () => showDialog(callback, context, subdivisionOption),
+      child: ScaledPadding(
+          scale: 0.8,
+          child: FittedBox(child: ThemedText(subdivisionOption.toString()))));
 
   Future<void> showDialog(
       Future<void> Function(int updatedSubdivisionOption) callback,

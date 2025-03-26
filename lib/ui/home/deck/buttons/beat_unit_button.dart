@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/domain/models/fraction.dart';
-import 'package:tempus/ui/core/outlined.dart';
+import 'package:tempus/ui/core/themed_button.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/core/selector.dart';
 import 'package:tempus/ui/core/themed_text.dart';
@@ -21,23 +21,19 @@ class BeatUnitButton extends StatelessWidget {
       required this.setBeatUnit});
 
   @override
-  Widget build(BuildContext context) => Outlined(
-        child: GestureDetector(
-            onTap: () async => await _showDialog(context),
-            behavior: HitTestBehavior.opaque,
-            child: SizedBox(
-              height: constraints.maxHeight,
-              width: constraints.maxHeight / 2,
-              child: LayoutBuilder(
-                builder: (_, innerConstraints) => ScaledPadding(
-                  scale: 0.9,
-                  child: FittedBox(
-                      child:
-                          ThemedText(beatUnit.toString(), isMusicalSymbal: true)),
-                ),
-              ),
-            )),
-      );
+  Widget build(BuildContext context) => ThemedButton(
+      onPressed: () async => await _showDialog(context),
+      child: SizedBox(
+        height: constraints.maxHeight,
+        width: constraints.maxHeight / 2,
+        child: LayoutBuilder(
+          builder: (_, innerConstraints) => ScaledPadding(
+            scale: 0.9,
+            child: FittedBox(
+                child: ThemedText(beatUnit.toString(), isMusicalSymbal: true)),
+          ),
+        ),
+      ));
 
   Future<void> _showDialog(BuildContext context) async {
     BeatUnit updatedBeatUnit = beatUnit;

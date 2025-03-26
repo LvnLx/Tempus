@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:tempus/domain/models/fraction.dart';
 import 'package:tempus/ui/core/bar.dart';
-import 'package:tempus/ui/core/outlined.dart';
+import 'package:tempus/ui/core/themed_button.dart';
 import 'package:tempus/ui/core/selector.dart';
 import 'package:tempus/ui/core/themed_text.dart';
 
@@ -22,26 +22,24 @@ class TimeSignatureButton extends StatelessWidget {
       required this.timeSignature});
 
   @override
-  Widget build(BuildContext context) => Outlined(
-      child: GestureDetector(
-          onTap: () async => await _showDialog(context),
-          behavior: HitTestBehavior.opaque,
-          child: SizedBox(
-              height: constraints.maxHeight,
-              width: constraints.maxHeight / 2,
-              child: Column(children: [
-                Expanded(
-                    child: SizedBox.expand(
-                        child: FittedBox(
-                            child: ThemedText(
-                                timeSignature.numerator.toString())))),
-                Bar(orientation: Axis.horizontal, girth: 0),
-                Expanded(
-                    child: SizedBox.expand(
-                        child: FittedBox(
-                            child: ThemedText(
-                                timeSignature.denominator.toString()))))
-              ]))));
+  Widget build(BuildContext context) => ThemedButton(
+      onPressed: () async => await _showDialog(context),
+      child: SizedBox(
+          height: constraints.maxHeight,
+          width: constraints.maxHeight / 2,
+          child: Column(children: [
+            Expanded(
+                child: SizedBox.expand(
+                    child: FittedBox(
+                        child:
+                            ThemedText(timeSignature.numerator.toString())))),
+            Bar(orientation: Axis.horizontal, girth: 0),
+            Expanded(
+                child: SizedBox.expand(
+                    child: FittedBox(
+                        child:
+                            ThemedText(timeSignature.denominator.toString()))))
+          ])));
 
   Future<void> _showDialog(BuildContext context) async {
     TimeSignature updatedTimeSignature = timeSignature;

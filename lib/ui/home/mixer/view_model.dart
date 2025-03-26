@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:tempus/data/services/audio_service.dart' hide BeatUnit;
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/domain/constants/options.dart';
@@ -39,14 +40,19 @@ class MixerViewModel extends ChangeNotifier {
   bool get playback => _audioService.playback.value;
   Map<Key, Subdivision> get subdivisions => _audioService.subdivisions.value;
 
-  Future<void> addSubdivision() async => await _audioService.subdivisions.set({
-        ...subdivisions,
-        UniqueKey():
-            Subdivision(option: Options.subdivisionOptions[0], volume: 0.0)
-      });
+  Future<void> addSubdivision() async {
+    HapticFeedback.lightImpact();
+    await _audioService.subdivisions.set({
+      ...subdivisions,
+      UniqueKey():
+          Subdivision(option: Options.subdivisionOptions[0], volume: 0.0)
+    });
+  }
 
-  Future<void> removeSubdivision(Key key) async =>
-      await _audioService.subdivisions.set({...subdivisions}..remove(key));
+  Future<void> removeSubdivision(Key key) async {
+    HapticFeedback.lightImpact();
+    await _audioService.subdivisions.set({...subdivisions}..remove(key));
+  }
 
   Future<void> setBeatVolume(double volume) async =>
       await _audioService.beatVolume.set(volume);

@@ -10,7 +10,7 @@ import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/bar.dart';
 import 'package:tempus/ui/core/dialogs.dart';
-import 'package:tempus/ui/core/outlined.dart';
+import 'package:tempus/ui/core/themed_button.dart';
 import 'package:tempus/ui/core/themed_text.dart';
 import 'package:tempus/ui/home/deck/buttons/beat_unit_button.dart';
 import 'package:tempus/ui/home/deck/buttons/bpm_button.dart';
@@ -94,8 +94,8 @@ class DeckState extends State<Deck> {
                                         height: barConstraints.maxHeight,
                                         child: Bar(orientation: Axis.vertical),
                                       ),
-                                      GestureDetector(
-                                          onTap: () async =>
+                                      ThemedButton(
+                                          onPressed: () async =>
                                               await showIntegerSettingDialog(
                                                   context,
                                                   "Beats per minute",
@@ -106,23 +106,21 @@ class DeckState extends State<Deck> {
                                                   context
                                                       .read<DeckViewModel>()
                                                       .bpm),
-                                          child: Outlined(
-                                              child: SizedBox(
-                                                  height:
-                                                      barConstraints.maxHeight /
-                                                          2,
-                                                  width:
-                                                      barConstraints.maxHeight,
-                                                  child: FittedBox(
-                                                      child: ThemedText(tapTimes
-                                                                  .length ==
-                                                              1
-                                                          ? "TAP"
-                                                          : context
-                                                              .watch<
-                                                                  DeckViewModel>()
-                                                              .bpm
-                                                              .toString()))))),
+                                          child: SizedBox(
+                                              height:
+                                                  barConstraints.maxHeight /
+                                                      2,
+                                              width: barConstraints.maxHeight,
+                                              child: FittedBox(
+                                                  child: ThemedText(tapTimes
+                                                              .length ==
+                                                          1
+                                                      ? "TAP"
+                                                      : context
+                                                          .watch<
+                                                              DeckViewModel>()
+                                                          .bpm
+                                                          .toString())))),
                                       Bar(orientation: Axis.vertical),
                                       TimeSignatureButton(
                                           setTimeSignature:
