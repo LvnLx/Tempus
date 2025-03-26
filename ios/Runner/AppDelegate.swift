@@ -86,9 +86,9 @@ import AVFoundation
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
   
-  func beatStarted() {
+  func beatStarted(_ count: Int) {
     DispatchQueue.main.async {
-      self.methodChannel.invokeMethod("beatStarted", arguments: nil)
+      self.methodChannel.invokeMethod("beatStarted", arguments: [String(count)])
     }
   }
   

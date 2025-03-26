@@ -7,7 +7,7 @@ import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
 import 'package:tempus/domain/models/fraction.dart' as fraction;
 import 'package:tempus/domain/models/sample_set.dart' as sample_set;
-import 'package:tempus/ui/home/mixer/channel/view.dart';
+import 'package:tempus/ui/home/mixer/channel.dart';
 
 class AudioService {
   final AssetService _assetService;
@@ -28,12 +28,16 @@ class AudioService {
 
   AudioService(this._assetService, this._preferenceService) {
     _methodChannel.setMethodCallHandler((call) async {
-      if (Event.values.map((event) => event.name).contains(call.method)) {
-        _eventController
-            .add(Event.values.firstWhere((event) => event.name == call.method));
-      } else {
-        throw MissingPluginException(
-            "Unknown method call method received: ${call.method}");
+      switch (call.method) {
+        case "beatStarted":
+          _eventController.add(Beat(int.parse(call.arguments[0])));
+        case "downbeatStarted":
+          _eventController.add(Downbeat());
+        case "innerBeatStarted":
+          _eventController.add(InnerBeat());
+        default:
+          throw MissingPluginException(
+              "Unknown method call method received: ${call.method}");
       }
     });
   }
@@ -120,7 +124,17 @@ class AudioService {
   }
 }
 
-enum Event { beatStarted, downbeatStarted, innerBeatStarted }
+abstract class Event {}
+
+class Beat extends Event {
+  final int count;
+
+  Beat(this.count);
+}
+
+class Downbeat extends Event {}
+
+class InnerBeat extends Event {}
 
 abstract class _Action<T> {
   final AudioService _audioService;

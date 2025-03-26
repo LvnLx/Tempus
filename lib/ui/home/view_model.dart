@@ -19,11 +19,11 @@ class HomeViewModel extends ChangeNotifier {
 
     _audioService.eventStream.listen((event) {
       switch (event) {
-        case Event.beatStarted:
+        case Beat():
           if (beatHaptics) HapticFeedback.mediumImpact();
-        case Event.downbeatStarted:
+        case Downbeat():
           if (downbeatHaptics) HapticFeedback.heavyImpact();
-        case Event.innerBeatStarted:
+        case InnerBeat():
           if (innerBeatHaptics) HapticFeedback.lightImpact();
       }
     });
