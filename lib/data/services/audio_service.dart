@@ -127,7 +127,7 @@ class AudioService {
   }
 }
 
-enum Event { beatStarted }
+enum Event { beatStarted, downbeatStarted, innerBeatStarted }
 
 abstract class _Action<T> {
   final AudioService _audioService;

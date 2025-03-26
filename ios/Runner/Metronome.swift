@@ -11,12 +11,16 @@ class Metronome {
   private let nextFrame: UnsafeMutablePointer<Int> = UnsafeMutablePointer.allocate(capacity: 1)
   private var subdivisions: [String: Subdivision]?
   private let beatStarted: () -> Void
+  private let downbeatStarted: () -> Void
+  private let innerBeatStarted: () -> Void
   private var sampleSet: SampleSet?
   private var timeSignature: TimeSignature?
   private let validFrameCount: UnsafeMutablePointer<Int> = UnsafeMutablePointer<Int>.allocate(capacity: 1)
   
-  init(_ beatStarted: @escaping () -> Void) {
+  init(_ beatStarted: @escaping () -> Void, _ downbeatStarted: @escaping () -> Void, _ innerBeatStarted: @escaping () -> Void) {
     self.beatStarted = beatStarted
+    self.downbeatStarted = downbeatStarted
+    self.innerBeatStarted = innerBeatStarted
     dispatchQueue.initialize(to: DispatchQueue(label: "com.lvnlx.tempus"))
     
     var audioComponentDescription: AudioComponentDescription = AudioComponentDescription(
@@ -202,7 +206,7 @@ class Metronome {
   
   func updateClips() {
     let downbeatClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-    downbeatClip.initialize(to: Clip(sample: sampleSet!.downbeatSample, startFrame: 0, volume: downbeatVolume! * appVolume! * 1.5))
+    downbeatClip.initialize(to: Clip(onStart: downbeatStarted, sample: sampleSet!.downbeatSample, startFrame: 0, volume: downbeatVolume! * appVolume! * 1.5))
     
     let beatCount: Double = (timeSignature! / beatUnit!).evaluate()
     let beatLength: Int = Int((Double(validFrameCount.pointee) / beatCount).rounded())
@@ -229,7 +233,7 @@ class Metronome {
       
       subdivisionClipData.forEach { (startFrame, volume) in
         let subdivisionClip: UnsafeMutablePointer<Clip> = UnsafeMutablePointer<Clip>.allocate(capacity: 1)
-        subdivisionClip.initialize(to: Clip(sample: sampleSet!.innerBeatSample, startFrame: (beat * beatLength) + startFrame, volume: volume * appVolume!))
+        subdivisionClip.initialize(to: Clip(onStart: innerBeatStarted, sample: sampleSet!.innerBeatSample, startFrame: (beat * beatLength) + startFrame, volume: volume * appVolume!))
         subdivisionClips.append(subdivisionClip)
       }
     }

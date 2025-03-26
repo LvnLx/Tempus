@@ -20,7 +20,9 @@ class PreferenceService {
   late final BeatUnit beatUnit;
   late final BeatVolume beatVolume;
   late final Bpm bpm;
+  late final DownbeatHaptics downbeatHaptics;
   late final DownbeatVolume downbeatVolume;
+  late final InnerBeatHaptics innerBeatHaptics;
   late final Premium premium;
   late final SampleSet sampleSet;
   late final Subdivisions subdivisions;
@@ -35,7 +37,9 @@ class PreferenceService {
     beatUnit = BeatUnit(this, fraction.BeatUnit(1, 4));
     beatVolume = BeatVolume(this, 1.0);
     bpm = Bpm(this, 120);
+    downbeatHaptics = DownbeatHaptics(this, false);
     downbeatVolume = DownbeatVolume(this, 1.0);
+    innerBeatHaptics = InnerBeatHaptics(this, false);
     premium = Premium(this, false);
     sampleSet = SampleSet(this, sample_set.SampleSet("sine", false));
     subdivisions = Subdivisions(this, {});
@@ -169,8 +173,16 @@ class Bpm extends _Preference<int> {
   Bpm(super._service, super.defaultValue);
 }
 
+class DownbeatHaptics extends _ServiceOwned<bool> {
+  DownbeatHaptics(super._service, super.defaultValue);
+}
+
 class DownbeatVolume extends _Preference<double> {
   DownbeatVolume(super._service, super.defaultValue);
+}
+
+class InnerBeatHaptics extends _ServiceOwned<bool> {
+  InnerBeatHaptics(super._service, super.defaultValue);
 }
 
 class Premium extends _Preference<bool> {
