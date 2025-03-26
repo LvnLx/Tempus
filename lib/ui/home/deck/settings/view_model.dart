@@ -20,17 +20,21 @@ class SettingsViewModel extends ChangeNotifier {
     _assetService.sampleSetsValueNotifier.addListener(notifyListeners);
     _audioService.appVolume.valueNotifier.addListener(notifyListeners);
     _audioService.sampleSet.valueNotifier.addListener(notifyListeners);
-    _preferenceService.beatHaptics.valueNotifier.addListener(notifyListeners);
     _preferenceService.autoUpdateBeatUnit.valueNotifier
         .addListener(notifyListeners);
+    _preferenceService.beatHaptics.valueNotifier.addListener(notifyListeners);
+    _preferenceService.downbeatHaptics.valueNotifier.addListener(notifyListeners);
+    _preferenceService.innerBeatHaptics.valueNotifier.addListener(notifyListeners);
     _preferenceService.visualizer.valueNotifier.addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
     _themeService.themeModeValueNotifier.addListener(notifyListeners);
   }
 
   double get appVolume => _audioService.appVolume.value;
-  bool get areBeatHapticsEnabled => _preferenceService.beatHaptics.value;
   bool get autoUpdateBeatUnit => _preferenceService.autoUpdateBeatUnit.value;
+  bool get beatHaptics => _preferenceService.beatHaptics.value;
+  bool get downbeatHaptics => _preferenceService.downbeatHaptics.value;
+  bool get innerBeatHaptics => _preferenceService.innerBeatHaptics.value;
   bool get isPremium => _purchaseService.isPremium;
   bool get isVisualizerEnabled => _preferenceService.visualizer.value;
   SampleSet get sampleSet => _audioService.sampleSet.value;
@@ -77,11 +81,17 @@ class SettingsViewModel extends ChangeNotifier {
   Future<void> setAppVolume(double volume) async =>
       await _audioService.appVolume.set(volume);
 
-  Future<void> setAreBeatHapticsEnabled(bool value) async =>
-      await _preferenceService.beatHaptics.set(value);
-
   Future<void> setAutoUpdateBeatUnit(bool value) async =>
       await _preferenceService.autoUpdateBeatUnit.set(value);
+
+  Future<void> setBeatHaptics(bool value) async =>
+      await _preferenceService.beatHaptics.set(value);
+
+  Future<void> setDownbeatHaptics(bool value) async =>
+      await _preferenceService.downbeatHaptics.set(value);
+
+  Future<void> setInnerBeatHaptics(bool value) async =>
+      await _preferenceService.innerBeatHaptics.set(value);
 
   Future<void> setIsVisualizerEnabled(bool value) async =>
       await _preferenceService.visualizer.set(value);

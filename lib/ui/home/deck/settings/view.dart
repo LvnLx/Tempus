@@ -9,6 +9,7 @@ import 'package:tempus/domain/extensions/string.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/home/deck/settings/pages/app_volume_page.dart';
+import 'package:tempus/ui/home/deck/settings/pages/haptics_page.dart';
 import 'package:tempus/ui/home/deck/settings/pages/sample_set_page.dart';
 import 'package:tempus/ui/home/deck/settings/pages/theme_page.dart';
 import 'package:tempus/ui/home/deck/settings/view_model.dart';
@@ -74,13 +75,29 @@ class _SettingsState extends State<Settings> {
                 })
           ]),
           SettingsSection(title: Text("Accessibility"), tiles: [
-            SettingsTile.switchTile(
-              title: Text("Beat haptics"),
-              initialValue:
-                  context.watch<SettingsViewModel>().areBeatHapticsEnabled,
-              onToggle: (value) => context
-                  .read<SettingsViewModel>()
-                  .setAreBeatHapticsEnabled(value),
+            SettingsTile.navigation(
+              title: Text("Haptics"),
+              onPressed: (context) => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => HapticsPage(
+                          getSettingsThemeData: _getSettingsThemeData,
+                          beatHaptics:
+                              context.watch<SettingsViewModel>().beatHaptics,
+                          downbeatHaptics: context
+                              .watch<SettingsViewModel>()
+                              .downbeatHaptics,
+                          innerBeatHaptics: context
+                              .watch<SettingsViewModel>()
+                              .innerBeatHaptics,
+                          setBeatHaptics:
+                              context.read<SettingsViewModel>().setBeatHaptics,
+                          setDownbeatHaptics: context
+                              .read<SettingsViewModel>()
+                              .setDownbeatHaptics,
+                          setInnerBeatHaptics: context
+                              .read<SettingsViewModel>()
+                              .setInnerBeatHaptics))),
             )
           ]),
           SettingsSection(title: Text("Audio"), tiles: [

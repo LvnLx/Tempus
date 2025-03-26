@@ -12,18 +12,29 @@ class HomeViewModel extends ChangeNotifier {
   HomeViewModel(
       this._audioService, this._preferenceService, this._themeService) {
     _preferenceService.beatHaptics.valueNotifier.addListener(notifyListeners);
+    _preferenceService.downbeatHaptics.valueNotifier
+        .addListener(notifyListeners);
+    _preferenceService.innerBeatHaptics.valueNotifier
+        .addListener(notifyListeners);
 
     _audioService.eventStream.listen((event) {
-      if (areBeatHapticsEnabled && event == Event.beatStarted) {
-        HapticFeedback.mediumImpact();
+      switch (event) {
+        case Event.beatStarted:
+          if (beatHaptics) HapticFeedback.mediumImpact();
+        case Event.downbeatStarted:
+          if (downbeatHaptics) HapticFeedback.heavyImpact();
+        case Event.innerBeatStarted:
+          if (innerBeatHaptics) HapticFeedback.lightImpact();
       }
     });
 
     _themeService.themeModeValueNotifier.addListener(notifyListeners);
   }
 
-  bool get areBeatHapticsEnabled => _preferenceService.beatHaptics.value;
+  bool get beatHaptics => _preferenceService.beatHaptics.value;
   ThemeData get darkThemeData => _themeService.darkThemeData;
+  bool get downbeatHaptics => _preferenceService.downbeatHaptics.value;
+  bool get innerBeatHaptics => _preferenceService.innerBeatHaptics.value;
   ThemeData get lightThemeData => _themeService.lightThemeData;
   ThemeMode get themeMode => _themeService.themeMode;
 }
