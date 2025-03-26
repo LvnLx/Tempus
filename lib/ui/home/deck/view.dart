@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/bar.dart';
-import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/themed_button.dart';
 import 'package:tempus/ui/core/themed_text.dart';
 import 'package:tempus/ui/home/deck/buttons/beat_unit_button.dart';
@@ -96,7 +95,7 @@ class DeckState extends State<Deck> {
                                       ),
                                       ThemedButton(
                                           onPressed: () async =>
-                                              await showIntegerSettingDialog(
+                                              await _showBpmDialog(
                                                   context,
                                                   "Beats per minute",
                                                   3,
@@ -249,4 +248,44 @@ class DeckState extends State<Deck> {
                   ]))
             ]));
   }
+
+  Future<void> _showBpmDialog(
+    BuildContext context,
+    String title,
+    int maxInputLength,
+    Future<void> Function(int value) callback,
+    int initialValue) async {
+  String updatedValue = "";
+  await showPlatformDialog(
+      context: context,
+      builder: (context) => PlatformAlertDialog(
+              title: Text(title),
+              content: Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: PlatformTextField(
+                    autofocus: true,
+                    cursorColor: Colors.transparent,
+                    hintText: initialValue.toString(),
+                    keyboardType: TextInputType.number,
+                    makeCupertinoDecorationNull: true,
+                    maxLength: maxInputLength,
+                    onChanged: (text) => updatedValue = text,
+                    textAlign: TextAlign.center,
+                  )),
+              actions: [
+                PlatformDialogAction(
+                    child: Text("Cancel"),
+                    onPressed: () => Navigator.pop(context),
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDestructiveAction: true)),
+                PlatformDialogAction(
+                    child: Text("Set"),
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      await callback(max(int.tryParse(updatedValue) ?? initialValue, 1));
+                    },
+                    cupertino: (context, platform) =>
+                        CupertinoDialogActionData(isDefaultAction: true))
+              ]));
+}
 }

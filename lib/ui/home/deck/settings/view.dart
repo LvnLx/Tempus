@@ -163,29 +163,14 @@ class _SettingsState extends State<Settings> {
           SettingsSection(title: Text("Metronome"), tiles: [
             SettingsTile(
                 title: Text("Reset"),
-                onPressed: (context) => showDialog(DialogConfiguration(
-                        context,
-                        "Reset Metronome",
+                onPressed: (context) => showDialog(DialogConfiguration.confirm(
+                    context,
+                    title: "Reset Metronome",
+                    message:
                         "All of the metronome's settings will be reset to their default values",
-                        [
-                          PlatformDialogAction(
-                              child: Text("Cancel"),
-                              onPressed: () => Navigator.pop(context),
-                              cupertino: (context, platform) =>
-                                  CupertinoDialogActionData(
-                                      isDefaultAction: true)),
-                          PlatformDialogAction(
-                              child: Text("Ok"),
-                              onPressed: () async {
-                                Navigator.pop(context);
-                                await context
-                                    .read<SettingsViewModel>()
-                                    .resetMetronome();
-                              },
-                              cupertino: (context, platform) =>
-                                  CupertinoDialogActionData(
-                                      isDestructiveAction: true))
-                        ]))),
+                    onConfirm: () async => await context
+                        .read<SettingsViewModel>()
+                        .resetMetronome()))),
             SettingsTile.switchTile(
               title: Text("Auto update beat unit"),
               description: Text(
@@ -212,29 +197,13 @@ class _SettingsState extends State<Settings> {
                     context, Strings.supportEmail, "Tempus%20Support")),
             SettingsTile(
                 title: Text("Reset app"),
-                onPressed: (context) => showDialog(DialogConfiguration(
-                        context,
-                        "Reset App",
+                onPressed: (context) => showDialog(DialogConfiguration.confirm(
+                    context,
+                    title: "Reset App",
+                    message:
                         "All of the app's settings will be reset to their default values, including the metronome's settings",
-                        [
-                          PlatformDialogAction(
-                              child: Text("Cancel"),
-                              onPressed: () => Navigator.pop(context),
-                              cupertino: (context, platform) =>
-                                  CupertinoDialogActionData(
-                                      isDefaultAction: true)),
-                          PlatformDialogAction(
-                              child: Text("Ok"),
-                              onPressed: () async {
-                                Navigator.pop(context);
-                                await context
-                                    .read<SettingsViewModel>()
-                                    .resetApp();
-                              },
-                              cupertino: (context, platform) =>
-                                  CupertinoDialogActionData(
-                                      isDestructiveAction: true))
-                        ])))
+                    onConfirm: () async =>
+                        await context.read<SettingsViewModel>().resetApp())))
           ])
         ],
       ),
@@ -259,8 +228,10 @@ Future<void> _showEmail(
     BuildContext context, String email, String subject) async {
   if (!await launchUrl(Uri.parse("mailto:$email?subject=$subject"))) {
     if (context.mounted) {
-      showDialog(DialogConfiguration(context, "Email Failed",
-          "Unable to open the mail app. Please reach out to $email manually"));
+      showDialog(DialogConfiguration.inform(context,
+          title: "Email Failed",
+          message:
+              "Unable to open the mail app. Please reach out to $email manually"));
     }
   }
 }
