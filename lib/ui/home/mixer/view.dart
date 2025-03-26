@@ -3,12 +3,12 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
+import 'package:tempus/ui/core/bar.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/core/themed_text.dart';
-import 'package:tempus/ui/home/mixer/beat_unit_button/view.dart';
-import 'package:tempus/ui/home/mixer/channel/view.dart';
-import 'package:tempus/ui/home/mixer/fixed_channel/view.dart';
+import 'package:tempus/ui/home/mixer/channel.dart';
+import 'package:tempus/ui/home/mixer/fixed_channel.dart';
 import 'package:tempus/ui/home/mixer/view_model.dart';
 
 class Mixer extends StatefulWidget {
@@ -42,30 +42,43 @@ class MixerState extends State<Mixer> {
                         .downbeatVolumeValueNotifier,
                     child: ScaledPadding(
                         scale: 0.8,
-                        child: FittedBox(child: ThemedText("ACC")))),
-                VerticalDivider(color: Theme.of(context).colorScheme.onSurface),
+                        child: FittedBox(child: ThemedText("ACC.")))),
+                Bar(orientation: Axis.vertical),
                 FixedChannel(
                     sliderCallback:
                         context.read<MixerViewModel>().setBeatVolume,
                     volumeValueNotifier:
                         context.read<MixerViewModel>().beatVolumeValueNotifier,
-                    child: BeatUnitButton(
-                        beatUnit: context.watch<MixerViewModel>().beatUnit,
-                        isPremium: context.watch<MixerViewModel>().isPremium,
-                        setBeatUnit: context.read<MixerViewModel>().setBeatUnit)),
+                    child: ScaledPadding(
+                        scale: 0.8,
+                        child: FittedBox(
+                            child: ThemedText(
+                                context.watch<MixerViewModel>().playback
+                                    ? context
+                                        .watch<MixerViewModel>()
+                                        .count
+                                        .toString()
+                                    : "BEAT")))),
                 ...(context
                     .watch<MixerViewModel>()
                     .subdivisions
                     .keys
                     .map((key) => Channel(
-                        key: key,
-                        onRemove: (Key key) async => await context
-                            .read<MixerViewModel>()
-                            .removeSubdivision(key)))
+                          key: key,
+                          onRemove: (Key key) async => await context
+                              .read<MixerViewModel>()
+                              .removeSubdivision(key),
+                          setSubdivisionOption: context
+                              .read<MixerViewModel>()
+                              .setSubdivisionOption,
+                          setSubdivisionVolume: context
+                              .read<MixerViewModel>()
+                              .setSubdivisionVolume,
+                          subdivisions:
+                              context.watch<MixerViewModel>().subdivisions,
+                        ))
                     .toList()),
-                VerticalDivider(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                Bar(orientation: Axis.vertical),
                 if (context.watch<MixerViewModel>().subdivisions.length <
                     Options.subdivisionOptions.length)
                   GestureDetector(

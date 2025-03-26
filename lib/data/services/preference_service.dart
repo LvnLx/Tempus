@@ -7,7 +7,7 @@ import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/domain/extensions/subdivisions.dart';
 import 'package:tempus/domain/models/fraction.dart' as fraction;
 import 'package:tempus/domain/models/sample_set.dart' as sample_set;
-import 'package:tempus/ui/home/mixer/channel/view.dart';
+import 'package:tempus/ui/home/mixer/channel.dart';
 
 class PreferenceService {
   final AssetService _assetService;
@@ -28,7 +28,6 @@ class PreferenceService {
   late final Subdivisions subdivisions;
   late final ThemeMode themeMode;
   late final TimeSignature timeSignature;
-  late final Visualizer visualizer;
 
   PreferenceService(this._assetService) {
     appVolume = AppVolume(this, 1.0);
@@ -45,7 +44,6 @@ class PreferenceService {
     subdivisions = Subdivisions(this, {});
     themeMode = ThemeMode(this, material.ThemeMode.system);
     timeSignature = TimeSignature(this, fraction.TimeSignature(4, 4));
-    visualizer = Visualizer(this, true);
   }
 
   Future<void> init() async {
@@ -277,8 +275,4 @@ class TimeSignature extends _Preference<fraction.TimeSignature> {
       return defaultValue;
     }
   }
-}
-
-class Visualizer extends _ServiceOwned<bool> {
-  Visualizer(super._service, super.defaultValue);
 }

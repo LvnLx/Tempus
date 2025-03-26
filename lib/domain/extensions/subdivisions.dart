@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:tempus/ui/home/mixer/channel/view.dart';
+import 'package:tempus/ui/home/mixer/channel.dart';
 
 extension SubdivisionsExtensions on Map<Key, SubdivisionData> {
   String toJsonString() =>

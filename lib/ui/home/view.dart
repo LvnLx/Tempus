@@ -9,6 +9,7 @@ import 'package:tempus/data/services/audio_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
+import 'package:tempus/ui/core/bar.dart';
 import 'package:tempus/ui/home/deck/view.dart';
 import 'package:tempus/ui/home/deck/view_model.dart';
 import 'package:tempus/ui/home/mixer/view.dart';
@@ -58,10 +59,7 @@ class Home extends StatelessWidget {
                                 child: Column(
                               children: [
                                 Expanded(child: Mixer()),
-                                Divider(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface),
+                                Bar(orientation: Axis.horizontal),
                                 Expanded(child: Deck())
                               ],
                             )))),

@@ -25,7 +25,6 @@ class SettingsViewModel extends ChangeNotifier {
     _preferenceService.beatHaptics.valueNotifier.addListener(notifyListeners);
     _preferenceService.downbeatHaptics.valueNotifier.addListener(notifyListeners);
     _preferenceService.innerBeatHaptics.valueNotifier.addListener(notifyListeners);
-    _preferenceService.visualizer.valueNotifier.addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
     _themeService.themeModeValueNotifier.addListener(notifyListeners);
   }
@@ -36,7 +35,6 @@ class SettingsViewModel extends ChangeNotifier {
   bool get downbeatHaptics => _preferenceService.downbeatHaptics.value;
   bool get innerBeatHaptics => _preferenceService.innerBeatHaptics.value;
   bool get isPremium => _purchaseService.isPremium;
-  bool get isVisualizerEnabled => _preferenceService.visualizer.value;
   SampleSet get sampleSet => _audioService.sampleSet.value;
   List<SampleSet> get sampleSets => _assetService.sampleSets;
   ThemeMode get themeMode => _themeService.themeMode;
@@ -49,8 +47,6 @@ class SettingsViewModel extends ChangeNotifier {
         .set(_preferenceService.beatHaptics.defaultValue);
     _preferenceService.autoUpdateBeatUnit
         .set(_preferenceService.autoUpdateBeatUnit.defaultValue);
-    _preferenceService.visualizer
-        .set(_preferenceService.visualizer.defaultValue);
     _themeService.setThemeMode(_preferenceService.themeMode.defaultValue);
     await _audioService.setState(
         _preferenceService.appVolume.defaultValue,
@@ -92,9 +88,6 @@ class SettingsViewModel extends ChangeNotifier {
 
   Future<void> setInnerBeatHaptics(bool value) async =>
       await _preferenceService.innerBeatHaptics.set(value);
-
-  Future<void> setIsVisualizerEnabled(bool value) async =>
-      await _preferenceService.visualizer.set(value);
 
   Future<void> setSampleSet(SampleSet sampleSet) async =>
       await _audioService.sampleSet.set(sampleSet);
