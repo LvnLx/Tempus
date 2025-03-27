@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart' hide showDialog;
+import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:provider/provider.dart';
@@ -163,29 +163,7 @@ class _SettingsState extends State<Settings> {
           SettingsSection(title: Text("Metronome"), tiles: [
             SettingsTile(
                 title: Text("Reset"),
-                onPressed: (context) => showDialog(DialogConfiguration(
-                        context,
-                        "Reset Metronome",
-                        "All of the metronome's settings will be reset to their default values",
-                        [
-                          PlatformDialogAction(
-                              child: Text("Cancel"),
-                              onPressed: () => Navigator.pop(context),
-                              cupertino: (context, platform) =>
-                                  CupertinoDialogActionData(
-                                      isDefaultAction: true)),
-                          PlatformDialogAction(
-                              child: Text("Ok"),
-                              onPressed: () async {
-                                Navigator.pop(context);
-                                await context
-                                    .read<SettingsViewModel>()
-                                    .resetMetronome();
-                              },
-                              cupertino: (context, platform) =>
-                                  CupertinoDialogActionData(
-                                      isDestructiveAction: true))
-                        ]))),
+                onPressed: (context) async => await _showResetMetronomeDialog(context)),
             SettingsTile.switchTile(
               title: Text("Auto update beat unit"),
               description: Text(
@@ -212,29 +190,8 @@ class _SettingsState extends State<Settings> {
                     context, Strings.supportEmail, "Tempus%20Support")),
             SettingsTile(
                 title: Text("Reset app"),
-                onPressed: (context) => showDialog(DialogConfiguration(
-                        context,
-                        "Reset App",
-                        "All of the app's settings will be reset to their default values, including the metronome's settings",
-                        [
-                          PlatformDialogAction(
-                              child: Text("Cancel"),
-                              onPressed: () => Navigator.pop(context),
-                              cupertino: (context, platform) =>
-                                  CupertinoDialogActionData(
-                                      isDefaultAction: true)),
-                          PlatformDialogAction(
-                              child: Text("Ok"),
-                              onPressed: () async {
-                                Navigator.pop(context);
-                                await context
-                                    .read<SettingsViewModel>()
-                                    .resetApp();
-                              },
-                              cupertino: (context, platform) =>
-                                  CupertinoDialogActionData(
-                                      isDestructiveAction: true))
-                        ])))
+                onPressed: (context) async =>
+                    await _showResetAppDialog(context))
           ])
         ],
       ),
@@ -253,14 +210,34 @@ class _SettingsState extends State<Settings> {
       tileHighlightColor: Theme.of(context).colorScheme.secondary,
       titleTextColor: Theme.of(context).colorScheme.secondary,
       trailingTextColor: Theme.of(context).colorScheme.secondary);
-}
 
-Future<void> _showEmail(
-    BuildContext context, String email, String subject) async {
-  if (!await launchUrl(Uri.parse("mailto:$email?subject=$subject"))) {
-    if (context.mounted) {
-      showDialog(DialogConfiguration(context, "Email Failed",
-          "Unable to open the mail app. Please reach out to $email manually"));
+  Future<void> _showEmail(
+      BuildContext context, String email, String subject) async {
+    if (!await launchUrl(Uri.parse("mailto:$email?subject=$subject"))) {
+      if (context.mounted) {
+        await showTextDialog(context,
+            title: "Email Failed",
+            message:
+                "Unable to open the mail app. Please reach out to $email manually");
+      }
     }
   }
+
+  Future<void> _showResetAppDialog(BuildContext context) async =>
+      await showTextDialog(context,
+          title: "Reset App",
+          message:
+              "All of the app's settings will be reset to their default values, including the metronome's settings",
+          dialogAction: DialogAction.confirm,
+          onConfirm: () async =>
+              await context.read<SettingsViewModel>().resetApp());
+
+  Future<void> _showResetMetronomeDialog(BuildContext context) async =>
+      await showTextDialog(context,
+          title: "Reset Metronome",
+          message:
+              "All of the metronome's settings will be reset to their default values",
+          dialogAction: DialogAction.confirm,
+          onConfirm: () async =>
+              await context.read<SettingsViewModel>().resetMetronome());
 }
