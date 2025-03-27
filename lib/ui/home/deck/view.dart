@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/bar.dart';
+import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/themed_button.dart';
 import 'package:tempus/ui/core/themed_text.dart';
 import 'package:tempus/ui/home/deck/buttons/beat_unit_button.dart';
@@ -95,20 +96,10 @@ class DeckState extends State<Deck> {
                                       ),
                                       ThemedButton(
                                           onPressed: () async =>
-                                              await _showBpmDialog(
-                                                  context,
-                                                  "Beats per minute",
-                                                  3,
-                                                  context
-                                                      .read<DeckViewModel>()
-                                                      .setBpm,
-                                                  context
-                                                      .read<DeckViewModel>()
-                                                      .bpm),
+                                              await _showBpmDialog(context),
                                           child: SizedBox(
                                               height:
-                                                  barConstraints.maxHeight /
-                                                      2,
+                                                  barConstraints.maxHeight / 2,
                                               width: barConstraints.maxHeight,
                                               child: FittedBox(
                                                   child: ThemedText(tapTimes
@@ -221,12 +212,9 @@ class DeckState extends State<Deck> {
                     Padding(
                         padding: const EdgeInsets.only(left: 24.0),
                         child: GestureDetector(
-                            onTap: () {
-                              showPlatformModalSheet(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      Settings());
-                            },
+                            onTap: () async => await showPlatformModalSheet(
+                                context: context,
+                                builder: (BuildContext context) => Settings()),
                             child: AxisSizedBox(
                                 reference: Axis.vertical,
                                 child: FittedBox(
@@ -249,43 +237,23 @@ class DeckState extends State<Deck> {
             ]));
   }
 
-  Future<void> _showBpmDialog(
-    BuildContext context,
-    String title,
-    int maxInputLength,
-    Future<void> Function(int value) callback,
-    int initialValue) async {
-  String updatedValue = "";
-  await showPlatformDialog(
-      context: context,
-      builder: (context) => PlatformAlertDialog(
-              title: Text(title),
-              content: Padding(
-                  padding: EdgeInsets.only(top: 8.0),
-                  child: PlatformTextField(
-                    autofocus: true,
-                    cursorColor: Colors.transparent,
-                    hintText: initialValue.toString(),
-                    keyboardType: TextInputType.number,
-                    makeCupertinoDecorationNull: true,
-                    maxLength: maxInputLength,
-                    onChanged: (text) => updatedValue = text,
-                    textAlign: TextAlign.center,
-                  )),
-              actions: [
-                PlatformDialogAction(
-                    child: Text("Cancel"),
-                    onPressed: () => Navigator.pop(context),
-                    cupertino: (context, platform) =>
-                        CupertinoDialogActionData(isDestructiveAction: true)),
-                PlatformDialogAction(
-                    child: Text("Set"),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      await callback(max(int.tryParse(updatedValue) ?? initialValue, 1));
-                    },
-                    cupertino: (context, platform) =>
-                        CupertinoDialogActionData(isDefaultAction: true))
-              ]));
-}
+  Future<void> _showBpmDialog(BuildContext context) async {
+    String updatedValue = "";
+    await showInputDialog(context,
+        title: "Beats Per Minute",
+        input: PlatformTextField(
+          autofocus: true,
+          cursorColor: Colors.transparent,
+          hintText: context.read<DeckViewModel>().bpm.toString(),
+          keyboardType: TextInputType.number,
+          makeCupertinoDecorationNull: true,
+          maxLength: 3,
+          onChanged: (text) => updatedValue = text,
+          textAlign: TextAlign.center,
+        ),
+        onConfirm: () async => await context.read<DeckViewModel>().setBpm(max(
+            int.tryParse(updatedValue) ?? context.read<DeckViewModel>().bpm,
+            1)),
+        confirmText: "Set");
+  }
 }

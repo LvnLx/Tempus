@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' hide showDialog;
+import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/domain/constants/options.dart';
@@ -87,10 +87,7 @@ class MixerState extends State<Mixer> {
                         if (_canAddSubdivison()) {
                           await context.read<MixerViewModel>().addSubdivision();
                         } else {
-                          await _showPurchaseDialog(
-                              context,
-                              "Simultaneous subdivisions are available with the premium version. Would you like to continue to the purchase?",
-                              context.read<MixerViewModel>().purchasePremium);
+                          await _showPurchaseDialog(context);
                         }
                       },
                       child: SizedBox(
@@ -117,15 +114,17 @@ class MixerState extends State<Mixer> {
       context.read<MixerViewModel>().subdivisions.isEmpty ||
       context.read<MixerViewModel>().isPremium;
 
-  Future<void> _showPurchaseDialog(BuildContext context, String message,
-          Future<PurchaseResult> Function() callback) async =>
-      await showDialog(DialogConfiguration.confirm(context,
+  Future<void> _showPurchaseDialog(BuildContext context) async =>
+      await showTextDialog(context,
           title: "Premium Feature",
-          message: message,
+          message:
+              "Simultaneous subdivisions are available with the premium version. Would you like to continue to the purchase?",
+          dialogAction: DialogAction.confirm,
           confirmText: "Purchase", onConfirm: () async {
-        PurchaseResult purchaseResult = await callback();
+        PurchaseResult purchaseResult =
+            await context.read<MixerViewModel>().purchasePremium();
         if (context.mounted) {
           await showPurchaseResultDialog(context, purchaseResult);
         }
-      }));
+      });
 }

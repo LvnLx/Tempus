@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/domain/models/fraction.dart';
+import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/themed_button.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/core/selector.dart';
@@ -38,63 +39,45 @@ class BeatUnitButton extends StatelessWidget {
   Future<void> _showDialog(BuildContext context) async {
     BeatUnit updatedBeatUnit = beatUnit;
 
-    return await showPlatformDialog(
-        context: context,
-        builder: (_) => PlatformAlertDialog(
-                title: Text("Beat Unit"),
-                content: Padding(
-                    padding: EdgeInsets.only(top: 8.0),
-                    child: SizedBox(
-                      height: (TextPainter(
-                              text: TextSpan(text: "\n\n\n"),
-                              maxLines: 3,
-                              textScaler: MediaQuery.of(context).textScaler,
-                              textDirection: TextDirection.ltr)
-                            ..layout())
-                          .size
-                          .height,
-                      child: LayoutBuilder(
-                        builder: (_, constraints) => Selector(
-                            callback: (index) async => updatedBeatUnit =
-                                (isPremium
-                                    ? Options.premiumBeatUnits
-                                    : Options.freeBeatUnits)[index],
-                            itemExtent: constraints.maxWidth / 6,
-                            initialItemIndex: (isPremium
-                                    ? Options.premiumBeatUnits
-                                    : Options.freeBeatUnits)
-                                .indexOf(beatUnit),
-                            options: (isPremium
-                                    ? Options.premiumBeatUnits
-                                    : Options.freeBeatUnits)
-                                .map((beatUnit) => SizedBox(
-                                      height: constraints.maxWidth / 10,
-                                      child: Center(
-                                        child: PlatformText(beatUnit.toString(),
-                                            style: TextStyle(
-                                                fontFamily: "NotoMusic",
-                                                fontWeight: FontWeight.bold)),
-                                      ),
-                                    ))
-                                .toList(),
-                            orientation: Axis.horizontal,
-                            useTheme: false),
-                      ),
-                    )),
-                actions: [
-                  PlatformDialogAction(
-                      child: Text("Cancel"),
-                      onPressed: () => Navigator.pop(context),
-                      cupertino: (context, platform) =>
-                          CupertinoDialogActionData(isDestructiveAction: true)),
-                  PlatformDialogAction(
-                      child: Text("Set"),
-                      onPressed: () async {
-                        Navigator.pop(context);
-                        await setBeatUnit(updatedBeatUnit);
-                      },
-                      cupertino: (context, platform) =>
-                          CupertinoDialogActionData(isDefaultAction: true))
-                ]));
+    await showInputDialog(context,
+        title: "Beat Unit",
+        input: SizedBox(
+          height: (TextPainter(
+                  text: TextSpan(text: "\n\n\n"),
+                  maxLines: 3,
+                  textScaler: MediaQuery.of(context).textScaler,
+                  textDirection: TextDirection.ltr)
+                ..layout())
+              .size
+              .height,
+          child: LayoutBuilder(
+            builder: (_, constraints) => Selector(
+                callback: (index) async => updatedBeatUnit = (isPremium
+                    ? Options.premiumBeatUnits
+                    : Options.freeBeatUnits)[index],
+                itemExtent: constraints.maxWidth / 6,
+                initialItemIndex: (isPremium
+                        ? Options.premiumBeatUnits
+                        : Options.freeBeatUnits)
+                    .indexOf(beatUnit),
+                options: (isPremium
+                        ? Options.premiumBeatUnits
+                        : Options.freeBeatUnits)
+                    .map((beatUnit) => SizedBox(
+                          height: constraints.maxWidth / 10,
+                          child: Center(
+                            child: PlatformText(beatUnit.toString(),
+                                style: TextStyle(
+                                    fontFamily: "NotoMusic",
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                        ))
+                    .toList(),
+                orientation: Axis.horizontal,
+                useTheme: false),
+          ),
+        ),
+        onConfirm: () async => await setBeatUnit(updatedBeatUnit),
+        confirmText: "Set");
   }
 }
