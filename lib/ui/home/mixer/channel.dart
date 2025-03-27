@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:tempus/domain/models/subdivision.dart';
 import 'package:tempus/ui/core/bar.dart';
-import 'package:tempus/ui/core/outlined.dart';
+import 'package:tempus/ui/core/themed_button.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
+import 'package:tempus/ui/core/themed_slider.dart';
 import 'package:tempus/ui/home/mixer/subdivision_option_button.dart';
 
 class Channel extends StatelessWidget {
@@ -33,12 +34,10 @@ class Channel extends StatelessWidget {
                   flex: 10,
                   child: RotatedBox(
                       quarterTurns: 3,
-                      child: PlatformSlider(
-                        activeColor: Theme.of(context).colorScheme.primary,
-                        onChanged: (double value) async =>
-                            await setSubdivisionVolume(key!, value),
-                        value: subdivisions[key]!.volume,
-                      ))),
+                      child: ThemedSlider(
+                          onChanged: (value) async =>
+                              await setSubdivisionVolume(key!, value),
+                          value: subdivisions[key]!.volume))),
               Expanded(child: Bar(orientation: Axis.horizontal)),
               Expanded(
                   flex: 3,
@@ -49,14 +48,12 @@ class Channel extends StatelessWidget {
               Expanded(child: Bar(orientation: Axis.horizontal)),
               Expanded(
                 flex: 3,
-                child: GestureDetector(
-                  onTap: () => onRemove(key!),
-                  child: Outlined(
-                    child: ScaledPadding(
-                      scale: 0.8,
-                      child: Icon(PlatformIcons(context).clear,
-                          color: Theme.of(context).colorScheme.error),
-                    ),
+                child: ThemedButton(
+                  onPressed: () async => onRemove(key!),
+                  child: ScaledPadding(
+                    scale: 0.8,
+                    child: Icon(PlatformIcons(context).clear,
+                        color: Theme.of(context).colorScheme.error),
                   ),
                 ),
               )
