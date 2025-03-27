@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_settings_ui/flutter_settings_ui.dart';
+import 'package:tempus/ui/core/themed_slider.dart';
 
 class AppVolumePage extends StatelessWidget {
   final double appVolume;
@@ -32,8 +33,7 @@ class AppVolumePage extends StatelessWidget {
                 title: LayoutBuilder(
                   builder: (_, constraints) => SizedBox(
                     width: constraints.maxWidth * 0.95,
-                    child: PlatformSlider(
-                        activeColor: Theme.of(context).colorScheme.primary,
+                    child: ThemedSlider(
                         value: appVolume,
                         onChanged: (value) => setAppVolume(value)),
                   ),
