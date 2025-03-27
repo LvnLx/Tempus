@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
-import 'package:tempus/ui/core/themed_slider.dart';
 
 class FixedChannel extends StatefulWidget {
   final Widget child;
@@ -32,7 +32,8 @@ class _FixedChannelState extends State<FixedChannel> {
             flex: 5,
             child: RotatedBox(
                 quarterTurns: 3,
-                child: ThemedSlider(
+                child: PlatformSlider(
+                    activeColor: Theme.of(context).colorScheme.primary,
                     onChanged: (double value) async =>
                         await widget.sliderCallback(value),
                     value: volume.value))),
