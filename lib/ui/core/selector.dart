@@ -27,7 +27,7 @@ class Selector extends StatelessWidget {
           itemExtent: itemExtent,
           onSelectedItemChanged: (index) {
             if (callback != null) {
-              HapticFeedback.selectionClick();
+              HapticFeedback.lightImpact();
               callback!(index);
             }
           },

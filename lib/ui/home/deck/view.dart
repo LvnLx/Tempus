@@ -10,7 +10,7 @@ import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/bar.dart';
 import 'package:tempus/ui/core/dialogs.dart';
-import 'package:tempus/ui/core/themed_button.dart';
+import 'package:tempus/ui/core/outlined.dart';
 import 'package:tempus/ui/core/themed_text.dart';
 import 'package:tempus/ui/home/deck/buttons/beat_unit_button.dart';
 import 'package:tempus/ui/home/deck/buttons/bpm_button.dart';
@@ -94,23 +94,35 @@ class DeckState extends State<Deck> {
                                         height: barConstraints.maxHeight,
                                         child: Bar(orientation: Axis.vertical),
                                       ),
-                                      ThemedButton(
-                                          onPressed: () async =>
-                                              await _showBpmDialog(context),
-                                          child: SizedBox(
-                                              height:
-                                                  barConstraints.maxHeight / 2,
-                                              width: barConstraints.maxHeight,
-                                              child: FittedBox(
-                                                  child: ThemedText(tapTimes
-                                                              .length ==
-                                                          1
-                                                      ? "TAP"
-                                                      : context
-                                                          .watch<
-                                                              DeckViewModel>()
-                                                          .bpm
-                                                          .toString())))),
+                                      GestureDetector(
+                                          onTap: () async =>
+                                              await showIntegerSettingDialog(
+                                                  context,
+                                                  "Beats per minute",
+                                                  3,
+                                                  context
+                                                      .read<DeckViewModel>()
+                                                      .setBpm,
+                                                  context
+                                                      .read<DeckViewModel>()
+                                                      .bpm),
+                                          child: Outlined(
+                                              child: SizedBox(
+                                                  height:
+                                                      barConstraints.maxHeight /
+                                                          2,
+                                                  width:
+                                                      barConstraints.maxHeight,
+                                                  child: FittedBox(
+                                                      child: ThemedText(tapTimes
+                                                                  .length ==
+                                                              1
+                                                          ? "TAP"
+                                                          : context
+                                                              .watch<
+                                                                  DeckViewModel>()
+                                                              .bpm
+                                                              .toString()))))),
                                       Bar(orientation: Axis.vertical),
                                       TimeSignatureButton(
                                           setTimeSignature:
@@ -212,9 +224,12 @@ class DeckState extends State<Deck> {
                     Padding(
                         padding: const EdgeInsets.only(left: 24.0),
                         child: GestureDetector(
-                            onTap: () async => await showPlatformModalSheet(
-                                context: context,
-                                builder: (BuildContext context) => Settings()),
+                            onTap: () {
+                              showPlatformModalSheet(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      Settings());
+                            },
                             child: AxisSizedBox(
                                 reference: Axis.vertical,
                                 child: FittedBox(
@@ -235,25 +250,5 @@ class DeckState extends State<Deck> {
                                 )))))
                   ]))
             ]));
-  }
-
-  Future<void> _showBpmDialog(BuildContext context) async {
-    String updatedValue = "";
-    await showInputDialog(context,
-        title: "Beats Per Minute",
-        input: PlatformTextField(
-          autofocus: true,
-          cursorColor: Colors.transparent,
-          hintText: context.read<DeckViewModel>().bpm.toString(),
-          keyboardType: TextInputType.number,
-          makeCupertinoDecorationNull: true,
-          maxLength: 3,
-          onChanged: (text) => updatedValue = text,
-          textAlign: TextAlign.center,
-        ),
-        onConfirm: () async => await context.read<DeckViewModel>().setBpm(max(
-            int.tryParse(updatedValue) ?? context.read<DeckViewModel>().bpm,
-            1)),
-        confirmText: "Set");
   }
 }

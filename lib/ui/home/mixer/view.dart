@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/domain/constants/options.dart';
-import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
 import 'package:tempus/ui/core/bar.dart';
 import 'package:tempus/ui/core/dialogs.dart';
@@ -87,7 +86,10 @@ class MixerState extends State<Mixer> {
                         if (_canAddSubdivison()) {
                           await context.read<MixerViewModel>().addSubdivision();
                         } else {
-                          await _showPurchaseDialog(context);
+                          await showPurchaseDialog(
+                              context,
+                              "Simultaneous subdivisions are available with the premium version. Would you like to continue to the purchase?",
+                              context.read<MixerViewModel>().purchasePremium);
                         }
                       },
                       child: SizedBox(
@@ -113,18 +115,4 @@ class MixerState extends State<Mixer> {
   bool _canAddSubdivison() =>
       context.read<MixerViewModel>().subdivisions.isEmpty ||
       context.read<MixerViewModel>().isPremium;
-
-  Future<void> _showPurchaseDialog(BuildContext context) async =>
-      await showTextDialog(context,
-          title: "Premium Feature",
-          message:
-              "Simultaneous subdivisions are available with the premium version. Would you like to continue to the purchase?",
-          dialogAction: DialogAction.confirm,
-          confirmText: "Purchase", onConfirm: () async {
-        PurchaseResult purchaseResult =
-            await context.read<MixerViewModel>().purchasePremium();
-        if (context.mounted) {
-          await showPurchaseResultDialog(context, purchaseResult);
-        }
-      });
 }
