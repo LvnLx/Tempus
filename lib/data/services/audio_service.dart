@@ -74,9 +74,9 @@ class AudioService {
 
     await setState(
         _appVolume.value,
-        _bpm.value,
         _beatUnit.value,
         _beatVolume.value,
+        _bpm.value,
         _downbeatVolume.value,
         _sampleSet.value,
         _subdivisions.value,
@@ -97,17 +97,17 @@ class AudioService {
 
   Future<void> setState(
       double appVolume,
-      int bpm,
       fraction.BeatUnit beatUnit,
       double beatVolume,
+      int bpm,
       double downbeatVolume,
       sample_set.SampleSet sampleSet,
       Map<Key, Subdivision> subdivisions,
       fraction.TimeSignature timeSignature) async {
     await _appVolume.set(appVolume, isMetronomeInitialization: true);
-    await _bpm.set(bpm, flag: false, isMetronomeInitialization: true);
     await _beatUnit.set(beatUnit, isMetronomeInitialization: true);
     await _beatVolume.set(beatVolume, isMetronomeInitialization: true);
+    await _bpm.set(bpm, flag: false, isMetronomeInitialization: true);
     await _downbeatVolume.set(downbeatVolume, isMetronomeInitialization: true);
     await _sampleSet.set(sampleSet, isMetronomeInitialization: true);
     await _subdivisions.set(subdivisions, isMetronomeInitialization: true);

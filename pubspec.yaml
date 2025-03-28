@@ -10,16 +10,16 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_platform_widgets: ^7.0.1
-  purchases_flutter: ^8.4.5
-  provider: ^6.1.2
   flutter_settings_ui: ^3.0.1
+  provider: ^6.1.2
+  purchases_flutter: ^8.4.5
   shared_preferences: ^2.3.3
   url_launcher: ^6.3.1
 
 dev_dependencies:
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
 
 flutter:
   assets:

@@ -42,6 +42,7 @@ class HapticsPage extends StatelessWidget {
         lightTheme: getSettingsThemeData(context),
         sections: [
           SettingsSection(
+            title: Text("Haptics"),
             tiles: [
               SettingsTile.switchTile(
                   title: Text("Beat"),

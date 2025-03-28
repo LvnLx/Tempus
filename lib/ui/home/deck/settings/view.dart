@@ -76,29 +76,38 @@ class _SettingsState extends State<Settings> {
           ]),
           SettingsSection(title: Text("Accessibility"), tiles: [
             SettingsTile.navigation(
-              title: Text("Haptics"),
-              onPressed: (context) => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => HapticsPage(
-                          getSettingsThemeData: _getSettingsThemeData,
-                          beatHaptics:
-                              context.watch<SettingsViewModel>().beatHaptics,
-                          downbeatHaptics: context
-                              .watch<SettingsViewModel>()
-                              .downbeatHaptics,
-                          innerBeatHaptics: context
-                              .watch<SettingsViewModel>()
-                              .innerBeatHaptics,
-                          setBeatHaptics:
-                              context.read<SettingsViewModel>().setBeatHaptics,
-                          setDownbeatHaptics: context
-                              .read<SettingsViewModel>()
-                              .setDownbeatHaptics,
-                          setInnerBeatHaptics: context
-                              .read<SettingsViewModel>()
-                              .setInnerBeatHaptics))),
-            )
+                title: Text("Haptics"),
+                onPressed: (context) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HapticsPage(
+                            getSettingsThemeData: _getSettingsThemeData,
+                            beatHaptics:
+                                context.watch<SettingsViewModel>().beatHaptics,
+                            downbeatHaptics: context
+                                .watch<SettingsViewModel>()
+                                .downbeatHaptics,
+                            innerBeatHaptics: context
+                                .watch<SettingsViewModel>()
+                                .innerBeatHaptics,
+                            setBeatHaptics: context
+                                .read<SettingsViewModel>()
+                                .setBeatHaptics,
+                            setDownbeatHaptics: context
+                                .read<SettingsViewModel>()
+                                .setDownbeatHaptics,
+                            setInnerBeatHaptics: context
+                                .read<SettingsViewModel>()
+                                .setInnerBeatHaptics)))),
+            SettingsTile.switchTile(
+                enabled: context.watch<SettingsViewModel>().flashlightAcquired,
+                initialValue:
+                    context.watch<SettingsViewModel>().flashlightEnabled,
+                onToggle: (value) =>
+                    context.read<SettingsViewModel>().setFlashlight(value),
+                title: Text("Flashlight"),
+                description: Text(
+                    "Flashes the flashlight on each beat. This setting may be unavailable if the app is unable to access the flashlight for some reason"))
           ]),
           SettingsSection(title: Text("Audio"), tiles: [
             SettingsTile.navigation(
@@ -163,7 +172,8 @@ class _SettingsState extends State<Settings> {
           SettingsSection(title: Text("Metronome"), tiles: [
             SettingsTile(
                 title: Text("Reset"),
-                onPressed: (context) async => await _showResetMetronomeDialog(context)),
+                onPressed: (context) async =>
+                    await _showResetMetronomeDialog(context)),
             SettingsTile.switchTile(
               title: Text("Auto update beat unit"),
               description: Text(
@@ -175,7 +185,7 @@ class _SettingsState extends State<Settings> {
                   .setAutoUpdateBeatUnit(value),
             )
           ]),
-          SettingsSection(title: Text("Other"), tiles: [
+          SettingsSection(title: Text("Communication"), tiles: [
             SettingsTile(
                 title: Text("Contact"),
                 onPressed: (context) async => await _showEmail(
@@ -187,7 +197,9 @@ class _SettingsState extends State<Settings> {
             SettingsTile(
                 title: Text("Support"),
                 onPressed: (context) async => await _showEmail(
-                    context, Strings.supportEmail, "Tempus%20Support")),
+                    context, Strings.supportEmail, "Tempus%20Support"))
+          ]),
+          SettingsSection(title: Text("Other"), tiles: [
             SettingsTile(
                 title: Text("Reset app"),
                 onPressed: (context) async =>

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/data/services/device_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
@@ -24,6 +25,7 @@ class Main extends StatelessWidget {
       child: MultiProvider(
         providers: [
           Provider(create: (_) => AssetService()),
+          Provider(create: (_) => DeviceService()),
           Provider(
               create: (context) =>
                   PreferenceService(context.read<AssetService>())),
@@ -42,6 +44,7 @@ class Main extends StatelessWidget {
           ChangeNotifierProvider(
               create: (context) => HomeViewModel(
                   context.read<AudioService>(),
+                  context.read<DeviceService>(),
                   context.read<PreferenceService>(),
                   context.read<ThemeService>())),
           ChangeNotifierProvider(
@@ -51,6 +54,7 @@ class Main extends StatelessWidget {
               create: (context) => SettingsViewModel(
                   context.read<AssetService>(),
                   context.read<AudioService>(),
+                  context.read<DeviceService>(),
                   context.read<PreferenceService>(),
                   context.read<PurchaseService>(),
                   context.read<ThemeService>()))
