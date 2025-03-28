@@ -8,16 +8,16 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
-import 'package:tempus/ui/core/bar.dart';
+import 'package:tempus/ui/core/themed_divider.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/themed_button.dart';
 import 'package:tempus/ui/core/themed_text.dart';
-import 'package:tempus/ui/home/deck/buttons/beat_unit_button.dart';
-import 'package:tempus/ui/home/deck/buttons/bpm_button.dart';
-import 'package:tempus/ui/home/deck/bpm_dial.dart';
-import 'package:tempus/ui/home/deck/settings/view.dart';
-import 'package:tempus/ui/home/deck/buttons/time_signature_button.dart';
-import 'package:tempus/ui/home/deck/view_model.dart';
+import 'package:tempus/ui/deck/buttons/beat_unit_button.dart';
+import 'package:tempus/ui/deck/buttons/bpm_button.dart';
+import 'package:tempus/ui/deck/bpm_dial.dart';
+import 'package:tempus/ui/deck/settings/view.dart';
+import 'package:tempus/ui/deck/buttons/time_signature_button.dart';
+import 'package:tempus/ui/deck/view_model.dart';
 
 class Deck extends StatefulWidget {
   const Deck({super.key});
@@ -92,7 +92,7 @@ class DeckState extends State<Deck> {
                                               .setBeatUnit),
                                       SizedBox(
                                         height: barConstraints.maxHeight,
-                                        child: Bar(orientation: Axis.vertical),
+                                        child: ThemedDivider(orientation: Axis.vertical),
                                       ),
                                       ThemedButton(
                                           onPressed: () async =>
@@ -111,7 +111,7 @@ class DeckState extends State<Deck> {
                                                               DeckViewModel>()
                                                           .bpm
                                                           .toString())))),
-                                      Bar(orientation: Axis.vertical),
+                                      ThemedDivider(orientation: Axis.vertical),
                                       TimeSignatureButton(
                                           setTimeSignature:
                                               (updatedTimeSignature) => context

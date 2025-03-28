@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class Bar extends StatelessWidget {
+class ThemedDivider extends StatelessWidget {
   final Axis orientation;
   final double girth;
 
-  const Bar({super.key, required this.orientation, this.girth = 16.0});
+  const ThemedDivider({super.key, required this.orientation, this.girth = 16.0});
 
   @override
   Widget build(BuildContext context) => orientation == Axis.horizontal

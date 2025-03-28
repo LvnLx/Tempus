@@ -4,13 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:tempus/domain/constants/options.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/core/axis_sizer.dart';
-import 'package:tempus/ui/core/bar.dart';
+import 'package:tempus/ui/core/themed_divider.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/core/themed_text.dart';
-import 'package:tempus/ui/home/mixer/channel.dart';
-import 'package:tempus/ui/home/mixer/fixed_channel.dart';
-import 'package:tempus/ui/home/mixer/view_model.dart';
+import 'package:tempus/ui/mixer/channel.dart';
+import 'package:tempus/ui/mixer/fixed_channel.dart';
+import 'package:tempus/ui/mixer/view_model.dart';
 
 class Mixer extends StatefulWidget {
   const Mixer({super.key});
@@ -44,7 +44,7 @@ class MixerState extends State<Mixer> {
                     child: ScaledPadding(
                         scale: 0.8,
                         child: FittedBox(child: ThemedText("ACC.")))),
-                Bar(orientation: Axis.vertical),
+                ThemedDivider(orientation: Axis.vertical),
                 FixedChannel(
                     sliderCallback:
                         context.read<MixerViewModel>().setBeatVolume,
@@ -79,7 +79,7 @@ class MixerState extends State<Mixer> {
                               context.watch<MixerViewModel>().subdivisions,
                         ))
                     .toList()),
-                Bar(orientation: Axis.vertical),
+                ThemedDivider(orientation: Axis.vertical),
                 if (context.watch<MixerViewModel>().subdivisions.length <
                     Options.subdivisionOptions.length)
                   GestureDetector(

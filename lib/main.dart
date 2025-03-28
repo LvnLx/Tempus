@@ -6,9 +6,9 @@ import 'package:tempus/data/services/device_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
-import 'package:tempus/ui/home/deck/settings/view_model.dart';
-import 'package:tempus/ui/home/deck/view_model.dart';
-import 'package:tempus/ui/home/mixer/view_model.dart';
+import 'package:tempus/ui/deck/settings/view_model.dart';
+import 'package:tempus/ui/deck/view_model.dart';
+import 'package:tempus/ui/mixer/view_model.dart';
 import 'package:tempus/ui/home/view.dart';
 import 'package:tempus/ui/home/view_model.dart';
 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:tempus/domain/models/subdivision.dart';
-import 'package:tempus/ui/core/bar.dart';
+import 'package:tempus/ui/core/themed_divider.dart';
 import 'package:tempus/ui/core/themed_button.dart';
 import 'package:tempus/ui/core/scaled_padding.dart';
 import 'package:tempus/ui/core/themed_slider.dart';
-import 'package:tempus/ui/home/mixer/subdivision_option_button.dart';
+import 'package:tempus/ui/mixer/subdivision_option_button.dart';
 
 class Channel extends StatelessWidget {
   final void Function(Key key) onRemove;
@@ -26,7 +26,7 @@ class Channel extends StatelessWidget {
     return LayoutBuilder(
       builder: (_, constraints) => Row(
         children: [
-          Bar(orientation: Axis.vertical),
+          ThemedDivider(orientation: Axis.vertical),
           SizedBox(
             width: constraints.maxHeight / 6,
             child: Column(children: [
@@ -38,14 +38,14 @@ class Channel extends StatelessWidget {
                           onChanged: (value) async =>
                               await setSubdivisionVolume(key!, value),
                           value: subdivisions[key]!.volume))),
-              Expanded(child: Bar(orientation: Axis.horizontal)),
+              Expanded(child: ThemedDivider(orientation: Axis.horizontal)),
               Expanded(
                   flex: 3,
                   child: SubdivisionOptionButton(
                       callback: (updatedSubdivisionOption) =>
                           setSubdivisionOption(key!, updatedSubdivisionOption),
                       subdivisionOption: subdivisions[key]!.option)),
-              Expanded(child: Bar(orientation: Axis.horizontal)),
+              Expanded(child: ThemedDivider(orientation: Axis.horizontal)),
               Expanded(
                 flex: 3,
                 child: ThemedButton(

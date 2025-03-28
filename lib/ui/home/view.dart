@@ -10,10 +10,10 @@ import 'package:tempus/data/services/device_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
-import 'package:tempus/ui/core/bar.dart';
-import 'package:tempus/ui/home/deck/view.dart';
-import 'package:tempus/ui/home/deck/view_model.dart';
-import 'package:tempus/ui/home/mixer/view.dart';
+import 'package:tempus/ui/core/themed_divider.dart';
+import 'package:tempus/ui/deck/view.dart';
+import 'package:tempus/ui/deck/view_model.dart';
+import 'package:tempus/ui/mixer/view.dart';
 import 'package:tempus/ui/home/view_model.dart';
 
 class Home extends StatelessWidget {
@@ -61,7 +61,7 @@ class Home extends StatelessWidget {
                                 child: Column(
                               children: [
                                 Expanded(child: Mixer()),
-                                Bar(orientation: Axis.horizontal),
+                                ThemedDivider(orientation: Axis.horizontal),
                                 Expanded(child: Deck())
                               ],
                             )))),

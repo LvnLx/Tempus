@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:tempus/domain/models/fraction.dart';
-import 'package:tempus/ui/core/bar.dart';
+import 'package:tempus/ui/core/themed_divider.dart';
 import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/themed_button.dart';
 import 'package:tempus/ui/core/selector.dart';
@@ -34,7 +34,7 @@ class TimeSignatureButton extends StatelessWidget {
                     child: FittedBox(
                         child:
                             ThemedText(timeSignature.numerator.toString())))),
-            Bar(orientation: Axis.horizontal, girth: 0),
+            ThemedDivider(orientation: Axis.horizontal, girth: 0),
             Expanded(
                 child: SizedBox.expand(
                     child: FittedBox(
@@ -75,7 +75,7 @@ class TimeSignatureButton extends StatelessWidget {
                             .toList(),
                         orientation: Axis.horizontal,
                         useTheme: false)),
-                Flexible(child: Bar(orientation: Axis.horizontal)),
+                Flexible(child: ThemedDivider(orientation: Axis.horizontal)),
                 Expanded(
                     child: Selector(
                         callback: (index) async => updatedTimeSignature =
