@@ -22,6 +22,7 @@ class PreferenceService {
   late final Bpm bpm;
   late final DownbeatHaptics downbeatHaptics;
   late final DownbeatVolume downbeatVolume;
+  late final Flashlight flashlight;
   late final InnerBeatHaptics innerBeatHaptics;
   late final Premium premium;
   late final SampleSet sampleSet;
@@ -38,6 +39,7 @@ class PreferenceService {
     bpm = Bpm(this, 120);
     downbeatHaptics = DownbeatHaptics(this, false);
     downbeatVolume = DownbeatVolume(this, 1.0);
+    flashlight = Flashlight(this, false);
     innerBeatHaptics = InnerBeatHaptics(this, false);
     premium = Premium(this, false);
     sampleSet = SampleSet(this, sample_set.SampleSet("sine", false));
@@ -179,6 +181,10 @@ class DownbeatVolume extends _Preference<double> {
   DownbeatVolume(super._service, super.defaultValue);
 }
 
+class Flashlight extends _ServiceOwned<bool> {
+  Flashlight(super._service, super.defaultValue);
+}
+
 class InnerBeatHaptics extends _ServiceOwned<bool> {
   InnerBeatHaptics(super._service, super.defaultValue);
 }
@@ -226,8 +232,8 @@ class Subdivisions extends _Preference<Map<Key, Subdivision>> {
     if (subdivisionsAsJsonString != null) {
       Map<String, dynamic> subdivisionsAsJson =
           jsonDecode(subdivisionsAsJsonString);
-      return subdivisionsAsJson.map(
-          (key, value) => MapEntry(Key(key), Subdivision.fromJson(value)));
+      return subdivisionsAsJson
+          .map((key, value) => MapEntry(Key(key), Subdivision.fromJson(value)));
     } else {
       return defaultValue;
     }

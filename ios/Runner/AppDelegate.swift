@@ -4,16 +4,21 @@ import AVFoundation
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
-  private var methodChannel: FlutterMethodChannel!
+  private var audio: FlutterMethodChannel!
+  private var device: FlutterMethodChannel!
+  
+  private var avCaptureDevice: AVCaptureDevice?
   private var metronome: Metronome!
   
   override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
     
-    methodChannel = FlutterMethodChannel(name: "audio", binaryMessenger: controller.binaryMessenger)
+    audio = FlutterMethodChannel(name: "audio", binaryMessenger: controller.binaryMessenger)
+    device = FlutterMethodChannel(name: "device", binaryMessenger: controller.binaryMessenger)
+    
     metronome = Metronome(self.beatStarted, self.downbeatStarted, self.innerBeatStarted)
     
-    methodChannel.setMethodCallHandler({
+    audio.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
       let arguments = call.arguments as? [String] ?? []
       
@@ -75,7 +80,37 @@ import AVFoundation
         result(FlutterMethodNotImplemented)
       }
     })
+    
+    device.setMethodCallHandler({
+      (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+      let arguments = call.arguments as? [String] ?? []
       
+      switch call.method {
+      case "acquireFlashlight":
+        guard
+          let device = AVCaptureDevice.default(for: AVMediaType.video),
+          device.hasTorch
+        else {
+          return result("Failed")
+        }
+    
+        self.avCaptureDevice = device
+
+        do {
+          try self.avCaptureDevice!.lockForConfiguration()
+        } catch {
+          return result("Failed")
+        }
+        
+        return result("Succeeded")
+      case "setFlashlight":
+        let value: Bool = Bool(arguments[0])!
+        self.avCaptureDevice?.torchMode = value ? .on : .off
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    })
+    
     do {
       try AVAudioSession.sharedInstance().setCategory(.playback, options: .mixWithOthers)
     } catch {
@@ -88,22 +123,22 @@ import AVFoundation
   
   func beatStarted(_ count: Int) {
     DispatchQueue.main.async {
-      self.methodChannel.invokeMethod("beatStarted", arguments: [String(count)])
+      self.audio.invokeMethod("beatStarted", arguments: [String(count)])
     }
   }
   
   func downbeatStarted() {
     DispatchQueue.main.async {
-      self.methodChannel.invokeMethod("downbeatStarted", arguments: nil)
+      self.audio.invokeMethod("downbeatStarted", arguments: nil)
     }
   }
   
   func innerBeatStarted() {
     DispatchQueue.main.async {
-      self.methodChannel.invokeMethod("innerBeatStarted", arguments: nil)
+      self.audio.invokeMethod("innerBeatStarted", arguments: nil)
     }
   }
-      
+  
   private func subdivisionsFromJsonString(_ subdivisionsAsJsonString: String) -> [String: Subdivision] {
     let subdivisionsAsData: Data? = subdivisionsAsJsonString.data(using: .utf8)
     let subdivisionsAsJson: [String: [String: Any]] = try! JSONSerialization.jsonObject(with: subdivisionsAsData!) as! [String: [String: Any]]
