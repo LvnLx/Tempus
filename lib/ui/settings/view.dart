@@ -8,11 +8,11 @@ import 'package:tempus/domain/constants/strings.dart';
 import 'package:tempus/domain/extensions/string.dart';
 import 'package:tempus/domain/models/purchase_result.dart';
 import 'package:tempus/ui/core/dialogs.dart';
-import 'package:tempus/ui/deck/settings/pages/app_volume_page.dart';
-import 'package:tempus/ui/deck/settings/pages/haptics_page.dart';
-import 'package:tempus/ui/deck/settings/pages/sample_set_page.dart';
-import 'package:tempus/ui/deck/settings/pages/theme_page.dart';
-import 'package:tempus/ui/deck/settings/view_model.dart';
+import 'package:tempus/ui/settings/pages/app_volume_page.dart';
+import 'package:tempus/ui/settings/pages/haptics_page.dart';
+import 'package:tempus/ui/settings/pages/sample_set_page.dart';
+import 'package:tempus/ui/settings/pages/theme_page.dart';
+import 'package:tempus/ui/settings/view_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Settings extends StatefulWidget {

@@ -15,7 +15,7 @@ import 'package:tempus/ui/core/themed_text.dart';
 import 'package:tempus/ui/deck/buttons/beat_unit_button.dart';
 import 'package:tempus/ui/deck/buttons/bpm_button.dart';
 import 'package:tempus/ui/deck/bpm_dial.dart';
-import 'package:tempus/ui/deck/settings/view.dart';
+import 'package:tempus/ui/settings/view.dart';
 import 'package:tempus/ui/deck/buttons/time_signature_button.dart';
 import 'package:tempus/ui/deck/view_model.dart';
 

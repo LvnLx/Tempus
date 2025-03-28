@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tempus/data/services/asset_service.dart';
 import 'package:tempus/data/services/audio_service.dart' hide SampleSet;
 import 'package:tempus/data/services/device_service.dart';
@@ -33,6 +34,30 @@ class SettingsViewModel extends ChangeNotifier {
         .addListener(notifyListeners);
     _purchaseService.isPremiumValueNotifier.addListener(notifyListeners);
     _themeService.themeModeValueNotifier.addListener(notifyListeners);
+
+    _audioService.eventStream.listen((event) {
+      switch (event) {
+        case Beat():
+          if (_preferenceService.beatHaptics.value) {
+            HapticFeedback.mediumImpact();
+          }
+
+          if (_deviceService.flashlight &&
+              _preferenceService.flashlight.value) {
+            _deviceService.setFlashlight(true);
+            Future.delayed(Duration(milliseconds: 25),
+                () => _deviceService.setFlashlight(false));
+          }
+        case Downbeat():
+          if (_preferenceService.downbeatHaptics.value) {
+            HapticFeedback.heavyImpact();
+          }
+        case InnerBeat():
+          if (_preferenceService.innerBeatHaptics.value) {
+            HapticFeedback.lightImpact();
+          }
+      }
+    });
   }
 
   double get appVolume => _audioService.appVolume.value;
