@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_platform_widgets: ^7.0.1
+  flutter_platform_widgets: ^8.0.0
   flutter_settings_ui: ^3.0.1
   provider: ^6.1.2
   purchases_flutter: ^8.4.5
