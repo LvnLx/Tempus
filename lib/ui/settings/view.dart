@@ -44,36 +44,49 @@ class _SettingsState extends State<Settings> {
         darkTheme: _getSettingsThemeData(context),
         lightTheme: _getSettingsThemeData(context),
         sections: [
-          SettingsSection(title: Text("Premium Access"), tiles: [
-            SettingsTile(
-              title: Text("Status"),
-              trailing: DefaultTextStyle(
-                  style: TextStyle(
-                      fontSize: 17,
-                      color: _getSettingsThemeData(context).trailingTextColor),
-                  child: Text(context.watch<SettingsViewModel>().isPremium
-                      ? "Active"
-                      : "Inactive")),
-            ),
-            SettingsTile(
-                title: Text("Purchase"),
-                onPressed: (context) async {
-                  PurchaseResult purchaseResult =
-                      await context.read<SettingsViewModel>().purchasePremium();
-                  if (context.mounted) {
-                    await showPurchaseResultDialog(context, purchaseResult);
-                  }
-                }),
-            SettingsTile(
-                title: Text("Restore"),
-                onPressed: (context) async {
-                  PurchaseResult purchaseResult =
-                      await context.read<SettingsViewModel>().restorePremium();
-                  if (context.mounted) {
-                    await showPurchaseResultDialog(context, purchaseResult);
-                  }
-                })
-          ]),
+          SettingsSection(
+              title: Text("Premium Access"),
+              tiles: (context.watch<SettingsViewModel>().isPremium
+                      ? List<SettingsTile>.empty()
+                      : [
+                          SettingsTile(
+                              title: Text("Purchase"),
+                              onPressed: (context) async {
+                                PurchaseResult purchaseResult = await context
+                                    .read<SettingsViewModel>()
+                                    .purchasePremium();
+                                if (context.mounted) {
+                                  await showPurchaseResultDialog(
+                                      context, purchaseResult);
+                                }
+                              }),
+                          SettingsTile(
+                              title: Text("Restore"),
+                              onPressed: (context) async {
+                                PurchaseResult purchaseResult = await context
+                                    .read<SettingsViewModel>()
+                                    .restorePremium();
+                                if (context.mounted) {
+                                  await showPurchaseResultDialog(
+                                      context, purchaseResult);
+                                }
+                              })
+                        ]) +
+                  [
+                    SettingsTile(
+                        title: Text("Status"),
+                              description: Text(
+                                  "${context.watch<SettingsViewModel>().isPremium ? "You have access to the following features" : "Gain access to the following features"}:\n- Multiple subdivisions at once\n- Nearly 10,000 time signatures\n- Over 100 beat units\n- Premium audio samples"),
+                        trailing: DefaultTextStyle(
+                            style: TextStyle(
+                                fontSize: 17,
+                                color: _getSettingsThemeData(context)
+                                    .trailingTextColor),
+                            child: Text(
+                                context.watch<SettingsViewModel>().isPremium
+                                    ? "Active"
+                                    : "Inactive")))
+                  ]),
           SettingsSection(title: Text("Accessibility"), tiles: [
             SettingsTile.navigation(
                 title: Text("Haptics"),
