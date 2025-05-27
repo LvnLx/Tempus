@@ -35,6 +35,7 @@ class ThemeSettingsPage extends StatelessWidget {
           lightTheme: getSettingsThemeData(context),
           sections: [
             SettingsSection(
+              title: Text("Theme"),
               tiles: [
                 SettingsTile(
                     title: Text("System"),
