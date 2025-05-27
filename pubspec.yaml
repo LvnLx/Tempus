@@ -14,6 +14,7 @@ dependencies:
   provider: ^6.1.2
   purchases_flutter: ^8.4.5
   shared_preferences: ^2.3.3
+  smooth_page_indicator: ^1.2.1
   url_launcher: ^6.3.1
 
 dev_dependencies:
