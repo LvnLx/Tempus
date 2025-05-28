@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tempus/domain/constants/options.dart';
@@ -10,8 +9,8 @@ import 'package:tempus/ui/core/dialogs.dart';
 import 'package:tempus/ui/core/themed_button.dart';
 import 'package:tempus/ui/core/themed_divider.dart';
 import 'package:tempus/ui/core/themed_text.dart';
-import 'package:tempus/ui/deck/buttons/beat_unit_button.dart';
-import 'package:tempus/ui/deck/buttons/time_signature_button.dart';
+import 'package:tempus/ui/clock/beat_unit_button.dart';
+import 'package:tempus/ui/clock/time_signature_button.dart';
 
 class Clock extends StatelessWidget {
   const Clock({super.key});
@@ -35,16 +34,12 @@ class Clock extends StatelessWidget {
                   ),
                   ThemedButton(
                       onPressed: () async => await _showBpmDialog(context),
-                      child: SizedBox(
-                          height: barConstraints.maxHeight / 2,
-                          width: barConstraints.maxHeight,
-                          child: FittedBox(
-                              child: ThemedText(context.read<ClockViewModel>().tapTimes.length == 1
-                                  ? "TAP"
-                                  : context
-                                      .watch<ClockViewModel>()
-                                      .bpm
-                                      .toString())))),
+                      child: ThemedText(context.read<ClockViewModel>().tapTimes.length == 1
+                          ? "TAP"
+                          : context
+                              .watch<ClockViewModel>()
+                              .bpm
+                              .toString())),
                   ThemedDivider(orientation: Axis.vertical),
                   TimeSignatureButton(
                       setTimeSignature: (updatedTimeSignature) => context
