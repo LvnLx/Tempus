@@ -7,7 +7,10 @@ import 'package:tempus/data/services/audio_service.dart';
 import 'package:tempus/data/services/device_service.dart';
 import 'package:tempus/data/services/preference_service.dart';
 import 'package:tempus/data/services/purchase_service.dart';
+import 'package:tempus/data/services/tap_tempo_service.dart';
 import 'package:tempus/data/services/theme_service.dart';
+import 'package:tempus/ui/clock/view.dart';
+import 'package:tempus/ui/clock/view_model.dart';
 import 'package:tempus/ui/core/themed_divider.dart';
 import 'package:tempus/ui/deck/view.dart';
 import 'package:tempus/ui/deck/view_model.dart';
@@ -57,10 +60,18 @@ class Main extends StatelessWidget {
                     PurchaseService(context.read<PreferenceService>())),
             Provider(
                 create: (context) =>
+                    TapTempoService(context.read<AudioService>())),
+            Provider(
+                create: (context) =>
                     ThemeService(context.read<PreferenceService>())),
             ChangeNotifierProvider(
+                create: (context) => ClockViewModel(
+                    context.read<AudioService>(),
+                    context.read<PurchaseService>(),
+                    context.read<TapTempoService>())),
+            ChangeNotifierProvider(
                 create: (context) => DeckViewModel(context.read<AudioService>(),
-                    context.read<PurchaseService>())),
+                    context.read<TapTempoService>())),
             ChangeNotifierProvider(
                 create: (context) =>
                     MainViewModel(context.read<ThemeService>())),
@@ -106,6 +117,9 @@ class Main extends StatelessWidget {
                                             child: Column(
                                           children: [
                                             Expanded(child: Mixer()),
+                                            ThemedDivider(
+                                                orientation: Axis.horizontal),
+                                            Expanded(child: Clock()),
                                             ThemedDivider(
                                                 orientation: Axis.horizontal),
                                             Expanded(child: Deck())
