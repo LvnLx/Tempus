@@ -27,12 +27,10 @@ class BeatUnitButton extends StatelessWidget {
       child: SizedBox(
         height: constraints.maxHeight,
         width: constraints.maxHeight / 2,
-        child: LayoutBuilder(
-          builder: (_, innerConstraints) => ScaledPadding(
-            scale: 0.9,
-            child: FittedBox(
-                child: ThemedText(beatUnit.toString(), isMusicalSymbal: true)),
-          ),
+        child: ScaledPadding(
+          scale: 0.9,
+          child: FittedBox(
+              child: ThemedText(beatUnit.toString(), isMusicalSymbal: true)),
         ),
       ));
 

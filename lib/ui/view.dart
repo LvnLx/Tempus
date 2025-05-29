@@ -116,13 +116,13 @@ class Main extends StatelessWidget {
                                         child: SafeArea(
                                             child: Column(
                                           children: [
-                                            Expanded(child: Mixer()),
+                                            Expanded(flex: 6, child: Mixer()),
                                             ThemedDivider(
                                                 orientation: Axis.horizontal),
                                             Expanded(child: Clock()),
                                             ThemedDivider(
                                                 orientation: Axis.horizontal),
-                                            Expanded(child: Deck())
+                                            Expanded(flex: 6, child: Deck())
                                           ],
                                         )))),
                               ));

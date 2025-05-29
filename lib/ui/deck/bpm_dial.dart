@@ -16,6 +16,7 @@ class BpmDial extends StatefulWidget {
 class BpmDialState extends State<BpmDial> {
   double dialRotation = 0;
 
+  late Point origin;
   late Point previousIncrement;
   late Point previous;
 
@@ -23,33 +24,12 @@ class BpmDialState extends State<BpmDial> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (_, constraints) {
-        Point origin =
-            Point(constraints.maxWidth / 2, constraints.maxHeight / 2);
+        origin = Point(constraints.maxWidth / 2, constraints.maxHeight / 2);
         return GestureDetector(
-          onPanStart: (DragStartDetails details) {
-            previous = previousIncrement = Point(
-                details.localPosition.dx - origin.x,
-                origin.y - details.localPosition.dy);
-          },
-          onPanUpdate: (DragUpdateDetails details) async {
-            Point current = Point(details.localPosition.dx - origin.x,
-                origin.y - details.localPosition.dy);
-
-            double previousStepDegrees =
-                rotationDelta(current, previousIncrement);
-            double previousDegrees = rotationDelta(current, previous);
-
-            int change =
-                (previousStepDegrees / widget.callbackThreshold / 2).round();
-
-            if (change != 0) {
-              await widget.callback(change);
-              previousIncrement = current;
-            }
-
-            previous = current;
-            setState(() => dialRotation += previousDegrees);
-          },
+          onHorizontalDragStart: onStart,
+          onHorizontalDragUpdate: onUpdate,
+          onVerticalDragStart: onStart,
+          onVerticalDragUpdate: onUpdate,
           child: Transform.rotate(
             angle: radians(dialRotation),
             child: Stack(
@@ -78,6 +58,30 @@ class BpmDialState extends State<BpmDial> {
         );
       },
     );
+  }
+
+  void onStart(DragStartDetails dragStartDetails) {
+    previous = previousIncrement = Point(
+        dragStartDetails.localPosition.dx - origin.x,
+        origin.y - dragStartDetails.localPosition.dy);
+  }
+
+  Future<void> onUpdate(DragUpdateDetails dragUpdateDetails) async {
+    Point current = Point(dragUpdateDetails.localPosition.dx - origin.x,
+        origin.y - dragUpdateDetails.localPosition.dy);
+
+    double previousStepDegrees = rotationDelta(current, previousIncrement);
+    double previousDegrees = rotationDelta(current, previous);
+
+    int change = (previousStepDegrees / widget.callbackThreshold / 2).round();
+
+    if (change != 0) {
+      await widget.callback(change);
+      previousIncrement = current;
+    }
+
+    previous = current;
+    setState(() => dialRotation += previousDegrees);
   }
 }
 

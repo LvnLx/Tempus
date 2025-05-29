@@ -1,43 +1,42 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
 import 'package:tempus/data/services/audio_service.dart';
+import 'package:tempus/domain/utils/queue_notifier.dart';
 
 class TapTempoService {
   final AudioService _audioService;
 
   final int _maxTapTimeCount = 5;
-  final ValueNotifier<Queue<int>> _tapTimesValueNotifier =
-      ValueNotifier(Queue());
+  final QueueNotifier<int> _tapTimesValueNotifier = QueueNotifier();
 
   late Timer _lastTapTimer;
 
   TapTempoService(this._audioService);
 
   Queue<int> get tapTimes => _tapTimesValueNotifier.value;
-  ValueNotifier<Queue<int>> get tapTimesValueNotifier => _tapTimesValueNotifier;
+  QueueNotifier<int> get tapTimesValueNotifier => _tapTimesValueNotifier;
 
   void addTapTime(int tapTime) {
     if (_tapTimesValueNotifier.value.length >= _maxTapTimeCount) {
-      _tapTimesValueNotifier.value.removeFirst();
+      _tapTimesValueNotifier.removeFirst();
     }
 
-    _tapTimesValueNotifier.value.addLast(tapTime);
+    _tapTimesValueNotifier.addLast(tapTime);
   }
 
   void tapTempo() {
     if (_tapTimesValueNotifier.value.isEmpty) {
       addTapTime(DateTime.now().millisecondsSinceEpoch);
       _lastTapTimer =
-          Timer(Duration(seconds: 3), () => _tapTimesValueNotifier.value.clear);
+          Timer(Duration(seconds: 3), () => _tapTimesValueNotifier.clear);
     } else {
       addTapTime(DateTime.now().millisecondsSinceEpoch);
       _setBpm(
           (1 / (_averageTapDeltaMilliseconds() / 1000) * 60).round(), false);
       _lastTapTimer.cancel();
       _lastTapTimer =
-          Timer(Duration(seconds: 3), () => _tapTimesValueNotifier.value.clear);
+          Timer(Duration(seconds: 3), () => _tapTimesValueNotifier.clear);
     }
   }
 
