@@ -19,7 +19,7 @@ An iOS metronome app developed with [Flutter](https://flutter.dev/), supporting 
   <img src="https://github.com/user-attachments/assets/544e0546-6a9a-4978-9081-610d92ca6219" height="200">
   
 ### Complex Time Signatures
-- Many metronome apps only support a small set of time signatures, so it seemed like a great challenge and feature to be able to support any time signature a user would like. Users can select subdivisions with numerators and denominators ranging from 1 - 99 each, which also yields irrational time signatures:
+- Many metronome apps only support a small set of time signatures, so it seemed like a good technical challenge and feature to be able to support any time signature a user would like. Users can select subdivisions with numerators and denominators ranging from 1 - 99 each, which also yields irrational time signatures:
 
   <img src="https://github.com/user-attachments/assets/5ea1387f-c8c6-43df-93a6-a885d1532a7f" width="200">
 
