@@ -13,7 +13,7 @@ An iOS metronome app developed with [Flutter](https://flutter.dev/), supporting 
 
 ## Key Features
 ### Multiple Subdivisions
-- One of the main technical motivations for creating this app was having a metronome app that supports multiple subdivisions at once, similar to a [Boss DB-90](https://www.boss.info/us/products/db-90/), but even more flexbile. Users can select subdivisions ranging from 2 to 9, which correspond to eighth notes (2), eighth note triplets (3), quarter notes (4), and so on, while controlling the volume of them independently
+- One of the main technical motivations for creating this app was having a metronome app that supports multiple subdivisions at once, similar to a [Boss DB-90](https://www.boss.info/us/products/db-90/), but even more flexbile in terms of subdivision choice. Users can select subdivisions ranging from 2 to 9, which correspond to eighth notes (2), eighth note triplets (3), quarter notes (4), and so on, while controlling the volume of them independently
 - The UI implementation for subdivision control (and beat/accent volume control) was also heavily inspired by the [Boss DB-90](https://www.boss.info/us/products/db-90/), as well as the faders found in DAWs/mixing consoles — an inspiration stemming from my hobbyist background in audio engineering and creating drum covers:
 
   <img src="https://github.com/user-attachments/assets/544e0546-6a9a-4978-9081-610d92ca6219" height="200">
