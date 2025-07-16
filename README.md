@@ -13,6 +13,17 @@ An iOS metronome app developed with [Flutter](https://flutter.dev/), supporting 
   - [Sample Selection](#sample-selection)
   - [Volume Adjustment](#volume-adjustment)
 - [Techincal Challenges](#technical-challenges)
+  - [Audio Artifacts](#audio-artifacts)
+    - [Background](#background)
+    - [Causes](#causes)
+    - [Iterations](#iterations)
+      - [Queueing](#queueing)
+      - [Audio Buffering](#audio-buffering)
+      - [Fading](#fading)
+      - [Ensuring Completion](#ensuring-completion)
+  - [Timing](#timing)
+    - [System](#system)
+    - [Events](#events)
 - [Architecture](#architecture)
 - [Limitations](#limitations)
 - [Media](#media)
@@ -130,9 +141,11 @@ This doesn't seem that revolutionary on the surface, however all of the previous
 With this approach, all areas of potential audio artifacting are directly addressed. Any given audio sample will always be started from it's first sample and always be guaranteed playback it's last sample.
 
 > [!IMPORTANT]
-> This approach still allows multiple clips to overlap, in instances of higher tempos with intricate subdivisions, for example
+> This approach still allows multiple clips to overlap. For example, in instances of higher tempos with intricate subdivisions
 
 ### Timing
+
+#### System
 
 One of the big functional challenges in metronomes is the support for time signatures and beat units. Many metronome apps support a list of pre-canned time signatures (such as 4/4, 3/4, 6/8. 5/4, 12/8, ...) and beat units (such as quarter notes, dotted quarter notes, eighth notes, ...). Welcoming the challenge of not just hardcoding a bunch of different combinations for timing, I decided on implementing a generalized, sample accurate system, that offers user practically limitless flexibility (see the [Key Features](#key-features) section for the ranges that are supported for each timing element)
 
@@ -151,6 +164,10 @@ Anytime the audio buffer interface would ask for a sample, both it's own [pointe
 This approach implements what was discussed in [Ensuring Completion](#ensuring-completion). In addition to what was just described, any wrapping around to the beginning of buffers is also handled, so that there is only ever one active timing buffer, and clips are reset to a state in which they are ready to be picked up again by the time the next measure is played
 
 The locations and measure length shown in the previous chart for quarter notes are a simple numeric example of where clips are placed within the timing buffer and show values for a given input. For those interested in a more technical look at how all of the locations and measure length are calculated, please feel free to take a look at the implementation [here](https://github.com/LvnLx/Tempus/blob/main/ios/Runner/Metronome.swift#L207)
+
+#### Events
+
+One of the difficulties with having a low-level audio engine like this is notifying any other parts of the application of changes or events in audio. To help alleviate this issue and enable some insight from the outside world a simple tie in was made to the existing clips used in the timing buffers. The clips are already written as a `struct` in code, which allows them to also take a callback function as one of their fields. This callback can technically be repurposed to do anyhting, but since most of the functionality for the rest of the app lives within the [Flutter](https://flutter.dev/) layer of the application, the callback simply sends a method channel invocation with some data about what kind of clip made the call. More details about this communication can be found in the [Architecture](#architecture) section
 
 ## Architecture
 
