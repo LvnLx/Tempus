@@ -171,6 +171,4 @@ One of the difficulties with having a low-level audio engine like this is notify
 
 ## Architecture
 
-### Audio Events
-
 ## Limitations
