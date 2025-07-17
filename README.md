@@ -160,23 +160,32 @@ With this approach, all areas of potential audio artifacting are directly addres
 
 #### System
 
-One of the big functional challenges in metronomes is the support for time signatures and beat units. Many metronome apps support a list of pre-canned time signatures (such as `4/4`, `3/4`, `6/8`, `5/4`, `12/8`, ...) and beat units (such as quarter notes, dotted quarter notes, eighth notes, ...). Welcoming the challenge of not just hardcoding a bunch of different combinations for timing, I decided on implementing a generalized, sample accurate system, that offers user practically limitless flexibility (see the [Key Features](#key-features) section for the ranges that are supported for each timing element)
+One of the big functional challenges in metronomes is the support for time signatures and beat units, due to the need for the duration of a measure and location for all the notes within the measure to be calculated. Many metronome apps support a list of pre-canned time signatures (such as `4/4`, `3/4`, `6/8`, `5/4`, `12/8`, ...) and beat units (such as quarter notes, dotted quarter notes, eighth notes, ...) which can drastically simplify the necessary duration and location calculations
 
-To integrate with a dynamic timing system like this, the audio buffer interface would essentially act as the driver for a separate timing buffer. The latter is a sample acurrate representation of a measure of the given metronome settings. For example:
+Given the limited flexibility most metronomes offer with predefined time signatures and beat units, the decision made for this app was to support any given time signature or beat unit. The latter is a combination of predefined dotted beat units, with the remaining beat units generated dynamically (see the [Features](#features) section for supported ranges). The following table shows an example of parameters set by the user and system, and how those evaluate to the measure length and locations of notes in terms of samples:
 
 | Tempo (BPM) | Time Signature |   Beat Unit  | Sample Rate (Hz) | Measure Length (Samples) |    Quarter Note Locations (Samples)    |
 | ----------- | -------------- | ------------ | ---------------- | ------------------------ | -------------------------------------- |
 |    `120`    |      `4/4`     | Quarter Note |     `44,100`     |         `88,200`         | `22,050`, `44,100`, `66,150`, `88,200` |
 
-Anytime the audio buffer interface would ask for a sample, both it's own [pointer](https://en.wikipedia.org/wiki/Pointer_(computer_programming)) and that of the timing buffer would be incremented. During this increment the following occurs:
+For those interested in a more technical look at how all of the locations and measure length are calculated, please feel free to take a look at the implementation [here](https://github.com/LvnLx/Tempus/blob/main/ios/Runner/Metronome.swift#L207)
 
-1. Any clip that starts on the current timing buffer sample is marked as active
-2. For all active clips, copy their current sample value into the audio buffer and increment their pointer
-3. For all clips that have reached the end of their sample values, mark them as inactive
+#### Integration
+
+To integrate a dynamic timing system like this, the audio buffer interface would essentially act as a driver for the timing system. This is achieved by adding a timing buffer which is incremented through at the same time, and to be more precise, **by** the audio buffer. As you may be able to guess, the timing buffer is a sample acurrate representation of a measure determined by the given metronome settings. This is what the outputs of the table in the [System](#system) section are used for. As the audio buffer interface iterates through the buffer it provides, it simultaneously iterates through the timing buffer, with the timing buffer wrapping back to the beginning once it reaches the end
+
+> [!NOTE]  
+> In most cases the timing buffer is much longer than the audio buffer, so the audio buffer will be iterated through multiple times before the timing buffer is restarted
+
+With regards to actually writing data to the audio buffer, the following process is used:
+
+1. Lopp through all clips, and for any clip with a start smaple that matches the current timing buffer sample, mark it as active
+2. Loop through all active clips, and copy their current sample value into the audio buffer, then increment the sample number it's on. If the sample number incremented to is outside of the valid sample range for the clip, mark it as inactive
 
 This approach implements what was discussed in [Ensuring Completion](#ensuring-completion). In addition to what was just described, any wrapping around to the beginning of buffers is also handled, so that there is only ever one active timing buffer, and clips are reset to a state in which they are ready to be picked up again by the time the next measure is played
 
-The locations and measure length shown in the previous chart for quarter notes are a simple numeric example of where clips are placed within the timing buffer and show values for a given input. For those interested in a more technical look at how all of the locations and measure length are calculated, please feel free to take a look at the implementation [here](https://github.com/LvnLx/Tempus/blob/main/ios/Runner/Metronome.swift#L207)
+> [!IMPORTANT]  
+> Whenever the audio buffer asks for data, it must be filled with data immediately while avoiding any costly operations, such as memory allocations, IO operations, or other blocking calls, to prevent buffer underruns (which may yield audio artifacts) sent to the audio hardware. This results in relatively primitive logic (like the one seen above) when writing to audio buffers
 
 #### Events
 
