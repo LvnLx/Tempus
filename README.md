@@ -26,6 +26,7 @@ This document is split into a [Nontechnical](#nontechnical) and [Technical](#tec
     - [Accessibility](#accessibility)
     - [Sample Selection](#sample-selection)
     - [Volume Adjustment](#volume-adjustment)
+    - [Settings Persistence]()
 - [Technical](#technical)
   - [Audio Engine](#audio-engine)
     - [Audio Artifacts](#audio-artifacts)
@@ -34,13 +35,18 @@ This document is split into a [Nontechnical](#nontechnical) and [Technical](#tec
       - [Audio Buffering](#audio-buffering)
       - [Fading](#fading)
       - [Ensuring Completion](#ensuring-completion)
-  - [Metronome](#timing)
+  - [Metronome](#metronome)
     - [System](#system)
+    - [Integration](#integration)
+    - [Updates](#updates)
     - [Events](#events)
-  - [Architecture](#architecture)
-  - [Limitations](#limitations)
-
-
+  - [Miscellaneous](#miscellaneous)
+    - [Flutter Native Communication](#flutter-native-communication)
+    - [Timing Accuracy](#timing-accuracy)
+    - [Setting Persistence](#setting-persistence)
+- [Limitations](#limitations)
+  - [Android](#android)
+  - [Multiple Measures](#multiple-measures)
 
 ## Nontechnical
 
@@ -156,7 +162,7 @@ With this approach, all areas of potential audio artifacting are directly addres
 > [!IMPORTANT]
 > This approach still allows multiple clips to overlap, something that doesn't inherintly cause audio artifacts. This can occur in instances of higher tempos with busy subdivisions
 
-### Timing
+### Metronome
 
 #### System
 
@@ -179,18 +185,53 @@ To integrate a dynamic timing system like this, the audio buffer interface would
 
 With regards to actually writing data to the audio buffer, the following process is used:
 
-1. Lopp through all clips, and for any clip with a start smaple that matches the current timing buffer sample, mark it as active
-2. Loop through all active clips, and copy their current sample value into the audio buffer, then increment the sample number it's on. If the sample number incremented to is outside of the valid sample range for the clip, mark it as inactive
+1. Lopp through all clips, and for any clip with a start smaple that matches the current timing buffer sample and is `active`, mark it as `playing`
+2. Loop through all `playing` clips, and copy their current sample value into the audio buffer, then increment the sample number it's on. If the sample number incremented to is outside of the valid sample range for the clip, mark it as no longer `playing`
 
 This approach implements what was discussed in [Ensuring Completion](#ensuring-completion). In addition to what was just described, any wrapping around to the beginning of buffers is also handled, so that there is only ever one active timing buffer, and clips are reset to a state in which they are ready to be picked up again by the time the next measure is played
 
 > [!IMPORTANT]  
 > Whenever the audio buffer asks for data, it must be filled with data immediately while avoiding any costly operations, such as memory allocations, IO operations, or other blocking calls, to prevent buffer underruns (which may yield audio artifacts) sent to the audio hardware. This results in relatively primitive logic (like the one seen above) when writing to audio buffers
 
+The detailed implementation of this cycle can be found [here](https://github.com/LvnLx/Tempus/blob/main/ios/Runner/Metronome.swift#L60)
+
+#### Updates
+
+To enable realtime changes to the metronome's settings while it's being played back a relatively simple pair of locking mechanism are used to ensure changes aren't made while writing data to the audio buffer, and to ensure clips finish playing once started (as discessed in [Ensuring Completion](#ensuring-completion))
+
+To ensure the metronome data isn't changed while the audio buffer is being written to a [DispatchQueue](https://developer.apple.com/documentation/dispatch/dispatchqueue) is used. It ensures that the function that writes to the audio buffer and the function that updates metronome settings can't run concurrently
+
+To ensure clips finish playing, any clips currently marked as `playing` are left in the list of clips that is referenced when writing to the audio buffer, and marked as no longer being `active`. This ensures they will never be marked as `playing` again (as described in step 1 outlined in the [Integration](#integration) process). All the newly clips are then added to the leftover `playing` but not `active` clips to be used next time the audio buffer is written to
+
+Any time a change is made to the metronome, such as a new time signature, beat unit, subdivision, or volume, the list of clips is updated while conforming to the above constraints. This ensures a real-time, artifact free experience.
+
 #### Events
 
-One of the difficulties with having a low-level audio engine like this is notifying any other parts of the application of changes or events in audio. To help alleviate this issue and enable some insight from the outside world a simple tie in was made to the existing clips used in the timing buffers. The clips are already written as a `struct` in code, which allows them to also take a callback function as one of their fields. This callback can technically be repurposed to do anyhting, but since most of the functionality for the rest of the app lives within the [Flutter](https://flutter.dev/) layer of the application, the callback simply sends a method channel invocation with some data about what kind of clip made the call. More details about this communication can be found in the [Architecture](#architecture) section
+One of the difficulties with having a low-level audio engine like this is notifying any other parts of the application of changes or events in audio. To help alleviate this issue and enable some insight from the outside world, a simple tie in was made to the existing clips used in the timing buffers. The clips are already written as a `struct` in code, which allows them to also take a callback function as one of their fields. This callback can technically be repurposed to do anyhting, but since most of the functionality for the rest of the app lives within the [Flutter](https://flutter.dev/) layer of the application, the callback simply sends a method channel invocation with some data about what kind of clip made the call. Anytime a clip is newly marked as `playing` it's the callback is invoked
 
-## Architecture
+### Miscellaneous
+
+#### Flutter Native Communication
+
+The app takes advantage of Flutter's [method channels](https://docs.flutter.dev/platform-integration/platform-channels), which can essentially act as a bridge between the Flutter runtime and the native runtime. Any metronome updates (as well as the flashlight feature) are transmitted via method channel invocations, packaged with relatively simple values such as strings or integers
+
+#### Timing Accuracy
+
+The final sample level calculations for measure length or clip locations is deferred as long as possible within the app. The user is only presented with integers, however when combined with the sample rate of audio (`44100` for the app), many of the values used for timing could end up as floating point values at various points throughout the app due to division operations. To avoid any timing inaccuracies, all calculations are done as close to when they are actually needed as possible, and simply stored as fractions throughout the entirety of the app (both at the Dart and Swift layers) before then
+
+> [!NOTE]  
+> Time signatures are inherintly fractions, and beat units are best represented that way as well. For example a quarter note is just `1/4` of a whole note
+
+#### Setting Persistence
+
+Most of the app's settings (including metronome state) are stored to the device in a key/value fashion. Since subdivisions and some metadata about the clip sounds available are more easily represented in a structured manner, rather than a custom string format, `JSON` encoders are used to transmit certain types of data between the Flutter and native layers
 
 ## Limitations
+
+### Android
+
+The necessary code to interact with [Oboe](https://github.com/google/oboe) (the Android equivalent for the audio buffer interface) already exists and is fully written for an earlier version of the app, however due to poor emulator performance, lack of access to a physical Andoid device, and overhead/data privacy concerns of publishing on the Google Play store, the decision was made to discontinue the Android version of the app. Importantly however, the UI is written using various platform agnostic widgets to ensure a coherent user experience if cross-platform development were to continue
+
+### Multiple Measures
+
+Support for multiple different measures after another and entire song structures was experimented with, however the interesting audio/metronome technical challenges are much smaller than the UI features needed to make such features worth investing time into, particularly for an app that isn't intended to be long-lived and generate substantial revenue
