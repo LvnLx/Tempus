@@ -2,102 +2,108 @@
 
 An iOS metronome app developed with [Flutter](https://flutter.dev/), supporting real-time adjustments to timing and sound settings without producing any audio artifacts (clicks and pops) during playback. The main focus of the app is to have robust and highly flexible features that ensure a seamless experience. It is available to [download on the App Store](https://apps.apple.com/us/app/tempus-metronome/id6738511466?platform=iphone)
 
-## Sections
-- [User Interface](#user-interface)
-- [Key Features](#key-features)
-  - [Multiple Subdivisions](#multiple-subdivisions)
-  - [Complex Time Signatures](#complex-time-signatures)
-  - [Flexible Beat Units](#flexible-beat-units)
-  - [Tempo Adjustment](#tempo-adjustment)
-  - [Accessibility](#accessibility)
-  - [Sample Selection](#sample-selection)
-  - [Volume Adjustment](#volume-adjustment)
-- [Techincal Challenges](#technical-challenges)
-  - [Audio Artifacts](#audio-artifacts)
-    - [Background](#background)
-    - [Causes](#causes)
+This document is split into a [Nontechnical](#nontechnical) and [Technical](#technical) section. The former doesn't require any previous programming experience to follow along, and covers high level design and features. The latter is targeted towards those with a programming background and provides a deeper look at implementations, considerations, and iterations of this app
+
+## Terminology
+
+- **Audio Artifact**: An unintended and typically unpleasant click or pop that occurs during audio playback
+- **Beat**: Any counted note in a measure. In `4/4` for example there are beats `1`, `2`, `3`, and `4`
+- **Clip**: A short bit of audio such as a tambourine, clave, or drumstick click
+- **Downbeat**: The first beat of a measure
+- **Sample**: A single point of audio data, typically in the `-1.0` - `1.0` range. Audio files typically have `44,100` or `48,000` samples per second
+- **Subdivision/Inner Beat**: Any note that falls between beats. For example an eighth note subdivision in `4/4` would be the `and` between each beat
+
+## Index
+
+- [Nontechnical](#nontechnical)
+  - [User Interface](#user-interface)
+  - [Features](#features)
+    - [Multiple Subdivisions](#multiple-subdivisions)
+    - [Complex Time Signatures](#complex-time-signatures)
+    - [Flexible Beat Units](#flexible-beat-units)
+    - [Tempo Adjustment](#tempo-adjustment)
+    - [Accessibility](#accessibility)
+    - [Sample Selection](#sample-selection)
+    - [Volume Adjustment](#volume-adjustment)
+- [Technical](#technical)
+  - [Audio Engine](#audio-engine)
+    - [Audio Artifacts](#audio-artifacts)
     - [Iterations](#iterations)
       - [Queueing](#queueing)
       - [Audio Buffering](#audio-buffering)
       - [Fading](#fading)
       - [Ensuring Completion](#ensuring-completion)
-  - [Timing](#timing)
+  - [Metronome](#timing)
     - [System](#system)
     - [Events](#events)
-- [Architecture](#architecture)
-- [Limitations](#limitations)
-- [Media](#media)
+  - [Architecture](#architecture)
+  - [Limitations](#limitations)
 
-## User Interface
 
-The design for the UI is intended to take cues from the native iOS look, remain consistent across devices (both iPhones and iPads are supported), adapt to the light/dark mode preference of the user's device, and remain intuitive to use. The settings page in particular leans very closely on the native settings look
+
+## Nontechnical
+
+### User Interface
+
+The design for the UI is intended to take cues from the native iOS look, remain consistent across iPhones and iPads, adapt to the light/dark mode preference of the user's device, and remain intuitive to use. The settings page in particular leans very closely on the native settings look
 
 | Light Mode | Dark Mode | Settings |
 | ---------- | --------- | -------- |
 | <img src="https://github.com/user-attachments/assets/e18bc486-af25-4dbc-8b2e-56960d27a3a2" width="300"> | <img src="https://github.com/user-attachments/assets/ca999eed-354c-467c-bf49-f90ef9ca5d65" width="300"> | <img src="https://github.com/user-attachments/assets/d9b9db98-8768-42d9-8f7d-e68e6a2f8588" width="300"> |
 
-## Key Features
-### Multiple Subdivisions
-- One of the main technical motivations for creating this app was having a metronome app that supports multiple subdivisions at once, similar to a [Boss DB-90](https://www.boss.info/us/products/db-90/), but even more flexbile in terms of subdivision choice. Users can select subdivisions ranging from 2 to 9, which correspond to eighth notes (2), eighth note triplets (3), quarter notes (4), and so on, while controlling the volume of them independently
-- The UI implementation for subdivision control (and beat/accent volume control) was also heavily inspired by the [Boss DB-90](https://www.boss.info/us/products/db-90/), as well as the faders found in DAWs/mixing consoles — an inspiration stemming from my hobbyist background in audio engineering and creating drum covers:
+### Features
 
-  <img src="https://github.com/user-attachments/assets/544e0546-6a9a-4978-9081-610d92ca6219" height="200"> <img src="https://github.com/user-attachments/assets/0994d73a-f5fe-4cf4-b9ac-1e460ae59232" height="200">
+#### Multiple Subdivisions
+One of the main technical motivations for creating this app was having a metronome app that supports multiple subdivisions at once, similar to a [Boss DB-90](https://www.boss.info/us/products/db-90/), but even more flexbile in terms of subdivision choice. Users can select subdivisions ranging from 2 to 9, which correspond to eighth notes (2), eighth note triplets (3), quarter notes (4), and so on, while controlling the volume of them independently
 
+The UI implementation for subdivision control (and beat/accent volume control) was also heavily inspired by the [Boss DB-90](https://www.boss.info/us/products/db-90/), as well as the faders found in DAWs/mixing consoles — an inspiration stemming from my hobbyist background in audio engineering and creating drum covers:
+
+<img src="https://github.com/user-attachments/assets/544e0546-6a9a-4978-9081-610d92ca6219" height="200"> <img src="https://github.com/user-attachments/assets/0994d73a-f5fe-4cf4-b9ac-1e460ae59232" height="200">
+
+#### Complex Time Signatures
+Many metronome apps only support a small set of predefined time signatures, so it seemed like a good technical challenge and feature to be able to support any time signature a user would like. Users can select subdivisions with numerators and denominators ranging from 1 - 99 each, which also enables irrational time signatures, something most metronome apps can not do:
+
+<img src="https://github.com/user-attachments/assets/5ea1387f-c8c6-43df-93a6-a885d1532a7f" height="200">
+
+#### Flexible Beat Units
+Similar to time signatures, the beat unit is typically only selectable from a small set of predefined options. Since musical notation is necessary to display the beat unit, the approach taken for this app is to have partially pre-defined, but also a large set of generated beat unit options, with support from whole notes to 99-lets, including a small set of dotted notes commonly used:
+
+<img src="https://github.com/user-attachments/assets/02dfd2c5-ab6f-4833-868d-f63a2e050ba7" height="200">
+
+#### Tempo Adjustment
+
+There are a variety of tempo adjustment behaviors that can be found across metronome apps. Having used many of them, immediate tempo adjustment capabilities, as opposed to gradual tempo ramping or only allowing updates while paused, appears to be the best user experience. The app allows real-time tempo adjustments, and importantly without any audio artifacts (regardless of the tempo and quantity of subdivisions being played back)
+
+> [!NOTE]  
+> Some of the most popular metronome apps exhibit audio artifacts when making adjustments during playback, demonstrating how challenging of a problem it can be to eliminate them
+
+The BPM range users can select from is 1 - 999, which is among the most flexible for metronome apps, as many set the lower limit to ~30 and the upper limit to ~300. For most use cases, users need to be able to make BPM adjustments both quickly and accurately. To enable this precision single digit incrementing/decrementing, a scroll wheel, and numeric input is supported:
   
-### Complex Time Signatures
-- Many metronome apps only support a small set of time signatures, so it seemed like a good technical challenge and feature to be able to support any time signature a user would like. Users can select subdivisions with numerators and denominators ranging from 1 - 99 each, which also enables irrational time signatures, something most metronome apps can not do:
+<img src="https://github.com/user-attachments/assets/2c20b56c-7672-47a1-ad30-76a244e2e132" height="200"> <img src="https://github.com/user-attachments/assets/515950b9-0f5f-4ede-aa40-a3226cb290bd" height="200">
 
-  <img src="https://github.com/user-attachments/assets/5ea1387f-c8c6-43df-93a6-a885d1532a7f" height="200">
+#### Accessibility
 
-### Flexible Beat Units
-- Similar to time signatures, beat unit is typically only selectable from a small set of pre-defined options. Since musical notation is necessary to display the beat unit, the approach taken for this app is to have partially pre-defined, but also a large set of generated beat unit options, with support from whole notes to 99-lets, including a small set of dotted notes commonly used, which integrates well with the aforementioned time signatures:
+Since audio is not always feasible, both haptics and flashlight usage are supported. Some apps have flashlight support, however haptics are rarely supported, especially for the different types of notes being played back. The app supports different haptic strengths for accents, beats, and subdivisions, essentially giving the user a full haptic equivalent for the audio that is currently being played back:
 
-  <img src="https://github.com/user-attachments/assets/02dfd2c5-ab6f-4833-868d-f63a2e050ba7" height="200">
+<img src="https://github.com/user-attachments/assets/074de9eb-7cbb-4efe-8c05-7511fedc93fe" height="200"> <img src="https://github.com/user-attachments/assets/9b4d198a-3f13-492f-bfee-c8b7b520999b" height="200">
 
-### Tempo Adjustment
+#### Sample Selection
 
-- There are a variety of tempo adjustment behaviors that can be found across metronome apps, and having used many of them, having immediate tempo adjustment capabilities appears to be the best user experience. The app allows real-time tempo adjustments, and importantly without any audio artifacts (regardless of the tempo and quantity of subdivisions being played back)
-- The BPM range users can select from is 1 - 999, which is among the most flexible for metronome apps, as many set the lower limit to ~30 and the upper limit to ~300. In most settings, users need to be able to make BPM adjustments both quickly and acurrately. To enable this precision single digit incrementing/decrement, a scroll wheel, and numeric input is supported:
-  
-  <img src="https://github.com/user-attachments/assets/2c20b56c-7672-47a1-ad30-76a244e2e132" height="200"> <img src="https://github.com/user-attachments/assets/515950b9-0f5f-4ede-aa40-a3226cb290bd" height="200">
+Although not unique to this app, sample selection is also supported (again, in real-time) with a sample being a set of sounds for the accent, beat, and subdivision:
 
-### Accessibility
+<img src="https://github.com/user-attachments/assets/1bf2feef-ff2d-4a66-b68a-5caab9e1805e" height="200">
 
-- Since audio is not always feasible, both haptics and flashlight usage are supported. Some apps have flashlight support, however haptics are rarely supported, especially for the different types of notes being played back. The app supports different haptic strengths for accents, beats, and subdivisions, essentially giving the user a full haptic equivalent for the audio that is currently being played back:
+#### Volume Adjustment
 
-  <img src="https://github.com/user-attachments/assets/074de9eb-7cbb-4efe-8c05-7511fedc93fe" height="200"> <img src="https://github.com/user-attachments/assets/9b4d198a-3f13-492f-bfee-c8b7b520999b" height="200">
+Volume adjustment is somewhat supported by different metronome apps, but to enable full flexibility for this app the volume for the beat, accent (note at the beginning of the measures), subdivisions, and app as a whole can be independently set, with the last one inspired by [Gap Click](https://gapclick.app/) developed by [Derek Lee](https://github.com/theextremeprogrammer):
 
-### Sample Selection
+<img src="https://github.com/user-attachments/assets/b7b10095-6c51-4c0e-9f29-2a764eb398f9" height="200"> <img src="https://github.com/user-attachments/assets/6cad9249-aa6a-487e-9ac7-dc0835ee19d0" height="200">
 
-- Although not unique to this app, sample selection is also supported (again, in real-time) with a sample being a set of sounds for the accent, beat, and subdivision:
+## Technical
 
-  <img src="https://github.com/user-attachments/assets/1bf2feef-ff2d-4a66-b68a-5caab9e1805e" height="200">
+### Audio Engine
 
-### Volume Adjustment
-
-- Volume adjustment is somewhat supported by different metronome apps, but to enable full flexibility for this app the volume for the beat, accent (note at the beginning of the measures), subdivisions, and app as a whole can be independently set, with the last one inspired by [Gap Click](https://gapclick.app/) developed by [Derek Lee](https://github.com/theextremeprogrammer):
-
-  <img src="https://github.com/user-attachments/assets/b7b10095-6c51-4c0e-9f29-2a764eb398f9" height="200"> <img src="https://github.com/user-attachments/assets/6cad9249-aa6a-487e-9ac7-dc0835ee19d0" height="200">
-
-## Technical Challenges
-
-### Audio Artifacts
-
-#### Background
-
-The core functionality of a metronome is centered around audio playback, a seemingly easy problem a first, however one that can quickly unravel into an unpleasant experience for the users due to audio artifacts in the form of clicks and pops. This becomes especially prevalent when making real-time adjustments to the audio that is being played back. A simple example of this is changing tempo
-
-Let's take the following click sound:
-
-<img src="https://github.com/user-attachments/assets/84a423e3-e309-41e3-9216-4d18952f395f" height="400">
-
-In most timing based applications (such as metronomes), the above image is a visual representation of the data, and is what the application typically interacts with. Of Important note is that this wave is not one continues line, but rather individual samples (points) at various amplitudes that appear to make a continuous line when inspected from far away. In code this would roughly be represented by an array of floating point values, typically in the range from -1.0 - 1.0. While not super important for the purposes of this problem, it's a good piece of context to keep in mind when trying to understand this problem
-
-Audio artifacts most commonly appear due to a rapid change in amplitude between two consecutive samples. In the previous image, there is always a smooth line that can be drawn between all of the samples. The below example shows the difference between an audio clip that does not exhibit an audio artifact, and one that does. Notice that the second image has a sharp jump from around -0.5 to 0.5 in the highlighted area:
-
-<img src="https://github.com/user-attachments/assets/2c8a7351-e197-4a48-ad1d-f85f94ab7aad" height="400"> <img src="https://github.com/user-attachments/assets/e934ad06-0605-468b-b6fb-7402cafe8876" height="400">
-
-#### Causes
+#### Audio Artifacts
 
 In the context of metronome apps, audio artifacting has the potential to present itself anytime a change is made to the metronome that affects the content being played back. This could be a volume change, a timing change (time signature, tempo, etc.), additions/subtractions of a subdivision, or changing the clips being used from a clave to a tambourine, for example.
 
