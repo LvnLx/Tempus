@@ -47,6 +47,8 @@ This document is split into a [Nontechnical](#nontechnical) and [Technical](#tec
 - [Limitations](#limitations)
   - [Android](#android)
   - [Multiple Measures](#multiple-measures)
+  - [Testing](#testing)
+  - [Continuous Integration and Deployment](#continuous-integration-and-deployment)
 
 ## Nontechnical
 
@@ -235,3 +237,11 @@ The necessary code to interact with [Oboe](https://github.com/google/oboe) (the 
 ### Multiple Measures
 
 Support for multiple different measures after another and entire song structures was experimented with, however the interesting audio/metronome technical challenges are much smaller than the UI features needed to make such features worth investing time into, particularly for an app that isn't intended to be long-lived and generate substantial revenue
+
+### Testing
+
+Due to the overhead and relatively low value that tests would bring for a metronome app with the current feature set and one not intended to be a long-lived product and generate substantial revenue, the decision was made to not invest time into automated testing. The level of manual testing for the app was relatively low for the current feature set, however if more features such as full song structure support were added this decision would be reevaluated
+
+### Continuous Integration and Deployment
+
+CI/CD pipelines were omitted for similar reasons outlined in [Testing](#testing), however the addition of Android support would prompt reevaluation on pipelines for both autoamted testing and deployment
