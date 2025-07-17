@@ -1,6 +1,6 @@
 # Tempus
 
-An iOS metronome app developed with [Flutter](https://flutter.dev/), supporting real-time adjustments to timing and sound settings without producing any audio artifacts (clicks and pops) during playback. The main focus of the app is to have robust and highly flexible features that ensure a seamless experience. It is available to [download on the App Store](https://apps.apple.com/us/app/tempus-metronome/id6738511466?platform=iphone)
+An iOS metronome app developed with [Flutter](https://flutter.dev/), supporting real-time adjustments to timing and sound settings without producing any audio artifacts during playback. The main focus of the app is to have robust and highly flexible features that ensure a seamless experience. It is available to [download on the App Store](https://apps.apple.com/us/app/tempus-metronome/id6738511466?platform=iphone)
 
 This document is split into a [Nontechnical](#nontechnical) and [Technical](#technical) section. The former doesn't require any previous programming experience to follow along, and covers high level design and features. The latter is targeted towards those with a programming background and provides a deeper look at implementations, considerations, and iterations of this app
 
