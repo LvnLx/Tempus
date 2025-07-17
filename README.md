@@ -125,48 +125,48 @@ This being the first approach, audio artifacts were an issue due to the potentia
 Another issue was timing accuracy, due to the lack of control over delays in dequeueing when dealing with the [Audio Queue Services](https://developer.apple.com/documentation/audiotoolbox/audio-queue-services) interface
 
 > [!IMPORTANT]
-> Time signatures and beat units were not considered at this point yet due to the added timing complexities. Only simple tempo control was considered, for example 120 BPM
+> Time signatures and beat units were not considered at this point yet due to the added timing complexities. Only simple tempo control was considered, for example `120` BPM
 
 ##### Audio Buffering
 
 With the realization that high level interfaces such as [Audio Queue Services](https://developer.apple.com/documentation/audiotoolbox/audio-queue-services) wouldn't be sufficient for the intricate and precise audio/timing controls needed for a metronome, I began looking for better options. After doing quite a bit of research it appeared that a buffered interface such as the Audio Unit components of the [Audio Toolbox](https://developer.apple.com/documentation/audiotoolbox) would be the right option. The Android equivalent is [Oboe](https://github.com/google/oboe), and was used for the C++ implementation of the app (see the [Limitations](#limitations) section for details)
 
-At a high level, a buffered audio interface works by periodically asking the program to load audio data into a buffer of audio data, which the interface provides: "Give me 512 samples of audio data into this buffer, please". This appears to be very simple on the surface, and it is! The caveat is that as soon as the interface asks for data, the data **must** be provided. Any "blocking" operations such as allocating new memory, making external calls, or waiting for other functions to complete, should be avoided, as the audio buffer may otherwise be starved of data
+At a high level, a buffered audio interface works by periodically asking the program to load audio data into a buffer of audio data, which the interface provides: "Give me `512` samples of audio data into this buffer, please". This appears to be very simple on the surface, and it is! The caveat is that as soon as the interface asks for data, the data **must** be provided. Any "blocking" operations such as allocating new memory, making external calls, or waiting for other functions to complete, should be avoided, as the audio buffer may otherwise be starved of data
 
-Usage of a buffered audio interface like this doesn't inherintly help us solve the problem of audio artifacts, however it gives us sample level control of audio that is being played back. This guarantees sample accurate timing (crucial for a metronome), and removes any abstractions that hide potential latency or delays to changes in metronome content we might want to make:
+Usage of a buffered audio interface like this doesn't inherintly help us solve the problem of audio artifacts, however it gives us sample level control of audio that is being played back. This guarantees sample accurate timing (crucial for a metronome), and removes any abstractions that hide potential latency to changes in metronome content we might want to make:
 
 <img src="https://github.com/user-attachments/assets/1a3e8093-4968-4952-ac6b-4b7edf878a8a" height="200">
 
 ##### Fading
 
-Even armed with an audio buffer interface that improved timing properties of the metronome, the problem of audio artifacts still remained. There were a few iterations that I worked through at this stage, however the prevalent theme was trying to make any changes to the metronome that might introduce audio artifacts *gradually*. An example of this is taking a short window from the time the change was requested (say 50 milliseconds), and gradually fading from the current audio buffer to the next one. This is essentially crossfading, for which a visual example can be found [here](https://manual.audacityteam.org/man/fade_and_crossfade.html#dj)
+Even armed with an audio buffer interface that improved timing properties of the metronome, the problem of audio artifacts still remained. There were a few iterations that I worked through at this stage, however the prevalent theme was trying to make any changes to the metronome that might introduce audio artifacts *gradually*. An example of this is taking a short window from the time the change was requested (say `50` milliseconds), and gradually fading from the current audio buffer to another audio buffer. This is essentially crossfading, for which a visual example can be found [here](https://manual.audacityteam.org/man/fade_and_crossfade.html#dj)
 
-While helping reduce audio artifacts (primarily by making them quieter and more gradual), they were still celarly audible. An extreme example of this is a sample with a value of 1.0 followed by a sample with a value of -1.0. If the adjustment requested by the user is delayed to be made halfway through the crossfade, we might be able to avoid the abrupt jump between the two adjacent samples, however the shift in sounds samples can still incur audio artifacts, the the clips may be starting/stopping at completely different points within the clip. Alas, the fading option was not viable
+While helping reduce audio artifacts (primarily by making them quieter and more gradual), they were still celarly audible. If the the crossfade is made at the exact halfway point of both clips, we might be able to avoid an abrupt jump between the samples between both clips, however audio artifacts can still occur as the clips may have drastically different sound content. Alas, the fading option doesn't address the underlying problem
 
 ##### Ensuring Completion
 
-A working solution to this problem took a few weeks and tons of brain racking to arrive at, and as with most things it took some reconsideration to realize what actually addressed the problem. One of the main concerns was enabling real-time user changes. I had associated that with changing what was in the audio buffer **immediately**, and while that assessment was correct, one of the key details wasn't obvious
+A working solution to this problem took a few weeks, tons of brain racking, and some major mental reframing of the problem to arrive at. One of the main functional drivers was enabling real-time user changes. I had mentally associated real-time user changes with changing what was in the audio buffer **immediately**, and while that assessment was semanticlaly correct, one of the key details wasn't obvious:
 
-> Once a clip has started playing back, it must complete without being directly altered
+> As soon as a clip has started playing, the remainder of the clip can finish playing back without impacting the correctness of the metronome's subsequent audio
 
-This doesn't seem that revolutionary on the surface, however all of the previous solutions effectively changed any clips that were in progress of being played. Instead of cutting off a clip, a much cleaner approach would be to just let any clips that are currently being played back complete. And vice versa, if the user requested change would cause the playback head to be placed in the middle of a clip that was never properly started at it's first sample, it isn't played back
+This doesn't seem that revolutionary on the surface, however all of the previous solutions effectively changed any clips that were in progress of being played. Instead of cutting off a clip, a much cleaner approach would be to just let any clips that are currently being played back complete. And vice versa, if the user requested change would cause the playback head to be placed in the middle of a clip that was never started at it's first sample, it isn't played back. Another way to think about this is to consider that the first sample being played back correctly places the clip in time with respect to the metronome.
 
 With this approach, all areas of potential audio artifacting are directly addressed. Any given audio sample will always be started from it's first sample and always be guaranteed playback it's last sample.
 
 > [!IMPORTANT]
-> This approach still allows multiple clips to overlap. For example, in instances of higher tempos with intricate subdivisions
+> This approach still allows multiple clips to overlap, something that doesn't inherintly cause audio artifacts. This can occur in instances of higher tempos with busy subdivisions
 
 ### Timing
 
 #### System
 
-One of the big functional challenges in metronomes is the support for time signatures and beat units. Many metronome apps support a list of pre-canned time signatures (such as 4/4, 3/4, 6/8. 5/4, 12/8, ...) and beat units (such as quarter notes, dotted quarter notes, eighth notes, ...). Welcoming the challenge of not just hardcoding a bunch of different combinations for timing, I decided on implementing a generalized, sample accurate system, that offers user practically limitless flexibility (see the [Key Features](#key-features) section for the ranges that are supported for each timing element)
+One of the big functional challenges in metronomes is the support for time signatures and beat units. Many metronome apps support a list of pre-canned time signatures (such as `4/4`, `3/4`, `6/8`, `5/4`, `12/8`, ...) and beat units (such as quarter notes, dotted quarter notes, eighth notes, ...). Welcoming the challenge of not just hardcoding a bunch of different combinations for timing, I decided on implementing a generalized, sample accurate system, that offers user practically limitless flexibility (see the [Key Features](#key-features) section for the ranges that are supported for each timing element)
 
 To integrate with a dynamic timing system like this, the audio buffer interface would essentially act as the driver for a separate timing buffer. The latter is a sample acurrate representation of a measure of the given metronome settings. For example:
 
-| Tempo (BPM) | Time Signature |   Beat Unit  | Sample Rate | Measure Length (Samples) | Quarter Note Locations (Samples) |
-| ----------- | -------------- | ------------ | ----------- | ------------------------ | -------------------------------- |
-|     120     |       4/4      | Quarter Note |   44,100Hz  |          88,200          |  22,050, 44,100, 66,150, 88,200  |
+| Tempo (BPM) | Time Signature |   Beat Unit  | Sample Rate (Hz) | Measure Length (Samples) |    Quarter Note Locations (Samples)    |
+| ----------- | -------------- | ------------ | ---------------- | ------------------------ | -------------------------------------- |
+|    `120`    |      `4/4`     | Quarter Note |     `44,100`     |         `88,200`         | `22,050`, `44,100`, `66,150`, `88,200` |
 
 Anytime the audio buffer interface would ask for a sample, both it's own [pointer](https://en.wikipedia.org/wiki/Pointer_(computer_programming)) and that of the timing buffer would be incremented. During this increment the following occurs:
 
