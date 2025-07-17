@@ -2,7 +2,7 @@
 
 An iOS metronome app developed with [Flutter](https://flutter.dev/), supporting real-time adjustments to timing and sound settings without producing any audio artifacts during playback. The main focus of the app is to have robust and highly flexible features that ensure a seamless experience. It is available to [download on the App Store](https://apps.apple.com/us/app/tempus-metronome/id6738511466?platform=iphone)
 
-This document is split into a [Nontechnical](#nontechnical) and [Technical](#technical) section. The former doesn't require any previous programming experience to follow along, and covers high level design and features. The latter is targeted towards those with a programming background and provides a deeper look at implementations, considerations, and iterations of this app
+This document is split into a [Nontechnical](#nontechnical) and [Technical](#technical) section. The former doesn't require any previous programming experience to follow along, and covers high level design and features. The latter is targeted towards those with a programming background and provides a deeper look at implementations, considerations, and iterations of the app
 
 ## Terminology
 
@@ -63,7 +63,7 @@ The design for the UI is intended to take cues from the native iOS look, remain 
 ### Features
 
 #### Multiple Subdivisions
-One of the main technical motivations for creating this app was having a metronome app that supports multiple subdivisions at once, similar to a [Boss DB-90](https://www.boss.info/us/products/db-90/), but even more flexbile in terms of subdivision choice. Users can select subdivisions in the range `2` - `9`, which correspond to eighth notes (`2`), eighth note triplets (`3`), quarter notes (`4`), and so on, while controlling the volume of them independently
+One of the main technical motivations for creating the app was having a metronome app that supports multiple subdivisions at once, similar to a [Boss DB-90](https://www.boss.info/us/products/db-90/), but even more flexbile in terms of subdivision choice. Users can select subdivisions in the range `2` - `9`, which correspond to eighth notes (`2`), eighth note triplets (`3`), quarter notes (`4`), and so on, while controlling the volume of them independently
 
 The UI implementation for subdivision control (and beat/accent volume control) was also heavily inspired by the [Boss DB-90](https://www.boss.info/us/products/db-90/), as well as the faders found in DAWs/mixing consoles — an inspiration stemming from my hobbyist background in audio engineering and creating drum covers:
 
@@ -75,7 +75,7 @@ Many metronome apps only support a small set of predefined time signatures, so i
 <img src="https://github.com/user-attachments/assets/5ea1387f-c8c6-43df-93a6-a885d1532a7f" height="200">
 
 #### Flexible Beat Units
-Similar to time signatures, the beat unit is typically only selectable from a small set of predefined options. Since musical notation is necessary to display the beat unit, the approach taken for this app is to have partially pre-defined, but also a large set of generated beat unit options, with support from whole notes to 99-lets, including a small set of dotted notes commonly used:
+Similar to time signatures, the beat unit is typically only selectable from a small set of predefined options. Since musical notation is necessary to display the beat unit, the approach taken for the app is to have partially pre-defined, but also a large set of generated beat unit options, with support from whole notes to 99-lets, including a small set of dotted notes commonly used:
 
 <img src="https://github.com/user-attachments/assets/02dfd2c5-ab6f-4833-868d-f63a2e050ba7" height="200">
 
@@ -98,13 +98,13 @@ Since audio is not always feasible, both haptics and flashlight usage are suppor
 
 #### Sample Selection
 
-Although not unique to this app, sample selection is also supported (again, in real-time) with a sample being a set of sounds for the accent, beat, and subdivision:
+Although not unique to the app, sample selection is also supported (again, in real-time) with a sample being a set of sounds for the accent, beat, and subdivision:
 
 <img src="https://github.com/user-attachments/assets/1bf2feef-ff2d-4a66-b68a-5caab9e1805e" height="200">
 
 #### Volume Adjustment
 
-Volume adjustment is somewhat supported by different metronome apps, but to enable full flexibility for this app the volume for the beat, accent (note at the beginning of the measures), subdivisions, and app as a whole can be independently set, with the last one inspired by [Gap Click](https://gapclick.app/) developed by [Derek Lee](https://github.com/theextremeprogrammer):
+Volume adjustment is somewhat supported by different metronome apps, but to enable full flexibility for the app the volume for the beat, accent (note at the beginning of the measures), subdivisions, and app as a whole can be independently set, with the last one inspired by [Gap Click](https://gapclick.app/) developed by [Derek Lee](https://github.com/theextremeprogrammer):
 
 <img src="https://github.com/user-attachments/assets/b7b10095-6c51-4c0e-9f29-2a764eb398f9" height="200"> <img src="https://github.com/user-attachments/assets/6cad9249-aa6a-487e-9ac7-dc0835ee19d0" height="200">
 
@@ -139,7 +139,7 @@ Another issue was timing accuracy, due to the lack of control over delays in deq
 
 With the realization that high level interfaces such as [Audio Queue Services](https://developer.apple.com/documentation/audiotoolbox/audio-queue-services) wouldn't be sufficient for the intricate and precise audio/timing controls needed for a metronome, I began looking for better options. After doing quite a bit of research it appeared that a buffered interface such as the Audio Unit components of the [Audio Toolbox](https://developer.apple.com/documentation/audiotoolbox) would be the right option. The Android equivalent is [Oboe](https://github.com/google/oboe), and was used for the C++ implementation of the app (see the [Limitations](#limitations) section for details)
 
-At a high level, a buffered audio interface works by periodically asking the program to load audio data into a buffer of audio data, which the interface provides: "Give me `512` samples of audio data into this buffer, please". This appears to be very simple on the surface, and it is! The caveat is that as soon as the interface asks for data, the data **must** be provided. Any "blocking" operations such as allocating new memory, making external calls, or waiting for other functions to complete, should be avoided, as the audio buffer may otherwise be starved of data
+At a high level, a buffered audio interface works by periodically asking the program to load audio data into a buffer of audio data, which the interface provides: "Give me `512` samples of audio data into this buffer, please". the appears to be very simple on the surface, and it is! The caveat is that as soon as the interface asks for data, the data **must** be provided. Any "blocking" operations such as allocating new memory, making external calls, or waiting for other functions to complete, should be avoided, as the audio buffer may otherwise be starved of data
 
 Usage of a buffered audio interface like this doesn't inherintly help us solve the problem of audio artifacts, however it gives us sample level control of audio that is being played back. This guarantees sample accurate timing (crucial for a metronome), and removes any abstractions that hide potential latency to changes in metronome content we might want to make:
 
@@ -159,10 +159,10 @@ A working solution to this problem took a few weeks, tons of brain racking, and 
 
 This doesn't seem that revolutionary on the surface, however all of the previous solutions effectively changed any clips that were in progress of being played. Instead of cutting off a clip, a much cleaner approach would be to just let any clips that are currently being played back complete. And vice versa, if the user requested change would cause the playback head to be placed in the middle of a clip that was never started at it's first sample, it isn't played back. Another way to think about this is to consider that the first sample being played back correctly places the clip in time with respect to the metronome.
 
-With this approach, all areas of potential audio artifacting are directly addressed. Any given audio sample will always be started from it's first sample and always be guaranteed playback it's last sample.
+With the approach, all areas of potential audio artifacting are directly addressed. Any given audio sample will always be started from it's first sample and always be guaranteed playback it's last sample.
 
 > [!IMPORTANT]
-> This approach still allows multiple clips to overlap, something that doesn't inherintly cause audio artifacts. This can occur in instances of higher tempos with busy subdivisions
+> the approach still allows multiple clips to overlap, something that doesn't inherintly cause audio artifacts. This can occur in instances of higher tempos with busy subdivisions
 
 ### Metronome
 
@@ -170,7 +170,7 @@ With this approach, all areas of potential audio artifacting are directly addres
 
 One of the big functional challenges in metronomes is the support for time signatures and beat units, due to the need for the duration of a measure and location for all the notes within the measure to be calculated. Many metronome apps support a list of pre-canned time signatures (such as `4/4`, `3/4`, `6/8`, `5/4`, `12/8`, ...) and beat units (such as quarter notes, dotted quarter notes, eighth notes, ...) which can drastically simplify the necessary duration and location calculations
 
-Given the limited flexibility most metronomes offer with predefined time signatures and beat units, the decision made for this app was to support any given time signature or beat unit. The latter is a combination of predefined dotted beat units, with the remaining beat units generated dynamically (see the [Features](#features) section for supported ranges). The following table shows an example of parameters set by the user and system, and how those evaluate to the measure length and locations of notes in terms of samples:
+Given the limited flexibility most metronomes offer with predefined time signatures and beat units, the decision made for the app was to support any given time signature or beat unit. The latter is a combination of predefined dotted beat units, with the remaining beat units generated dynamically (see the [Features](#features) section for supported ranges). The following table shows an example of parameters set by the user and system, and how those evaluate to the measure length and locations of notes in terms of samples:
 
 | Tempo (BPM) | Time Signature |   Beat Unit  | Sample Rate (Hz) | Measure Length (Samples) |    Quarter Note Locations (Samples)    |
 | ----------- | -------------- | ------------ | ---------------- | ------------------------ | -------------------------------------- |
@@ -190,7 +190,7 @@ With regards to actually writing data to the audio buffer, the following process
 1. Lopp through all clips, and for any clip with a start smaple that matches the current timing buffer sample and is `active`, mark it as `playing`
 2. Loop through all `playing` clips, and copy their current sample value into the audio buffer, then increment the sample number it's on. If the sample number incremented to is outside of the valid sample range for the clip, mark it as no longer `playing`
 
-This approach implements what was discussed in [Ensuring Completion](#ensuring-completion). In addition to what was just described, any wrapping around to the beginning of buffers is also handled, so that there is only ever one active timing buffer, and clips are reset to a state in which they are ready to be picked up again by the time the next measure is played
+the approach implements what was discussed in [Ensuring Completion](#ensuring-completion). In addition to what was just described, any wrapping around to the beginning of buffers is also handled, so that there is only ever one active timing buffer, and clips are reset to a state in which they are ready to be picked up again by the time the next measure is played
 
 > [!IMPORTANT]  
 > Whenever the audio buffer asks for data, it must be filled with data immediately while avoiding any costly operations, such as memory allocations, IO operations, or other blocking calls, to prevent buffer underruns (which may yield audio artifacts) sent to the audio hardware. This results in relatively primitive logic (like the one seen above) when writing to audio buffers
