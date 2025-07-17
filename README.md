@@ -10,6 +10,7 @@ This document is split into a [Nontechnical](#nontechnical) and [Technical](#tec
 - **Beat**: Any counted note in a measure. In `4/4` for example there are beats `1`, `2`, `3`, and `4`
 - **Clip**: A short bit of audio such as a tambourine, clave, or drumstick click
 - **Downbeat**: The first beat of a measure
+- **Playback Head**: The sample location of where the audio is currently being played back
 - **Sample**: A single point of audio data, typically in the `-1.0` - `1.0` range. Audio files typically have `44,100` or `48,000` samples per second
 - **Subdivision/Inner Beat**: Any note that falls between beats. For example an eighth note subdivision in `4/4` would be the `and` between each beat
 
@@ -54,14 +55,14 @@ The design for the UI is intended to take cues from the native iOS look, remain 
 ### Features
 
 #### Multiple Subdivisions
-One of the main technical motivations for creating this app was having a metronome app that supports multiple subdivisions at once, similar to a [Boss DB-90](https://www.boss.info/us/products/db-90/), but even more flexbile in terms of subdivision choice. Users can select subdivisions ranging from 2 to 9, which correspond to eighth notes (2), eighth note triplets (3), quarter notes (4), and so on, while controlling the volume of them independently
+One of the main technical motivations for creating this app was having a metronome app that supports multiple subdivisions at once, similar to a [Boss DB-90](https://www.boss.info/us/products/db-90/), but even more flexbile in terms of subdivision choice. Users can select subdivisions in the range `2` - `9`, which correspond to eighth notes (`2`), eighth note triplets (`3`), quarter notes (`4`), and so on, while controlling the volume of them independently
 
 The UI implementation for subdivision control (and beat/accent volume control) was also heavily inspired by the [Boss DB-90](https://www.boss.info/us/products/db-90/), as well as the faders found in DAWs/mixing consoles — an inspiration stemming from my hobbyist background in audio engineering and creating drum covers:
 
 <img src="https://github.com/user-attachments/assets/544e0546-6a9a-4978-9081-610d92ca6219" height="200"> <img src="https://github.com/user-attachments/assets/0994d73a-f5fe-4cf4-b9ac-1e460ae59232" height="200">
 
 #### Complex Time Signatures
-Many metronome apps only support a small set of predefined time signatures, so it seemed like a good technical challenge and feature to be able to support any time signature a user would like. Users can select subdivisions with numerators and denominators ranging from 1 - 99 each, which also enables irrational time signatures, something most metronome apps can not do:
+Many metronome apps only support a small set of predefined time signatures, so it seemed like a good technical challenge and feature to be able to support any time signature a user would like. Users can select subdivisions with numerators and denominators in the range `1` - `99` each, which also enables irrational time signatures, something most metronome apps can not do:
 
 <img src="https://github.com/user-attachments/assets/5ea1387f-c8c6-43df-93a6-a885d1532a7f" height="200">
 
@@ -77,7 +78,7 @@ There are a variety of tempo adjustment behaviors that can be found across metro
 > [!NOTE]  
 > Some of the most popular metronome apps exhibit audio artifacts when making adjustments during playback, demonstrating how challenging of a problem it can be to eliminate them
 
-The BPM range users can select from is 1 - 999, which is among the most flexible for metronome apps, as many set the lower limit to ~30 and the upper limit to ~300. For most use cases, users need to be able to make BPM adjustments both quickly and accurately. To enable this precision single digit incrementing/decrementing, a scroll wheel, and numeric input is supported:
+The BPM range users can select from is `1` - `999`, which is among the most flexible for metronome apps, as many set the lower limit to `~30` and the upper limit to `~300`. For most use cases, users need to be able to make BPM adjustments both quickly and accurately. To enable this precision single digit incrementing/decrementing, a scroll wheel, and numeric input is supported:
   
 <img src="https://github.com/user-attachments/assets/2c20b56c-7672-47a1-ad30-76a244e2e132" height="200"> <img src="https://github.com/user-attachments/assets/515950b9-0f5f-4ede-aa40-a3226cb290bd" height="200">
 
@@ -105,22 +106,26 @@ Volume adjustment is somewhat supported by different metronome apps, but to enab
 
 #### Audio Artifacts
 
-In the context of metronome apps, audio artifacting has the potential to present itself anytime a change is made to the metronome that affects the content being played back. This could be a volume change, a timing change (time signature, tempo, etc.), additions/subtractions of a subdivision, or changing the clips being used from a clave to a tambourine, for example.
+In the context of metronome apps, audio artifacting has the potential to present itself anytime a change is made to the metronome during playback that affects the audio content. This could be a volume change, a timing change (time signature, tempo, etc.), additions/subtractions of a subdivision, or changing the clips being used from a clave to a tambourine, for example.
 
-During initial prototyping this wasn't an issue I was aware of, and I thought that I could simply make any changes to the audio as soon as the user requested that change. Regardless of if you pause, change the upcoming audio queue, then resume, or just change the queue while still playing back, audio artifacts will occur. This is becuase the playback head (the audio currently being played to the user) may be in the middle of a clip, and not in a silent section. An example of this can be seen below, where the line represents the playback head, i.e. the audio the user is currently hearing:
-
-<img src="https://github.com/user-attachments/assets/b228f74b-00f8-4ac7-bb20-22f76a383faf" height="400">
+During initial prototyping this wasn't an issue I was aware of, and I thought that I could simply make any changes to the audio as soon as the user requested that change. Regardless of if you pause, change the upcoming audio queue, then resume, or just change the queue while still playing back, audio artifacts will occur. This is becuase the playback head may be in the middle of a clip, and not in a silent section. If a sudden jump occurs in sample value (from `0.5` to -`0.75` for example), then an audio artifact will be audible
 
 #### Iterations
 
 ##### Queueing
 
-The initial attempts of implementing this were done using the [Audio Queue Services](https://developer.apple.com/documentation/audiotoolbox/audio-queue-services) interface, as it aligned with my idea of being able to queue my clips, followed by the necessary amount of silence before the next clip, which would effectively give the auditory experience of a metronome at a given tempo
+The initial attempts of implementing this were done using the [Audio Queue Services](https://developer.apple.com/documentation/audiotoolbox/audio-queue-services) interface, as it aligned with my idea of being able to queue my clips, followed by the necessary amount of silence before the next clip, which would effectively give the auditory experience of a metronome at a given tempo:
+
+<img src="https://github.com/user-attachments/assets/e4d1454b-5b97-4d4b-aa0c-9125081c3e03" height="200">
+
+This being the first approach, audio artifacts were an issue due to the potential for clips being changed while being played back. In the below example we are updating the queue from the top state to the bottom state during the middle of the playback of the first clip (this being an example of changing to a clip with a different sound, such as from a tambourine to a clave). The instant transition has a high probability to cause an audio artifact:
+
+<img src="https://github.com/user-attachments/assets/c43bb4d1-a6b3-43ed-8466-76fcaf4cc237" height="200">
+
+Another issue was timing accuracy, due to the lack of control over delays in dequeueing when dealing with the [Audio Queue Services](https://developer.apple.com/documentation/audiotoolbox/audio-queue-services) interface
 
 > [!IMPORTANT]
 > Time signatures and beat units were not considered at this point yet due to the added timing complexities. Only simple tempo control was considered, for example 120 BPM
-
-This being the first approach, audio artifacts were an issue due to the potential for clips being changed while being played back, as well as timing consistency. The latter was an issue due to the lack of control over delays in dequeueing and the aforemention playing/pausing approaches
 
 ##### Audio Buffering
 
@@ -128,7 +133,9 @@ With the realization that high level interfaces such as [Audio Queue Services](h
 
 At a high level, a buffered audio interface works by periodically asking the program to load audio data into a buffer of audio data, which the interface provides: "Give me 512 samples of audio data into this buffer, please". This appears to be very simple on the surface, and it is! The caveat is that as soon as the interface asks for data, the data **must** be provided. Any "blocking" operations such as allocating new memory, making external calls, or waiting for other functions to complete, should be avoided, as the audio buffer may otherwise be starved of data
 
-Usage of a buffered audio interface like this doesn't inherintly help us solve the problem of audio artifacts, however it gives us sample level control of audio that is being played back. This guarantees sample accurate timing (crucial for a metronome), and removes any abstractions that hide potential latency or delays to changes in audio we might want to make
+Usage of a buffered audio interface like this doesn't inherintly help us solve the problem of audio artifacts, however it gives us sample level control of audio that is being played back. This guarantees sample accurate timing (crucial for a metronome), and removes any abstractions that hide potential latency or delays to changes in metronome content we might want to make:
+
+<img src="https://github.com/user-attachments/assets/1a3e8093-4968-4952-ac6b-4b7edf878a8a" height="200">
 
 ##### Fading
 
